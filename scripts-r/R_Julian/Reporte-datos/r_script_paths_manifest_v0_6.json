@@ -1,0 +1,2763 @@
+{
+  "10_movimiento_dunas.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/5_deltavp250m",
+        "2": "data/6_inegiSVII_dunes",
+        "3": "data_crude/02_cm-conabio",
+        "4": "data/7_dunes250116",
+        "5": "data/3_misc_cesia"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data/5_deltavp250m/1delt_vp_250m.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/5_deltavp250m/1delt_vp_250m.tif",
+          "base": "data/5_deltavp250m",
+          "relativa": "1delt_vp_250m.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif",
+          "base": "data/6_inegiSVII_dunes",
+          "relativa": "cdv_usuev250sVII_dunas.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/02_cm-conabio/cm-conabio.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/02_cm-conabio/cm-conabio.shp",
+          "base": "data_crude/02_cm-conabio",
+          "relativa": "cm-conabio.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "entra",
+        "fuente": "st_read",
+        "expresion": {
+          "raw": "\"./data/7_dunes250116/DunasCosteras250116.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/7_dunes250116/DunasCosteras250116.shp",
+          "base": "data/7_dunes250116",
+          "relativa": "DunasCosteras250116.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "5": {
+        "orden": 5,
+        "rol": "entra",
+        "fuente": "st_read",
+        "expresion": {
+          "raw": "\"./data/3_misc_cesia/RegionesCosteras40km.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/3_misc_cesia/RegionesCosteras40km.shp",
+          "base": "data/3_misc_cesia",
+          "relativa": "RegionesCosteras40km.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/10_movimiento_dunas.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/10_movimiento_dunas.rds",
+          "base": "data_features",
+          "relativa": "10_movimiento_dunas.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    }
+  },
+  "11_tipo_costa.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/12_Tipo_de_costa"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/12_Tipo_de_costa/TipoCosta.SHP\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/12_Tipo_de_costa/TipoCosta.SHP",
+          "base": "data_crude/12_Tipo_de_costa",
+          "relativa": "TipoCosta.SHP",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/11_tipo_costa.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/11_tipo_costa.rds",
+          "base": "data_features",
+          "relativa": "11_tipo_costa.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "12_wind_speed.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/11_dataset-sis-biodiversity-era5-global",
+        "3": "data_crude/05_InventarioEstructuras"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data_crude/11_dataset-sis-biodiversity-era5-global/wind-speed_monthly-mean_era5_1979-2018_v1.0.nc\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/11_dataset-sis-biodiversity-era5-global/wind-speed_monthly-mean_era5_1979-2018_v1.0.nc",
+          "base": "data_crude/11_dataset-sis-biodiversity-era5-global",
+          "relativa": "wind-speed_monthly-mean_era5_1979-2018_v1.0.nc",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/05_InventarioEstructuras/estructuras_final_unido_.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/05_InventarioEstructuras/estructuras_final_unido_.shp",
+          "base": "data_crude/05_InventarioEstructuras",
+          "relativa": "estructuras_final_unido_.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/12_avg_windspeed.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/12_avg_windspeed.rds",
+          "base": "data_features",
+          "relativa": "12_avg_windspeed.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:2"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "13_z_v_holdridge.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/07_zvh_mx3gw",
+        "3": "data_crude/02_cm-conabio"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data_crude/07_zvh_mx3gw/zvh_mx3gw.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/07_zvh_mx3gw/zvh_mx3gw.tif",
+          "base": "data_crude/07_zvh_mx3gw",
+          "relativa": "zvh_mx3gw.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/02_cm-conabio/cm-conabio.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/02_cm-conabio/cm-conabio.shp",
+          "base": "data_crude/02_cm-conabio",
+          "relativa": "cm-conabio.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/13_zvh.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/13_zvh.rds",
+          "base": "data_features",
+          "relativa": "13_zvh.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:2"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "14_create_data_table.R": {
+    "bases": {
+      "entrada": {
+        "1": "data_features"
+      },
+      "salida": {
+        "1": "data_training_tables"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "data_features"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[1]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[2]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[3]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[4]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "5": {
+        "orden": 5,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[5]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "6": {
+        "orden": 6,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[6]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "7": {
+        "orden": 7,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[7]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "8": {
+        "orden": 8,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[8]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "9": {
+        "orden": 9,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[9]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "10": {
+        "orden": 10,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[10]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "11": {
+        "orden": 11,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[11]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "12": {
+        "orden": 12,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[12]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "13": {
+        "orden": 13,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "rdss[13]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "./data_features/{archivo_lista}",
+          "base": "data_features",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "rdss",
+          "origen_lista": "./data_features/",
+          "patron": "\\\\.rds$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "14": {
+        "orden": 14,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data_features/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/",
+          "base": "data_features",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_training_tables/train_dat_2c.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/train_dat_2c.rds",
+          "base": "data_training_tables",
+          "relativa": "train_dat_2c.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data_features",
+        "plantilla": "./data_features/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data_features/",
+        "patron": "\\\\.rds$",
+        "variable": "rdss",
+        "variable_fuente": "rdss",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "readRDS"
+        ],
+        "ocurrencias": [
+          "entra:1",
+          "entra:2",
+          "entra:3",
+          "entra:4",
+          "entra:5",
+          "entra:6",
+          "entra:7",
+          "entra:8",
+          "entra:9",
+          "entra:10",
+          "entra:11",
+          "entra:12",
+          "entra:13"
+        ],
+        "cantidad_llamadas": 13
+      }
+    }
+  },
+  "15_one_class_ei.R": {
+    "bases": {
+      "entrada": {
+        "1": "data_training_tables"
+      },
+      "salida": {
+        "1": "data_training_tables"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "data_training_tables",
+      "2": "cei_final_train_v1ask.csv",
+      "3": "cei_final_train_v1d.csv"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "\"./data_training_tables/train_dat_2c.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/train_dat_2c.rds",
+          "base": "data_training_tables",
+          "relativa": "train_dat_2c.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "\"./data_training_tables/train_dat_2c_loglik.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/train_dat_2c_loglik.rds",
+          "base": "data_training_tables",
+          "relativa": "train_dat_2c_loglik.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "fread",
+        "expresion": {
+          "raw": "\"./data_training_tables/cei_final_train_v1ask.csv\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/cei_final_train_v1ask.csv",
+          "base": "data_training_tables",
+          "relativa": "cei_final_train_v1ask.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_training_tables/train_dat_2c_eieqint.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/train_dat_2c_eieqint.rds",
+          "base": "data_training_tables",
+          "relativa": "train_dat_2c_eieqint.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_training_tables/train_dat_2c_eiqnint.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/train_dat_2c_eiqnint.rds",
+          "base": "data_training_tables",
+          "relativa": "train_dat_2c_eiqnint.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_training_tables/cei_final_train_v1.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/cei_final_train_v1.rds",
+          "base": "data_training_tables",
+          "relativa": "cei_final_train_v1.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "sale",
+        "fuente": "write.csv",
+        "expresion": {
+          "raw": "\"./data_training_tables/cei_final_train_v1.csv\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/cei_final_train_v1.csv",
+          "base": "data_training_tables",
+          "relativa": "cei_final_train_v1.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "5": {
+        "orden": 5,
+        "rol": "sale",
+        "fuente": "write.csv",
+        "expresion": {
+          "raw": "\"./data_training_tables/cei_final_train_v1d.csv\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/cei_final_train_v1d.csv",
+          "base": "data_training_tables",
+          "relativa": "cei_final_train_v1d.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "6": {
+        "orden": 6,
+        "rol": "sale",
+        "fuente": "write.csv",
+        "expresion": {
+          "raw": "\"./data_training_tables/cei_final_train_v1d.csv\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/cei_final_train_v1d.csv",
+          "base": "data_training_tables",
+          "relativa": "cei_final_train_v1d.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "7": {
+        "orden": 7,
+        "rol": "sale",
+        "fuente": "write.csv",
+        "expresion": {
+          "raw": "\"./data_training_tables/cei_final_train_v1ask.csv\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/cei_final_train_v1ask.csv",
+          "base": "data_training_tables",
+          "relativa": "cei_final_train_v1ask.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "dependencias_script": {
+      "1": {
+        "orden": 1,
+        "rol": "apoyo",
+        "fuente": "source",
+        "expresion": {
+          "raw": "\"./R/misc_functions.R\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./R/misc_functions.R",
+          "base": "R",
+          "relativa": "misc_functions.R",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    }
+  },
+  "16_final_training_data_v1.R": {
+    "bases": {
+      "entrada": {
+        "1": "data_training_tables"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "data_training_tables"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "\"./data_training_tables/train_dat_2c.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/train_dat_2c.rds",
+          "base": "data_training_tables",
+          "relativa": "train_dat_2c.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "\"./data_training_tables/train_dat_2c_eiqnint.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/train_dat_2c_eiqnint.rds",
+          "base": "data_training_tables",
+          "relativa": "train_dat_2c_eiqnint.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    }
+  },
+  "17_naive_bayes_ei.R": {
+    "bases": {
+      "entrada": {
+        "1": "data_training_tables"
+      },
+      "salida": {
+        "1": "data_training_tables"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "data_training_tables"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "readRDS",
+        "expresion": {
+          "raw": "\"./data_training_tables/cei_final_train_v1.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/cei_final_train_v1.rds",
+          "base": "data_training_tables",
+          "relativa": "cei_final_train_v1.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "write.csv",
+        "expresion": {
+          "raw": "\"./data_training_tables/cei_final_train_v1.csv\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/cei_final_train_v1.csv",
+          "base": "data_training_tables",
+          "relativa": "cei_final_train_v1.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "sale",
+        "fuente": "write.csv",
+        "expresion": {
+          "raw": "\"./data_training_tables/cei_final_train_v1d.csv\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_training_tables/cei_final_train_v1d.csv",
+          "base": "data_training_tables",
+          "relativa": "cei_final_train_v1d.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "dependencias_script": {
+      "1": {
+        "orden": 1,
+        "rol": "apoyo",
+        "fuente": "source",
+        "expresion": {
+          "raw": "\"./R/misc_functions.R\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./R/misc_functions.R",
+          "base": "R",
+          "relativa": "misc_functions.R",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    }
+  },
+  "18_create_ei_rasters.R": {
+    "bases": {
+      "entrada": {
+        "1": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data",
+        "2": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales",
+        "3": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m"
+      },
+      "salida": {
+        "1": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "equih",
+      "2": "1 Nubes",
+      "3": "Dropbox",
+      "4": "ei-coastal",
+      "5": "DunasCost250116_malla_ref_50m",
+      "6": "BN-results"
+    },
+    "variables_ruta": {
+      "dropbox_dir": "\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal\"",
+      "dat_csv": "paste0(dropbox_dir,\"/data/cei_final_train_v1ask.csv\")",
+      "datos_ei_file": "paste0(dropbox_dir, \"/BN-results/EII-data/cei_final_ie_expected_port_5_equal_2026.csv\")",
+      "corales_shp": "paste0(dropbox_dir, \"/data/data_crude/08_Corales/coral-global.shp\")",
+      "ref_grids_dir": "paste0(dropbox_dir, \"/data/data_crude/DunasCost250116_malla_ref_50m/\")",
+      "ei_map_dir": "paste0(dropbox_dir, \"/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R/\")",
+      "output": "paste0(ei_map_dir, \"eicoastal_\", region,\".tif\")"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "c_list[i]",
+          "tipo": "mixta"
+        },
+        "ensamble": {
+          "plantilla": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "corales_shp",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "ruta": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales/coral-global.shp",
+          "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales",
+          "relativa": "coral-global.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "ref_grids_dir",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "ruta": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m/",
+          "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "entra",
+        "fuente": "fread",
+        "expresion": {
+          "raw": "dat_csv",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "ruta": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/cei_final_train_v1ask.csv",
+          "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data",
+          "relativa": "cei_final_train_v1ask.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "5": {
+        "orden": 5,
+        "rol": "entra",
+        "fuente": "fread",
+        "expresion": {
+          "raw": "datos_ei_file",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "ruta": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data/cei_final_ie_expected_port_5_equal_2026.csv",
+          "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data",
+          "relativa": "cei_final_ie_expected_port_5_equal_2026.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "writeRaster",
+        "expresion": {
+          "raw": "output",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R/eicoastal_{expr}.tif",
+          "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R",
+          "relativa": "eicoastal_{expr}.tif",
+          "dinamica": true,
+          "modo_acceso": "plantilla_dinamica",
+          "coleccion_id": "1"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m",
+        "plantilla": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    },
+    "colecciones_generadas": {
+      "1": {
+        "rol": "sale",
+        "tipo_coleccion": "coleccion_generada",
+        "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R",
+        "plantilla": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R/eicoastal_{expr}.tif",
+        "relativa": "eicoastal_{expr}.tif",
+        "variable": "output",
+        "modo_acceso": "plantilla_dinamica",
+        "fuentes_llamada": [
+          "writeRaster"
+        ],
+        "ocurrencias": [
+          "sale:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "1_create_reference_grid.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/6_inegiSVII_dunes",
+        "2": "data/3_misc_cesia"
+      },
+      "salida": {
+        "1": "data/7_ref_grid_50m"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "3_misc_cesia"
+    },
+    "variables_ruta": {
+      "WRITEPATH": "\"./data/7_ref_grid_50m/\""
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif",
+          "base": "data/6_inegiSVII_dunes",
+          "relativa": "cdv_usuev250sVII_dunas.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "st_read",
+        "expresion": {
+          "raw": "\"./data/3_misc_cesia/DunasCosteras.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/3_misc_cesia/DunasCosteras.shp",
+          "base": "data/3_misc_cesia",
+          "relativa": "DunasCosteras.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "st_read",
+        "expresion": {
+          "raw": "\"./data/3_misc_cesia/RegionesCosteras40km.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/3_misc_cesia/RegionesCosteras40km.shp",
+          "base": "data/3_misc_cesia",
+          "relativa": "RegionesCosteras40km.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "writeRaster",
+        "expresion": {
+          "raw": "file.path(WRITEPATH,\n                                                paste0(\"region_\",\n                                                       coastr_poly$myid[1],\n                                                       \"/ref_grid.tif\"))",
+          "tipo": "file.path",
+          "variables_usadas": [
+            "WRITEPATH"
+          ]
+        },
+        "ensamble": {
+          "plantilla": "./data/7_ref_grid_50m/region_{expr}/ref_grid.tif",
+          "base": "data/7_ref_grid_50m",
+          "relativa": "region_{expr}/ref_grid.tif",
+          "dinamica": true,
+          "modo_acceso": "plantilla_dinamica",
+          "coleccion_id": "1"
+        }
+      }
+    },
+    "colecciones_generadas": {
+      "1": {
+        "rol": "sale",
+        "tipo_coleccion": "coleccion_generada",
+        "base": "data/7_ref_grid_50m",
+        "plantilla": "./data/7_ref_grid_50m/region_{expr}/ref_grid.tif",
+        "relativa": "region_{expr}/ref_grid.tif",
+        "variable": "file.path(WRITEPATH,\n                                                paste0(\"region_\",\n                                                       coastr_poly$myid[1],\n                                                       \"/ref_grid.tif\"))",
+        "modo_acceso": "plantilla_dinamica",
+        "fuentes_llamada": [
+          "writeRaster"
+        ],
+        "ocurrencias": [
+          "sale:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "1_create_reference_grid2.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/5_deltavp250m",
+        "2": "data/6_inegiSVII_dunes",
+        "3": "data/7_dunes250116",
+        "4": "data/3_misc_cesia"
+      },
+      "salida": {
+        "1": "data/8_ref_grid_50m"
+      }
+    },
+    "variables_ruta": {
+      "WRITEPATH": "\"./data/8_ref_grid_50m/\""
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data/5_deltavp250m/1delt_vp_250m.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/5_deltavp250m/1delt_vp_250m.tif",
+          "base": "data/5_deltavp250m",
+          "relativa": "1delt_vp_250m.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif",
+          "base": "data/6_inegiSVII_dunes",
+          "relativa": "cdv_usuev250sVII_dunas.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "st_read",
+        "expresion": {
+          "raw": "\"./data/7_dunes250116/DunasCosteras250116.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/7_dunes250116/DunasCosteras250116.shp",
+          "base": "data/7_dunes250116",
+          "relativa": "DunasCosteras250116.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "entra",
+        "fuente": "st_read",
+        "expresion": {
+          "raw": "\"./data/3_misc_cesia/RegionesCosteras40km.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/3_misc_cesia/RegionesCosteras40km.shp",
+          "base": "data/3_misc_cesia",
+          "relativa": "RegionesCosteras40km.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "writeRaster",
+        "expresion": {
+          "raw": "file.path(WRITEPATH,\n                                                paste0(\"region_\",\n                                                       coastr_poly$myid[1],\n                                                       \"/ref_grid.tif\"))",
+          "tipo": "file.path",
+          "variables_usadas": [
+            "WRITEPATH"
+          ]
+        },
+        "ensamble": {
+          "plantilla": "./data/8_ref_grid_50m/region_{expr}/ref_grid.tif",
+          "base": "data/8_ref_grid_50m",
+          "relativa": "region_{expr}/ref_grid.tif",
+          "dinamica": true,
+          "modo_acceso": "plantilla_dinamica",
+          "coleccion_id": "1"
+        }
+      }
+    },
+    "colecciones_generadas": {
+      "1": {
+        "rol": "sale",
+        "tipo_coleccion": "coleccion_generada",
+        "base": "data/8_ref_grid_50m",
+        "plantilla": "./data/8_ref_grid_50m/region_{expr}/ref_grid.tif",
+        "relativa": "region_{expr}/ref_grid.tif",
+        "variable": "file.path(WRITEPATH,\n                                                paste0(\"region_\",\n                                                       coastr_poly$myid[1],\n                                                       \"/ref_grid.tif\"))",
+        "modo_acceso": "plantilla_dinamica",
+        "fuentes_llamada": [
+          "writeRaster"
+        ],
+        "ocurrencias": [
+          "sale:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "1_features_tasa_erosion.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/04_Erosion_acresion"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "read.csv",
+        "expresion": {
+          "raw": "\"./data_crude/04_Erosion_acresion/Tasas_erosionMEX_Actualizado2018.txt\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/04_Erosion_acresion/Tasas_erosionMEX_Actualizado2018.txt",
+          "base": "data_crude/04_Erosion_acresion",
+          "relativa": "Tasas_erosionMEX_Actualizado2018.txt",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/1_tasa_erosion.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/1_tasa_erosion.rds",
+          "base": "data_features",
+          "relativa": "1_tasa_erosion.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "2_features_estructuras.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/05_InventarioEstructuras"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/05_InventarioEstructuras/estructuras_final_unido_.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/05_InventarioEstructuras/estructuras_final_unido_.shp",
+          "base": "data_crude/05_InventarioEstructuras",
+          "relativa": "estructuras_final_unido_.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/2_infraestructura.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/2_infraestructura.rds",
+          "base": "data_features",
+          "relativa": "2_infraestructura.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "3_sp_invasoras.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/15_plantas_snib"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m",
+      "2": "15_plantas_snib"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "read.csv",
+        "expresion": {
+          "raw": "\"./data_crude/15_plantas_snib/plantas_invasoras.csv\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/15_plantas_snib/plantas_invasoras.csv",
+          "base": "data_crude/15_plantas_snib",
+          "relativa": "plantas_invasoras.csv",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "entra",
+        "fuente": "read_excel",
+        "expresion": {
+          "raw": "\"./data_crude/15_plantas_snib/especies_invasoras.xlsx\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/15_plantas_snib/especies_invasoras.xlsx",
+          "base": "data_crude/15_plantas_snib",
+          "relativa": "especies_invasoras.xlsx",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/3_sp_inv_potential.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/3_sp_inv_potential.rds",
+          "base": "data_features",
+          "relativa": "3_sp_inv_potential.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "4_corales_global.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/08_coral-global"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/08_coral-global/coral-global.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/08_coral-global/coral-global.shp",
+          "base": "data_crude/08_coral-global",
+          "relativa": "coral-global.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/4_coral_distance.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/4_coral_distance.rds",
+          "base": "data_features",
+          "relativa": "4_coral_distance.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "5_pasto_marino.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/03_seagrasses-pol-simar"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/03_seagrasses-pol-simar/seagrasses-pol-simar.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/03_seagrasses-pol-simar/seagrasses-pol-simar.shp",
+          "base": "data_crude/03_seagrasses-pol-simar",
+          "relativa": "seagrasses-pol-simar.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/5_seagrass_distance.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/5_seagrass_distance.rds",
+          "base": "data_features",
+          "relativa": "5_seagrass_distance.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "6_batimetria_caracteristica.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/13_Batimetría"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data_crude/13_Batimetría/01_GEBCO2020_SIMAR.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/13_Batimetría/01_GEBCO2020_SIMAR.tif",
+          "base": "data_crude/13_Batimetría",
+          "relativa": "01_GEBCO2020_SIMAR.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/6_batimetria_charact.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/6_batimetria_charact.rds",
+          "base": "data_features",
+          "relativa": "6_batimetria_charact.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:2"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "7_inegi_uso_suelo.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/16_madmex",
+        "3": "data_crude/02_cm-conabio"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data_crude/16_madmex/cdv_usuev250sVII_cnal_s.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/16_madmex/cdv_usuev250sVII_cnal_s.tif",
+          "base": "data_crude/16_madmex",
+          "relativa": "cdv_usuev250sVII_cnal_s.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/02_cm-conabio/cm-conabio.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/02_cm-conabio/cm-conabio.shp",
+          "base": "data_crude/02_cm-conabio",
+          "relativa": "cm-conabio.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/7_inegi_landuse.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/7_inegi_landuse.rds",
+          "base": "data_features",
+          "relativa": "7_inegi_landuse.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:2"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "7_madmex_uso_suelo.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/16_madmex"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data_crude/16_madmex/madmex_landsat_2017_31.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/16_madmex/madmex_landsat_2017_31.tif",
+          "base": "data_crude/16_madmex",
+          "relativa": "madmex_landsat_2017_31.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/7_madmex_landuse.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/7_madmex_landuse.rds",
+          "base": "data_features",
+          "relativa": "7_madmex_landuse.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:2"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "7_madmex_uso_suelo_2.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/16_madmex"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data_crude/16_madmex/madmex_landsat_2017_31.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/16_madmex/madmex_landsat_2017_31.tif",
+          "base": "data_crude/16_madmex",
+          "relativa": "madmex_landsat_2017_31.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/7_madmex_landuse.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/7_madmex_landuse.rds",
+          "base": "data_features",
+          "relativa": "7_madmex_landuse.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:2"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "7_madmex_uso_suelo_3.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/16_madmex"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data_crude/16_madmex/madmex_landsat_2017_31.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/16_madmex/madmex_landsat_2017_31.tif",
+          "base": "data_crude/16_madmex",
+          "relativa": "madmex_landsat_2017_31.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/7_madmex_landuse_3_1_10_12.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/7_madmex_landuse_3_1_10_12.rds",
+          "base": "data_features",
+          "relativa": "7_madmex_landuse_3_1_10_12.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:2"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "8_manglares.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/06_DunasCost250116_malla_ref_50m",
+        "2": "data_crude/02_cm-conabio"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "06_DunasCost250116_malla_ref_50m"
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "region",
+          "tipo": "variable"
+        },
+        "ensamble": {
+          "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "relativa": "{archivo_lista}",
+          "dinamica": true,
+          "derivada_de": "c_list",
+          "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+          "patron": "\\\\.tif$",
+          "modo_acceso": "llama_coleccion_seleccionada",
+          "coleccion_id": "1"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/02_cm-conabio/cm-conabio.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/02_cm-conabio/cm-conabio.shp",
+          "base": "data_crude/02_cm-conabio",
+          "relativa": "cm-conabio.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "list.files",
+        "expresion": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/06_DunasCost250116_malla_ref_50m/",
+          "base": "data/06_DunasCost250116_malla_ref_50m",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/8_manglares.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/8_manglares.rds",
+          "base": "data_features",
+          "relativa": "8_manglares.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "colecciones_llamadas": {
+      "1": {
+        "rol": "entra",
+        "tipo_coleccion": "coleccion_llamada",
+        "base": "data/06_DunasCost250116_malla_ref_50m",
+        "plantilla": "./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+        "relativa": "{archivo_lista}",
+        "origen_lista": "./data/06_DunasCost250116_malla_ref_50m/",
+        "patron": "\\\\.tif$",
+        "variable": "c_list",
+        "variable_fuente": "c_list",
+        "modo_acceso": "llama_coleccion_seleccionada",
+        "fuentes_llamada": [
+          "rast"
+        ],
+        "ocurrencias": [
+          "entra:1"
+        ],
+        "cantidad_llamadas": 1
+      }
+    }
+  },
+  "9_condicion_dunas.R": {
+    "bases": {
+      "entrada": {
+        "1": "data/5_deltavp250m",
+        "2": "data/6_inegiSVII_dunes",
+        "3": "data_crude/02_cm-conabio",
+        "4": "data/7_dunes250116",
+        "5": "data/3_misc_cesia"
+      },
+      "salida": {
+        "1": "data_features"
+      }
+    },
+    "variables_ruta": {
+      "WRITEPATH": "\"./data/8_ref_grid_50m/\""
+    },
+    "entra": {
+      "1": {
+        "orden": 1,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data/5_deltavp250m/1delt_vp_250m.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/5_deltavp250m/1delt_vp_250m.tif",
+          "base": "data/5_deltavp250m",
+          "relativa": "1delt_vp_250m.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "2": {
+        "orden": 2,
+        "rol": "entra",
+        "fuente": "rast",
+        "expresion": {
+          "raw": "\"./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif",
+          "base": "data/6_inegiSVII_dunes",
+          "relativa": "cdv_usuev250sVII_dunas.tif",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "3": {
+        "orden": 3,
+        "rol": "entra",
+        "fuente": "vect",
+        "expresion": {
+          "raw": "\"./data_crude/02_cm-conabio/cm-conabio.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_crude/02_cm-conabio/cm-conabio.shp",
+          "base": "data_crude/02_cm-conabio",
+          "relativa": "cm-conabio.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "4": {
+        "orden": 4,
+        "rol": "entra",
+        "fuente": "st_read",
+        "expresion": {
+          "raw": "\"./data/7_dunes250116/DunasCosteras250116.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/7_dunes250116/DunasCosteras250116.shp",
+          "base": "data/7_dunes250116",
+          "relativa": "DunasCosteras250116.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      },
+      "5": {
+        "orden": 5,
+        "rol": "entra",
+        "fuente": "st_read",
+        "expresion": {
+          "raw": "\"./data/3_misc_cesia/RegionesCosteras40km.shp\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data/3_misc_cesia/RegionesCosteras40km.shp",
+          "base": "data/3_misc_cesia",
+          "relativa": "RegionesCosteras40km.shp",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "orden": 1,
+        "rol": "sale",
+        "fuente": "saveRDS",
+        "expresion": {
+          "raw": "\"./data_features/9_condicion_dunas.rds\"",
+          "tipo": "literal"
+        },
+        "ensamble": {
+          "ruta": "./data_features/9_condicion_dunas.rds",
+          "base": "data_features",
+          "relativa": "9_condicion_dunas.rds",
+          "modo_acceso": "archivo_unico"
+        }
+      }
+    }
+  }
+}

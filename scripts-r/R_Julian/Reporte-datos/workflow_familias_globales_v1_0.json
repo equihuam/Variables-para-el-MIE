@@ -1,0 +1,1058 @@
+{
+  "version": "1.0",
+  "descripcion": "Vista consolidada global de familias operativas para diseño de workflow.",
+  "familias_globales": [
+    {
+      "familia_id": "F016",
+      "tipo_familia": "coleccion_generada",
+      "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R",
+      "plantilla": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R/eicoastal_{expr}.tif",
+      "relativa": "eicoastal_{expr}.tif",
+      "modo_acceso": "plantilla_dinamica",
+      "variables": [
+        "output"
+      ],
+      "scripts_consumen": [],
+      "scripts_generan": [
+        "18_create_ei_rasters.R"
+      ],
+      "ocurrencias_generacion": [
+        "18_create_ei_rasters.R:sale:1"
+      ],
+      "fuentes_generacion": [
+        "writeRaster"
+      ],
+      "grado_consumo": 0,
+      "grado_generacion": 1
+    },
+    {
+      "familia_id": "F021",
+      "tipo_familia": "coleccion_generada",
+      "base": "data/7_ref_grid_50m",
+      "plantilla": "data/7_ref_grid_50m/region_{expr}/ref_grid.tif",
+      "relativa": "region_{expr}/ref_grid.tif",
+      "modo_acceso": "plantilla_dinamica",
+      "variables": [
+        "file.path(WRITEPATH,\n                                                paste0(\"region_\",\n                                                       coastr_poly$myid[1],\n                                                       \"/ref_grid.tif\"))"
+      ],
+      "scripts_consumen": [],
+      "scripts_generan": [
+        "1_create_reference_grid.R"
+      ],
+      "ocurrencias_generacion": [
+        "1_create_reference_grid.R:sale:1"
+      ],
+      "fuentes_generacion": [
+        "writeRaster"
+      ],
+      "grado_consumo": 0,
+      "grado_generacion": 1
+    },
+    {
+      "familia_id": "F022",
+      "tipo_familia": "coleccion_generada",
+      "base": "data/8_ref_grid_50m",
+      "plantilla": "data/8_ref_grid_50m/region_{expr}/ref_grid.tif",
+      "relativa": "region_{expr}/ref_grid.tif",
+      "modo_acceso": "plantilla_dinamica",
+      "variables": [
+        "file.path(WRITEPATH,\n                                                paste0(\"region_\",\n                                                       coastr_poly$myid[1],\n                                                       \"/ref_grid.tif\"))"
+      ],
+      "scripts_consumen": [],
+      "scripts_generan": [
+        "1_create_reference_grid2.R"
+      ],
+      "ocurrencias_generacion": [
+        "1_create_reference_grid2.R:sale:1"
+      ],
+      "fuentes_generacion": [
+        "writeRaster"
+      ],
+      "grado_consumo": 0,
+      "grado_generacion": 1
+    },
+    {
+      "familia_id": "F015",
+      "tipo_familia": "coleccion_llamada",
+      "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m",
+      "patron": "\\\\.tif$",
+      "plantilla": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m/{archivo_lista}",
+      "relativa": "{archivo_lista}",
+      "modo_acceso": "llama_coleccion_seleccionada",
+      "variables": [
+        "c_list"
+      ],
+      "origenes_lista": [
+        "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m"
+      ],
+      "scripts_consumen": [
+        "18_create_ei_rasters.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "18_create_ei_rasters.R:entra:1"
+      ],
+      "fuentes_consumo": [
+        "rast"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F007",
+      "tipo_familia": "coleccion_llamada",
+      "base": "data/06_DunasCost250116_malla_ref_50m",
+      "patron": "\\\\.tif$",
+      "plantilla": "data/06_DunasCost250116_malla_ref_50m/{archivo_lista}",
+      "relativa": "{archivo_lista}",
+      "modo_acceso": "llama_coleccion_seleccionada",
+      "variables": [
+        "c_list"
+      ],
+      "origenes_lista": [
+        "data/06_DunasCost250116_malla_ref_50m"
+      ],
+      "scripts_consumen": [
+        "11_tipo_costa.R",
+        "12_wind_speed.R",
+        "13_z_v_holdridge.R",
+        "1_features_tasa_erosion.R",
+        "2_features_estructuras.R",
+        "3_sp_invasoras.R",
+        "4_corales_global.R",
+        "5_pasto_marino.R",
+        "6_batimetria_caracteristica.R",
+        "7_inegi_uso_suelo.R",
+        "7_madmex_uso_suelo.R",
+        "7_madmex_uso_suelo_2.R",
+        "7_madmex_uso_suelo_3.R",
+        "8_manglares.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "11_tipo_costa.R:entra:1",
+        "12_wind_speed.R:entra:2",
+        "13_z_v_holdridge.R:entra:2",
+        "1_features_tasa_erosion.R:entra:1",
+        "2_features_estructuras.R:entra:1",
+        "3_sp_invasoras.R:entra:1",
+        "4_corales_global.R:entra:1",
+        "5_pasto_marino.R:entra:1",
+        "6_batimetria_caracteristica.R:entra:2",
+        "7_inegi_uso_suelo.R:entra:2",
+        "7_madmex_uso_suelo.R:entra:2",
+        "7_madmex_uso_suelo_2.R:entra:2",
+        "7_madmex_uso_suelo_3.R:entra:2",
+        "8_manglares.R:entra:1"
+      ],
+      "fuentes_consumo": [
+        "rast"
+      ],
+      "grado_consumo": 14,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F013",
+      "tipo_familia": "coleccion_llamada",
+      "base": "data_features",
+      "patron": "\\\\.rds$",
+      "plantilla": "data_features/{archivo_lista}",
+      "relativa": "{archivo_lista}",
+      "modo_acceso": "llama_coleccion_seleccionada",
+      "variables": [
+        "rdss"
+      ],
+      "origenes_lista": [
+        "data_features"
+      ],
+      "scripts_consumen": [
+        "14_create_data_table.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "14_create_data_table.R:entra:1",
+        "14_create_data_table.R:entra:10",
+        "14_create_data_table.R:entra:11",
+        "14_create_data_table.R:entra:12",
+        "14_create_data_table.R:entra:13",
+        "14_create_data_table.R:entra:2",
+        "14_create_data_table.R:entra:3",
+        "14_create_data_table.R:entra:4",
+        "14_create_data_table.R:entra:5",
+        "14_create_data_table.R:entra:6",
+        "14_create_data_table.R:entra:7",
+        "14_create_data_table.R:entra:8",
+        "14_create_data_table.R:entra:9"
+      ],
+      "fuentes_consumo": [
+        "readRDS"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F020",
+      "tipo_familia": "directorio_archivos",
+      "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "cei_final_ie_expected_port_5_equal_2026.csv"
+      ],
+      "scripts_consumen": [
+        "18_create_ei_rasters.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "18_create_ei_rasters.R:entra:5"
+      ],
+      "fuentes_consumo": [
+        "fread"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F019",
+      "tipo_familia": "directorio_archivos",
+      "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "cei_final_train_v1ask.csv"
+      ],
+      "scripts_consumen": [
+        "18_create_ei_rasters.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "18_create_ei_rasters.R:entra:4"
+      ],
+      "fuentes_consumo": [
+        "fread"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F017",
+      "tipo_familia": "directorio_archivos",
+      "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "coral-global.shp"
+      ],
+      "scripts_consumen": [
+        "18_create_ei_rasters.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "18_create_ei_rasters.R:entra:2"
+      ],
+      "fuentes_consumo": [
+        "vect"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F018",
+      "tipo_familia": "directorio_archivos",
+      "base": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m",
+      "modo_acceso": "archivo_unico",
+      "scripts_consumen": [
+        "18_create_ei_rasters.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "18_create_ei_rasters.R:entra:3"
+      ],
+      "fuentes_consumo": [
+        "list.files"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F009",
+      "tipo_familia": "directorio_archivos",
+      "base": "data/06_DunasCost250116_malla_ref_50m",
+      "modo_acceso": "archivo_unico",
+      "scripts_consumen": [
+        "11_tipo_costa.R",
+        "12_wind_speed.R",
+        "13_z_v_holdridge.R",
+        "1_features_tasa_erosion.R",
+        "2_features_estructuras.R",
+        "3_sp_invasoras.R",
+        "4_corales_global.R",
+        "5_pasto_marino.R",
+        "6_batimetria_caracteristica.R",
+        "7_inegi_uso_suelo.R",
+        "7_madmex_uso_suelo.R",
+        "7_madmex_uso_suelo_2.R",
+        "7_madmex_uso_suelo_3.R",
+        "8_manglares.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "11_tipo_costa.R:entra:3",
+        "12_wind_speed.R:entra:4",
+        "13_z_v_holdridge.R:entra:4",
+        "1_features_tasa_erosion.R:entra:3",
+        "2_features_estructuras.R:entra:3",
+        "3_sp_invasoras.R:entra:3",
+        "4_corales_global.R:entra:3",
+        "5_pasto_marino.R:entra:3",
+        "6_batimetria_caracteristica.R:entra:3",
+        "7_inegi_uso_suelo.R:entra:4",
+        "7_madmex_uso_suelo.R:entra:3",
+        "7_madmex_uso_suelo_2.R:entra:3",
+        "7_madmex_uso_suelo_3.R:entra:3",
+        "8_manglares.R:entra:3"
+      ],
+      "fuentes_consumo": [
+        "list.files"
+      ],
+      "grado_consumo": 14,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F005",
+      "tipo_familia": "directorio_archivos",
+      "base": "data/3_misc_cesia",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "DunasCosteras.shp",
+        "RegionesCosteras40km.shp"
+      ],
+      "scripts_consumen": [
+        "10_movimiento_dunas.R",
+        "1_create_reference_grid.R",
+        "1_create_reference_grid2.R",
+        "9_condicion_dunas.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "10_movimiento_dunas.R:entra:5",
+        "1_create_reference_grid.R:entra:2",
+        "1_create_reference_grid.R:entra:3",
+        "1_create_reference_grid2.R:entra:4",
+        "9_condicion_dunas.R:entra:5"
+      ],
+      "fuentes_consumo": [
+        "st_read"
+      ],
+      "grado_consumo": 4,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F001",
+      "tipo_familia": "directorio_archivos",
+      "base": "data/5_deltavp250m",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "1delt_vp_250m.tif"
+      ],
+      "scripts_consumen": [
+        "10_movimiento_dunas.R",
+        "1_create_reference_grid2.R",
+        "9_condicion_dunas.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "10_movimiento_dunas.R:entra:1",
+        "1_create_reference_grid2.R:entra:1",
+        "9_condicion_dunas.R:entra:1"
+      ],
+      "fuentes_consumo": [
+        "rast"
+      ],
+      "grado_consumo": 3,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F002",
+      "tipo_familia": "directorio_archivos",
+      "base": "data/6_inegiSVII_dunes",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "cdv_usuev250sVII_dunas.tif"
+      ],
+      "scripts_consumen": [
+        "10_movimiento_dunas.R",
+        "1_create_reference_grid.R",
+        "1_create_reference_grid2.R",
+        "9_condicion_dunas.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "10_movimiento_dunas.R:entra:2",
+        "1_create_reference_grid.R:entra:1",
+        "1_create_reference_grid2.R:entra:2",
+        "9_condicion_dunas.R:entra:2"
+      ],
+      "fuentes_consumo": [
+        "rast"
+      ],
+      "grado_consumo": 4,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F004",
+      "tipo_familia": "directorio_archivos",
+      "base": "data/7_dunes250116",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "DunasCosteras250116.shp"
+      ],
+      "scripts_consumen": [
+        "10_movimiento_dunas.R",
+        "1_create_reference_grid2.R",
+        "9_condicion_dunas.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "10_movimiento_dunas.R:entra:4",
+        "1_create_reference_grid2.R:entra:3",
+        "9_condicion_dunas.R:entra:4"
+      ],
+      "fuentes_consumo": [
+        "st_read"
+      ],
+      "grado_consumo": 3,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F003",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/02_cm-conabio",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "cm-conabio.shp"
+      ],
+      "scripts_consumen": [
+        "10_movimiento_dunas.R",
+        "13_z_v_holdridge.R",
+        "7_inegi_uso_suelo.R",
+        "8_manglares.R",
+        "9_condicion_dunas.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "10_movimiento_dunas.R:entra:3",
+        "13_z_v_holdridge.R:entra:3",
+        "7_inegi_uso_suelo.R:entra:3",
+        "8_manglares.R:entra:2",
+        "9_condicion_dunas.R:entra:3"
+      ],
+      "fuentes_consumo": [
+        "vect"
+      ],
+      "grado_consumo": 5,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F026",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/03_seagrasses-pol-simar",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "seagrasses-pol-simar.shp"
+      ],
+      "scripts_consumen": [
+        "5_pasto_marino.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "5_pasto_marino.R:entra:2"
+      ],
+      "fuentes_consumo": [
+        "vect"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F023",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/04_Erosion_acresion",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "Tasas_erosionMEX_Actualizado2018.txt"
+      ],
+      "scripts_consumen": [
+        "1_features_tasa_erosion.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "1_features_tasa_erosion.R:entra:2"
+      ],
+      "fuentes_consumo": [
+        "read.csv"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F011",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/05_InventarioEstructuras",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "estructuras_final_unido_.shp"
+      ],
+      "scripts_consumen": [
+        "12_wind_speed.R",
+        "2_features_estructuras.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "12_wind_speed.R:entra:3",
+        "2_features_estructuras.R:entra:2"
+      ],
+      "fuentes_consumo": [
+        "vect"
+      ],
+      "grado_consumo": 2,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F012",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/07_zvh_mx3gw",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "zvh_mx3gw.tif"
+      ],
+      "scripts_consumen": [
+        "13_z_v_holdridge.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "13_z_v_holdridge.R:entra:1"
+      ],
+      "fuentes_consumo": [
+        "rast"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F025",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/08_coral-global",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "coral-global.shp"
+      ],
+      "scripts_consumen": [
+        "4_corales_global.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "4_corales_global.R:entra:2"
+      ],
+      "fuentes_consumo": [
+        "vect"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F010",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/11_dataset-sis-biodiversity-era5-global",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "wind-speed_monthly-mean_era5_1979-2018_v1.0.nc"
+      ],
+      "scripts_consumen": [
+        "12_wind_speed.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "12_wind_speed.R:entra:1"
+      ],
+      "fuentes_consumo": [
+        "rast"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F008",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/12_Tipo_de_costa",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "TipoCosta.SHP"
+      ],
+      "scripts_consumen": [
+        "11_tipo_costa.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "11_tipo_costa.R:entra:2"
+      ],
+      "fuentes_consumo": [
+        "vect"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F027",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/13_Batimetría",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "01_GEBCO2020_SIMAR.tif"
+      ],
+      "scripts_consumen": [
+        "6_batimetria_caracteristica.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "6_batimetria_caracteristica.R:entra:1"
+      ],
+      "fuentes_consumo": [
+        "rast"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F024",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/15_plantas_snib",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "especies_invasoras.xlsx",
+        "plantas_invasoras.csv"
+      ],
+      "scripts_consumen": [
+        "3_sp_invasoras.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "3_sp_invasoras.R:entra:2",
+        "3_sp_invasoras.R:entra:4"
+      ],
+      "fuentes_consumo": [
+        "read.csv",
+        "read_excel"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F028",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_crude/16_madmex",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "cdv_usuev250sVII_cnal_s.tif",
+        "madmex_landsat_2017_31.tif"
+      ],
+      "scripts_consumen": [
+        "7_inegi_uso_suelo.R",
+        "7_madmex_uso_suelo.R",
+        "7_madmex_uso_suelo_2.R",
+        "7_madmex_uso_suelo_3.R"
+      ],
+      "scripts_generan": [],
+      "ocurrencias_consumo": [
+        "7_inegi_uso_suelo.R:entra:1",
+        "7_madmex_uso_suelo.R:entra:1",
+        "7_madmex_uso_suelo_2.R:entra:1",
+        "7_madmex_uso_suelo_3.R:entra:1"
+      ],
+      "fuentes_consumo": [
+        "rast"
+      ],
+      "grado_consumo": 4,
+      "grado_generacion": 0
+    },
+    {
+      "familia_id": "F006",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_features",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "10_movimiento_dunas.rds",
+        "11_tipo_costa.rds",
+        "12_avg_windspeed.rds",
+        "13_zvh.rds",
+        "1_tasa_erosion.rds",
+        "2_infraestructura.rds",
+        "3_sp_inv_potential.rds",
+        "4_coral_distance.rds",
+        "5_seagrass_distance.rds",
+        "6_batimetria_charact.rds",
+        "7_inegi_landuse.rds",
+        "7_madmex_landuse.rds",
+        "7_madmex_landuse_3_1_10_12.rds",
+        "8_manglares.rds",
+        "9_condicion_dunas.rds"
+      ],
+      "scripts_consumen": [
+        "14_create_data_table.R"
+      ],
+      "scripts_generan": [
+        "10_movimiento_dunas.R",
+        "11_tipo_costa.R",
+        "12_wind_speed.R",
+        "13_z_v_holdridge.R",
+        "1_features_tasa_erosion.R",
+        "2_features_estructuras.R",
+        "3_sp_invasoras.R",
+        "4_corales_global.R",
+        "5_pasto_marino.R",
+        "6_batimetria_caracteristica.R",
+        "7_inegi_uso_suelo.R",
+        "7_madmex_uso_suelo.R",
+        "7_madmex_uso_suelo_2.R",
+        "7_madmex_uso_suelo_3.R",
+        "8_manglares.R",
+        "9_condicion_dunas.R"
+      ],
+      "ocurrencias_consumo": [
+        "14_create_data_table.R:entra:14"
+      ],
+      "ocurrencias_generacion": [
+        "10_movimiento_dunas.R:sale:1",
+        "11_tipo_costa.R:sale:1",
+        "12_wind_speed.R:sale:1",
+        "13_z_v_holdridge.R:sale:1",
+        "1_features_tasa_erosion.R:sale:1",
+        "2_features_estructuras.R:sale:1",
+        "3_sp_invasoras.R:sale:1",
+        "4_corales_global.R:sale:1",
+        "5_pasto_marino.R:sale:1",
+        "6_batimetria_caracteristica.R:sale:1",
+        "7_inegi_uso_suelo.R:sale:1",
+        "7_madmex_uso_suelo.R:sale:1",
+        "7_madmex_uso_suelo_2.R:sale:1",
+        "7_madmex_uso_suelo_3.R:sale:1",
+        "8_manglares.R:sale:1",
+        "9_condicion_dunas.R:sale:1"
+      ],
+      "fuentes_consumo": [
+        "list.files"
+      ],
+      "fuentes_generacion": [
+        "saveRDS"
+      ],
+      "grado_consumo": 1,
+      "grado_generacion": 16
+    },
+    {
+      "familia_id": "F014",
+      "tipo_familia": "directorio_archivos",
+      "base": "data_training_tables",
+      "modo_acceso": "archivo_unico",
+      "archivos_relativos": [
+        "cei_final_train_v1.csv",
+        "cei_final_train_v1.rds",
+        "cei_final_train_v1ask.csv",
+        "cei_final_train_v1d.csv",
+        "train_dat_2c.rds",
+        "train_dat_2c_eieqint.rds",
+        "train_dat_2c_eiqnint.rds",
+        "train_dat_2c_loglik.rds"
+      ],
+      "scripts_consumen": [
+        "15_one_class_ei.R",
+        "16_final_training_data_v1.R",
+        "17_naive_bayes_ei.R"
+      ],
+      "scripts_generan": [
+        "14_create_data_table.R",
+        "15_one_class_ei.R",
+        "17_naive_bayes_ei.R"
+      ],
+      "ocurrencias_consumo": [
+        "15_one_class_ei.R:entra:1",
+        "15_one_class_ei.R:entra:2",
+        "15_one_class_ei.R:entra:3",
+        "16_final_training_data_v1.R:entra:1",
+        "16_final_training_data_v1.R:entra:2",
+        "17_naive_bayes_ei.R:entra:1"
+      ],
+      "ocurrencias_generacion": [
+        "14_create_data_table.R:sale:1",
+        "15_one_class_ei.R:sale:1",
+        "15_one_class_ei.R:sale:2",
+        "15_one_class_ei.R:sale:3",
+        "15_one_class_ei.R:sale:4",
+        "15_one_class_ei.R:sale:5",
+        "15_one_class_ei.R:sale:6",
+        "15_one_class_ei.R:sale:7",
+        "17_naive_bayes_ei.R:sale:1",
+        "17_naive_bayes_ei.R:sale:2"
+      ],
+      "fuentes_consumo": [
+        "fread",
+        "readRDS"
+      ],
+      "fuentes_generacion": [
+        "saveRDS",
+        "write.csv"
+      ],
+      "grado_consumo": 3,
+      "grado_generacion": 3
+    }
+  ],
+  "scripts": {
+    "10_movimiento_dunas.R": {
+      "consume_familias": [
+        "F001",
+        "F002",
+        "F003",
+        "F004",
+        "F005"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "11_tipo_costa.R": {
+      "consume_familias": [
+        "F007",
+        "F008",
+        "F009"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "12_wind_speed.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F010",
+        "F011"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "13_z_v_holdridge.R": {
+      "consume_familias": [
+        "F003",
+        "F007",
+        "F009",
+        "F012"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "14_create_data_table.R": {
+      "consume_familias": [
+        "F006",
+        "F013"
+      ],
+      "genera_familias": [
+        "F014"
+      ]
+    },
+    "15_one_class_ei.R": {
+      "consume_familias": [
+        "F014"
+      ],
+      "genera_familias": [
+        "F014"
+      ]
+    },
+    "16_final_training_data_v1.R": {
+      "consume_familias": [
+        "F014"
+      ],
+      "genera_familias": []
+    },
+    "17_naive_bayes_ei.R": {
+      "consume_familias": [
+        "F014"
+      ],
+      "genera_familias": [
+        "F014"
+      ]
+    },
+    "18_create_ei_rasters.R": {
+      "consume_familias": [
+        "F015",
+        "F017",
+        "F018",
+        "F019",
+        "F020"
+      ],
+      "genera_familias": [
+        "F016"
+      ]
+    },
+    "1_create_reference_grid.R": {
+      "consume_familias": [
+        "F002",
+        "F005"
+      ],
+      "genera_familias": [
+        "F021"
+      ]
+    },
+    "1_create_reference_grid2.R": {
+      "consume_familias": [
+        "F001",
+        "F002",
+        "F004",
+        "F005"
+      ],
+      "genera_familias": [
+        "F022"
+      ]
+    },
+    "1_features_tasa_erosion.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F023"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "2_features_estructuras.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F011"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "3_sp_invasoras.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F024"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "4_corales_global.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F025"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "5_pasto_marino.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F026"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "6_batimetria_caracteristica.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F027"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "7_inegi_uso_suelo.R": {
+      "consume_familias": [
+        "F003",
+        "F007",
+        "F009",
+        "F028"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "7_madmex_uso_suelo.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F028"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "7_madmex_uso_suelo_2.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F028"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "7_madmex_uso_suelo_3.R": {
+      "consume_familias": [
+        "F007",
+        "F009",
+        "F028"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "8_manglares.R": {
+      "consume_familias": [
+        "F003",
+        "F007",
+        "F009"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    },
+    "9_condicion_dunas.R": {
+      "consume_familias": [
+        "F001",
+        "F002",
+        "F003",
+        "F004",
+        "F005"
+      ],
+      "genera_familias": [
+        "F006"
+      ]
+    }
+  },
+  "indices": {
+    "familias_troncales_consumo": [
+      "F007",
+      "F009",
+      "F005",
+      "F001",
+      "F002",
+      "F004",
+      "F003",
+      "F011",
+      "F028",
+      "F014"
+    ],
+    "familias_generadoras": [
+      "F016",
+      "F021",
+      "F022",
+      "F006",
+      "F014"
+    ]
+  }
+}

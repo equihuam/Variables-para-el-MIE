@@ -4,6 +4,7 @@
 #library("raster")   ------ version terra ya lo incluye
 pacman::p_load(dplyr, data.table, terra)
 
+
 dropbox_dir <- "C:/Users/equih/1 Nubes/Dropbox/ei-coastal"
 dat_csv <- paste0(dropbox_dir,"/data/cei_final_train_v1ask.csv")
 

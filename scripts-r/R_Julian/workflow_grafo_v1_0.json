@@ -1,0 +1,756 @@
+{
+  "version": "1.0",
+  "descripcion": "Grafo simplificado script↔familia operativa.",
+  "nodes": [
+    {
+      "id": "F001",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data/5_deltavp250m"
+    },
+    {
+      "id": "F002",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data/6_inegiSVII_dunes"
+    },
+    {
+      "id": "F003",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/02_cm-conabio"
+    },
+    {
+      "id": "F004",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data/7_dunes250116"
+    },
+    {
+      "id": "F005",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data/3_misc_cesia"
+    },
+    {
+      "id": "F006",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_features"
+    },
+    {
+      "id": "F007",
+      "tipo_nodo": "familia",
+      "subtipo": "coleccion_llamada",
+      "label": "data/06_DunasCost250116_malla_ref_50m\n[\\\\.tif$]"
+    },
+    {
+      "id": "F008",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/12_Tipo_de_costa"
+    },
+    {
+      "id": "F009",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data/06_DunasCost250116_malla_ref_50m"
+    },
+    {
+      "id": "F010",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/11_dataset-sis-biodiversity-era5-global"
+    },
+    {
+      "id": "F011",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/05_InventarioEstructuras"
+    },
+    {
+      "id": "F012",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/07_zvh_mx3gw"
+    },
+    {
+      "id": "F013",
+      "tipo_nodo": "familia",
+      "subtipo": "coleccion_llamada",
+      "label": "data_features\n[\\\\.rds$]"
+    },
+    {
+      "id": "F014",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_training_tables"
+    },
+    {
+      "id": "F015",
+      "tipo_nodo": "familia",
+      "subtipo": "coleccion_llamada",
+      "label": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m\n[\\\\.tif$]"
+    },
+    {
+      "id": "F016",
+      "tipo_nodo": "familia",
+      "subtipo": "coleccion_generada",
+      "label": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R"
+    },
+    {
+      "id": "F017",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales"
+    },
+    {
+      "id": "F018",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m"
+    },
+    {
+      "id": "F019",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data"
+    },
+    {
+      "id": "F020",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data"
+    },
+    {
+      "id": "F021",
+      "tipo_nodo": "familia",
+      "subtipo": "coleccion_generada",
+      "label": "data/7_ref_grid_50m"
+    },
+    {
+      "id": "F022",
+      "tipo_nodo": "familia",
+      "subtipo": "coleccion_generada",
+      "label": "data/8_ref_grid_50m"
+    },
+    {
+      "id": "F023",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/04_Erosion_acresion"
+    },
+    {
+      "id": "F024",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/15_plantas_snib"
+    },
+    {
+      "id": "F025",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/08_coral-global"
+    },
+    {
+      "id": "F026",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/03_seagrasses-pol-simar"
+    },
+    {
+      "id": "F027",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/13_Batimetría"
+    },
+    {
+      "id": "F028",
+      "tipo_nodo": "familia",
+      "subtipo": "directorio_archivos",
+      "label": "data_crude/16_madmex"
+    },
+    {
+      "id": "S::10_movimiento_dunas.R",
+      "tipo_nodo": "script",
+      "label": "10_movimiento_dunas.R"
+    },
+    {
+      "id": "S::11_tipo_costa.R",
+      "tipo_nodo": "script",
+      "label": "11_tipo_costa.R"
+    },
+    {
+      "id": "S::12_wind_speed.R",
+      "tipo_nodo": "script",
+      "label": "12_wind_speed.R"
+    },
+    {
+      "id": "S::13_z_v_holdridge.R",
+      "tipo_nodo": "script",
+      "label": "13_z_v_holdridge.R"
+    },
+    {
+      "id": "S::14_create_data_table.R",
+      "tipo_nodo": "script",
+      "label": "14_create_data_table.R"
+    },
+    {
+      "id": "S::15_one_class_ei.R",
+      "tipo_nodo": "script",
+      "label": "15_one_class_ei.R"
+    },
+    {
+      "id": "S::16_final_training_data_v1.R",
+      "tipo_nodo": "script",
+      "label": "16_final_training_data_v1.R"
+    },
+    {
+      "id": "S::17_naive_bayes_ei.R",
+      "tipo_nodo": "script",
+      "label": "17_naive_bayes_ei.R"
+    },
+    {
+      "id": "S::18_create_ei_rasters.R",
+      "tipo_nodo": "script",
+      "label": "18_create_ei_rasters.R"
+    },
+    {
+      "id": "S::1_create_reference_grid.R",
+      "tipo_nodo": "script",
+      "label": "1_create_reference_grid.R"
+    },
+    {
+      "id": "S::1_create_reference_grid2.R",
+      "tipo_nodo": "script",
+      "label": "1_create_reference_grid2.R"
+    },
+    {
+      "id": "S::1_features_tasa_erosion.R",
+      "tipo_nodo": "script",
+      "label": "1_features_tasa_erosion.R"
+    },
+    {
+      "id": "S::2_features_estructuras.R",
+      "tipo_nodo": "script",
+      "label": "2_features_estructuras.R"
+    },
+    {
+      "id": "S::3_sp_invasoras.R",
+      "tipo_nodo": "script",
+      "label": "3_sp_invasoras.R"
+    },
+    {
+      "id": "S::4_corales_global.R",
+      "tipo_nodo": "script",
+      "label": "4_corales_global.R"
+    },
+    {
+      "id": "S::5_pasto_marino.R",
+      "tipo_nodo": "script",
+      "label": "5_pasto_marino.R"
+    },
+    {
+      "id": "S::6_batimetria_caracteristica.R",
+      "tipo_nodo": "script",
+      "label": "6_batimetria_caracteristica.R"
+    },
+    {
+      "id": "S::7_inegi_uso_suelo.R",
+      "tipo_nodo": "script",
+      "label": "7_inegi_uso_suelo.R"
+    },
+    {
+      "id": "S::7_madmex_uso_suelo.R",
+      "tipo_nodo": "script",
+      "label": "7_madmex_uso_suelo.R"
+    },
+    {
+      "id": "S::7_madmex_uso_suelo_2.R",
+      "tipo_nodo": "script",
+      "label": "7_madmex_uso_suelo_2.R"
+    },
+    {
+      "id": "S::7_madmex_uso_suelo_3.R",
+      "tipo_nodo": "script",
+      "label": "7_madmex_uso_suelo_3.R"
+    },
+    {
+      "id": "S::8_manglares.R",
+      "tipo_nodo": "script",
+      "label": "8_manglares.R"
+    },
+    {
+      "id": "S::9_condicion_dunas.R",
+      "tipo_nodo": "script",
+      "label": "9_condicion_dunas.R"
+    }
+  ],
+  "edges": [
+    {
+      "source": "F001",
+      "target": "S::10_movimiento_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F002",
+      "target": "S::10_movimiento_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F003",
+      "target": "S::10_movimiento_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F004",
+      "target": "S::10_movimiento_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F005",
+      "target": "S::10_movimiento_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::10_movimiento_dunas.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::11_tipo_costa.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F008",
+      "target": "S::11_tipo_costa.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::11_tipo_costa.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::11_tipo_costa.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::12_wind_speed.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::12_wind_speed.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F010",
+      "target": "S::12_wind_speed.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F011",
+      "target": "S::12_wind_speed.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::12_wind_speed.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F003",
+      "target": "S::13_z_v_holdridge.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F007",
+      "target": "S::13_z_v_holdridge.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::13_z_v_holdridge.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F012",
+      "target": "S::13_z_v_holdridge.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::13_z_v_holdridge.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F006",
+      "target": "S::14_create_data_table.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F013",
+      "target": "S::14_create_data_table.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::14_create_data_table.R",
+      "target": "F014",
+      "tipo": "genera"
+    },
+    {
+      "source": "F014",
+      "target": "S::15_one_class_ei.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::15_one_class_ei.R",
+      "target": "F014",
+      "tipo": "genera"
+    },
+    {
+      "source": "F014",
+      "target": "S::16_final_training_data_v1.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F014",
+      "target": "S::17_naive_bayes_ei.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::17_naive_bayes_ei.R",
+      "target": "F014",
+      "tipo": "genera"
+    },
+    {
+      "source": "F015",
+      "target": "S::18_create_ei_rasters.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F017",
+      "target": "S::18_create_ei_rasters.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F018",
+      "target": "S::18_create_ei_rasters.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F019",
+      "target": "S::18_create_ei_rasters.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F020",
+      "target": "S::18_create_ei_rasters.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::18_create_ei_rasters.R",
+      "target": "F016",
+      "tipo": "genera"
+    },
+    {
+      "source": "F002",
+      "target": "S::1_create_reference_grid.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F005",
+      "target": "S::1_create_reference_grid.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::1_create_reference_grid.R",
+      "target": "F021",
+      "tipo": "genera"
+    },
+    {
+      "source": "F001",
+      "target": "S::1_create_reference_grid2.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F002",
+      "target": "S::1_create_reference_grid2.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F004",
+      "target": "S::1_create_reference_grid2.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F005",
+      "target": "S::1_create_reference_grid2.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::1_create_reference_grid2.R",
+      "target": "F022",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::1_features_tasa_erosion.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::1_features_tasa_erosion.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F023",
+      "target": "S::1_features_tasa_erosion.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::1_features_tasa_erosion.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::2_features_estructuras.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::2_features_estructuras.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F011",
+      "target": "S::2_features_estructuras.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::2_features_estructuras.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::3_sp_invasoras.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::3_sp_invasoras.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F024",
+      "target": "S::3_sp_invasoras.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::3_sp_invasoras.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::4_corales_global.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::4_corales_global.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F025",
+      "target": "S::4_corales_global.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::4_corales_global.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::5_pasto_marino.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::5_pasto_marino.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F026",
+      "target": "S::5_pasto_marino.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::5_pasto_marino.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::6_batimetria_caracteristica.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::6_batimetria_caracteristica.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F027",
+      "target": "S::6_batimetria_caracteristica.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::6_batimetria_caracteristica.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F003",
+      "target": "S::7_inegi_uso_suelo.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F007",
+      "target": "S::7_inegi_uso_suelo.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::7_inegi_uso_suelo.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F028",
+      "target": "S::7_inegi_uso_suelo.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::7_inegi_uso_suelo.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::7_madmex_uso_suelo.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::7_madmex_uso_suelo.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F028",
+      "target": "S::7_madmex_uso_suelo.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::7_madmex_uso_suelo.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::7_madmex_uso_suelo_2.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::7_madmex_uso_suelo_2.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F028",
+      "target": "S::7_madmex_uso_suelo_2.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::7_madmex_uso_suelo_2.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F007",
+      "target": "S::7_madmex_uso_suelo_3.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::7_madmex_uso_suelo_3.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F028",
+      "target": "S::7_madmex_uso_suelo_3.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::7_madmex_uso_suelo_3.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F003",
+      "target": "S::8_manglares.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F007",
+      "target": "S::8_manglares.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F009",
+      "target": "S::8_manglares.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::8_manglares.R",
+      "target": "F006",
+      "tipo": "genera"
+    },
+    {
+      "source": "F001",
+      "target": "S::9_condicion_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F002",
+      "target": "S::9_condicion_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F003",
+      "target": "S::9_condicion_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F004",
+      "target": "S::9_condicion_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "F005",
+      "target": "S::9_condicion_dunas.R",
+      "tipo": "consume"
+    },
+    {
+      "source": "S::9_condicion_dunas.R",
+      "target": "F006",
+      "tipo": "genera"
+    }
+  ]
+}

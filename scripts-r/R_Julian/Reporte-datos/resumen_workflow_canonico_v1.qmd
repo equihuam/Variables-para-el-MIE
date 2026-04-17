@@ -1,0 +1,268 @@
+---
+title: "Hallazgos y propuesta canónica tentativa"
+format:
+  html:
+    toc: false
+    theme: cosmo
+    self-contained: true
+    lightbox: true
+    embed-resources: true
+lang: es
+---
+
+<style>
+.compact-note p {
+  margin-bottom: 0.7rem;
+}
+.inline-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 1rem 0 1.25rem 0;
+}
+.inline-actions a {
+  display: inline-block;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid #cfd7df;
+  border-radius: 0.65rem;
+  text-decoration: none;
+  background: #f8fafc;
+}
+.inline-actions a:hover {
+  background: #eef4f8;
+}
+pre.tree {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 0.85rem;
+  overflow-x: auto;
+  font-size: 0.92rem;
+}
+.small-links {
+  font-size: 0.92rem;
+  margin-top: 0.9rem;
+}
+.figure-box {
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #fff;
+}
+</style>
+
+<div class="compact-note">
+
+Hallazgo principal: el análisis de scripts permitió pasar de una lista de rutas a una vista de **familias operativas de archivos**. Con eso ya se distinguen etapas claras del flujo: base espacial/regional, cálculo de features, tablas de entrenamiento y generación de mapas.
+
+Se detectó una familia claramente troncal: **`data/06_DunasCost250116_malla_ref_50m`**, que alimenta muchos scripts. También emergen como etapas posteriores **`data_features`** y **`data_training_tables`**. Además apareció una posible inconsistencia de nomenclatura entre **`data/7_ref_grid_50m`** y **`data/8_ref_grid_50m`**, que probablemente representan la misma familia operativa y conviene validar directamente.
+
+Propuesta canónica tentativa: reorganizar por etapas del workflow y no por herencia histórica de carpetas. En términos generales: **`data_raw/`** para insumos fuente, **`data_intermediate/grids/`** para moldes o grillas base regionales, **`data_intermediate/features/`** para capas derivadas, **`data_intermediate/training_tables/`** para tablas de modelado y **`outputs/maps/`** para resultados cartográficos.
+
+</div>
+
+<div class="inline-actions">
+  <a href="#grafo">Ir al grafo</a>
+  <a href="#arbol">Ir al árbol tentativo</a>
+  <a href="workflow_familias_globales_v1_0.json">Ver JSON consolidado</a>
+</div>
+
+## Grafo simplificado {.unnumbered #grafo}
+
+<div class="figure-box">
+
+```{mermaid}
+flowchart LR
+    F001("data/5_deltavp250m")
+    F002("data/6_inegiSVII_dunes")
+    F003("data_crude/02_cm-conabio")
+    F004("data/7_dunes250116")
+    F005("data/3_misc_cesia")
+    F006("data_features")
+    F007("data/06_DunasCost250116_malla_ref_50m\\n[\\.tif$]")
+    F008("data_crude/12_Tipo_de_costa")
+    F009("data/06_DunasCost250116_malla_ref_50m")
+    F010("data_crude/11_dataset-sis-biodiversity-era5-global")
+    F011("data_crude/05_InventarioEstructuras")
+    F012("data_crude/07_zvh_mx3gw")
+    F013("data_features\\n[\\.rds$]")
+    F014("data_training_tables")
+    F015("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m\\n[\\.tif$]")
+    F016("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R")
+    F017("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales")
+    F018("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m")
+    F019("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data")
+    F020("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data")
+    F021("data/7_ref_grid_50m")
+    F022("data/8_ref_grid_50m")
+    F023("data_crude/04_Erosion_acresion")
+    F024("data_crude/15_plantas_snib")
+    F025("data_crude/08_coral-global")
+    F026("data_crude/03_seagrasses-pol-simar")
+    F027("data_crude/13_Batimetría")
+    F028("data_crude/16_madmex")
+    S10["10_movimiento_dunas.R"]
+    S11["11_tipo_costa.R"]
+    S12["12_wind_speed.R"]
+    S13["13_z_v_holdridge.R"]
+    S14["14_create_data_table.R"]
+    S15["15_one_class_ei.R"]
+    S16["16_final_training_data_v1.R"]
+    S17["17_naive_bayes_ei.R"]
+    S18["18_create_ei_rasters.R"]
+    S101["1_create_reference_grid.R"]
+    S102["1_create_reference_grid2.R"]
+    S1e["1_features_tasa_erosion.R"]
+    S2e["2_features_estructuras.R"]
+    S3e["3_sp_invasoras.R"]
+    S4e["4_corales_global.R"]
+    S5e["5_pasto_marino.R"]
+    S6e["6_batimetria_caracteristica.R"]
+    S7i["7_inegi_uso_suelo.R"]
+    S7m["7_madmex_uso_suelo.R"]
+    S7m2["7_madmex_uso_suelo_2.R"]
+    S7m3["7_madmex_uso_suelo_3.R"]
+    S8m["8_manglares.R"]
+    S9c["9_condicion_dunas.R"]
+    F001 --> S10
+    F002 --> S10
+    F003 --> S10
+    F004 --> S10
+    F005 --> S10
+    S10 --> F006
+    F007 --> S11
+    F008 --> S11
+    F009 --> S11
+    S11 --> F006
+    F007 --> S12
+    F009 --> S12
+    F010 --> S12
+    F011 --> S12
+    S12 --> F006
+    F003 --> S13
+    F007 --> S13
+    F009 --> S13
+    F012 --> S13
+    S13 --> F006
+    F006 --> S14
+    F013 --> S14
+    S14 --> F014
+    F014 --> S15
+    S15 --> F014
+    F014 --> S16
+    F014 --> S17
+    S17 --> F014
+    F015 --> S18
+    F017 --> S18
+    F018 --> S18
+    F019 --> S18
+    F020 --> S18
+    S18 --> F016
+    F002 --> S101
+    F005 --> S101
+    S101 --> F021
+    F001 --> S102
+    F002 --> S102
+    F004 --> S102
+    F005 --> S102
+    S102 --> F022
+    F007 --> S1e
+    F009 --> S1e
+    F023 --> S1e
+    S1e --> F006
+    F007 --> S2e
+    F009 --> S2e
+    F011 --> S2e
+    S2e --> F006
+    F007 --> S3e
+    F009 --> S3e
+    F024 --> S3e
+    S3e --> F006
+    F007 --> S4e
+    F009 --> S4e
+    F025 --> S4e
+    S4e --> F006
+    F007 --> S5e
+    F009 --> S5e
+    F026 --> S5e
+    S5e --> F006
+    F007 --> S6e
+    F009 --> S6e
+    F027 --> S6e
+    S6e --> F006
+    F007 --> S7i
+    F009 --> S7i
+    F028 --> S7i
+    F003 --> S7i
+    S7i --> F006
+    F007 --> S7m
+    F009 --> S7m
+    F028 --> S7m
+    S7m --> F006
+    F007 --> S7m2
+    F009 --> S7m2
+    F028 --> S7m2
+    S7m2 --> F006
+    F007 --> S7m3
+    F009 --> S7m3
+    F028 --> S7m3
+    S7m3 --> F006
+    F007 --> S8m
+    F009 --> S8m
+    F003 --> S8m
+    S8m --> F006
+    F001 --> S9c
+    F002 --> S9c
+    F003 --> S9c
+    F004 --> S9c
+    F005 --> S9c
+    S9c --> F006
+```
+
+</div>
+
+<div class="small-links">
+Descargas: <a href="workflow_grafo_v1_0.mmd">Mermaid fuente</a>, <a href="workflow_grafo_v1_0.json">grafo JSON</a>.
+</div>
+
+## Árbol canónico tentativo {.unnumbered #arbol}
+
+<div class="figure-box">
+
+```text
+proyecto/
+├── data_raw/
+│   ├── vectores_base/
+│   ├── rasters_base/
+│   ├── tablas_base/
+│   └── externos_modelado/
+├── data_intermediate/
+│   ├── grids/
+│   │   └── ref_grid_50m_regional/
+│   ├── features/
+│   │   ├── por_script/
+│   │   └── consolidadas/
+│   ├── training_tables/
+│   └── model_inputs/
+├── outputs/
+│   ├── maps/
+│   │   └── ei/
+│   ├── tables/
+│   └── reports/
+├── scripts/
+│   ├── prep/
+│   ├── features/
+│   ├── training/
+│   ├── inference/
+│   └── utils/
+└── metadata/
+    ├── manifests/
+    ├── dictionaries/
+    └── workflow/
+```
+
+</div>
+
+<div class="small-links">
+Descargas: <a href="arbol_canonico_tentativo_v1.md">árbol Markdown</a>, <a href="workflow_familias_globales_v1_0.json">familias globales</a>, <a href="r_script_paths_manifest_v0_6.json">manifest v0.6</a>.
+</div>

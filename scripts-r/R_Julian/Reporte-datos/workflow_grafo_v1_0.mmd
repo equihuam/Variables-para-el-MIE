@@ -1,0 +1,148 @@
+flowchart LR
+    F001("data/5_deltavp250m")
+    F002("data/6_inegiSVII_dunes")
+    F003("data_crude/02_cm-conabio")
+    F004("data/7_dunes250116")
+    F005("data/3_misc_cesia")
+    F006("data_features")
+    F007("data/06_DunasCost250116_malla_ref_50m
+[\\.tif$]")
+    F008("data_crude/12_Tipo_de_costa")
+    F009("data/06_DunasCost250116_malla_ref_50m")
+    F010("data_crude/11_dataset-sis-biodiversity-era5-global")
+    F011("data_crude/05_InventarioEstructuras")
+    F012("data_crude/07_zvh_mx3gw")
+    F013("data_features
+[\\.rds$]")
+    F014("data_training_tables")
+    F015("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m
+[\\.tif$]")
+    F016("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R")
+    F017("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales")
+    F018("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m")
+    F019("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data")
+    F020("C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data")
+    F021("data/7_ref_grid_50m")
+    F022("data/8_ref_grid_50m")
+    F023("data_crude/04_Erosion_acresion")
+    F024("data_crude/15_plantas_snib")
+    F025("data_crude/08_coral-global")
+    F026("data_crude/03_seagrasses-pol-simar")
+    F027("data_crude/13_Batimetría")
+    F028("data_crude/16_madmex")
+    S__10_movimiento_dunas_R["10_movimiento_dunas.R"]
+    S__11_tipo_costa_R["11_tipo_costa.R"]
+    S__12_wind_speed_R["12_wind_speed.R"]
+    S__13_z_v_holdridge_R["13_z_v_holdridge.R"]
+    S__14_create_data_table_R["14_create_data_table.R"]
+    S__15_one_class_ei_R["15_one_class_ei.R"]
+    S__16_final_training_data_v1_R["16_final_training_data_v1.R"]
+    S__17_naive_bayes_ei_R["17_naive_bayes_ei.R"]
+    S__18_create_ei_rasters_R["18_create_ei_rasters.R"]
+    S__1_create_reference_grid_R["1_create_reference_grid.R"]
+    S__1_create_reference_grid2_R["1_create_reference_grid2.R"]
+    S__1_features_tasa_erosion_R["1_features_tasa_erosion.R"]
+    S__2_features_estructuras_R["2_features_estructuras.R"]
+    S__3_sp_invasoras_R["3_sp_invasoras.R"]
+    S__4_corales_global_R["4_corales_global.R"]
+    S__5_pasto_marino_R["5_pasto_marino.R"]
+    S__6_batimetria_caracteristica_R["6_batimetria_caracteristica.R"]
+    S__7_inegi_uso_suelo_R["7_inegi_uso_suelo.R"]
+    S__7_madmex_uso_suelo_R["7_madmex_uso_suelo.R"]
+    S__7_madmex_uso_suelo_2_R["7_madmex_uso_suelo_2.R"]
+    S__7_madmex_uso_suelo_3_R["7_madmex_uso_suelo_3.R"]
+    S__8_manglares_R["8_manglares.R"]
+    S__9_condicion_dunas_R["9_condicion_dunas.R"]
+    F001 --> S__10_movimiento_dunas_R
+    F002 --> S__10_movimiento_dunas_R
+    F003 --> S__10_movimiento_dunas_R
+    F004 --> S__10_movimiento_dunas_R
+    F005 --> S__10_movimiento_dunas_R
+    S__10_movimiento_dunas_R --> F006
+    F007 --> S__11_tipo_costa_R
+    F008 --> S__11_tipo_costa_R
+    F009 --> S__11_tipo_costa_R
+    S__11_tipo_costa_R --> F006
+    F007 --> S__12_wind_speed_R
+    F009 --> S__12_wind_speed_R
+    F010 --> S__12_wind_speed_R
+    F011 --> S__12_wind_speed_R
+    S__12_wind_speed_R --> F006
+    F003 --> S__13_z_v_holdridge_R
+    F007 --> S__13_z_v_holdridge_R
+    F009 --> S__13_z_v_holdridge_R
+    F012 --> S__13_z_v_holdridge_R
+    S__13_z_v_holdridge_R --> F006
+    F006 --> S__14_create_data_table_R
+    F013 --> S__14_create_data_table_R
+    S__14_create_data_table_R --> F014
+    F014 --> S__15_one_class_ei_R
+    S__15_one_class_ei_R --> F014
+    F014 --> S__16_final_training_data_v1_R
+    F014 --> S__17_naive_bayes_ei_R
+    S__17_naive_bayes_ei_R --> F014
+    F015 --> S__18_create_ei_rasters_R
+    F017 --> S__18_create_ei_rasters_R
+    F018 --> S__18_create_ei_rasters_R
+    F019 --> S__18_create_ei_rasters_R
+    F020 --> S__18_create_ei_rasters_R
+    S__18_create_ei_rasters_R --> F016
+    F002 --> S__1_create_reference_grid_R
+    F005 --> S__1_create_reference_grid_R
+    S__1_create_reference_grid_R --> F021
+    F001 --> S__1_create_reference_grid2_R
+    F002 --> S__1_create_reference_grid2_R
+    F004 --> S__1_create_reference_grid2_R
+    F005 --> S__1_create_reference_grid2_R
+    S__1_create_reference_grid2_R --> F022
+    F007 --> S__1_features_tasa_erosion_R
+    F009 --> S__1_features_tasa_erosion_R
+    F023 --> S__1_features_tasa_erosion_R
+    S__1_features_tasa_erosion_R --> F006
+    F007 --> S__2_features_estructuras_R
+    F009 --> S__2_features_estructuras_R
+    F011 --> S__2_features_estructuras_R
+    S__2_features_estructuras_R --> F006
+    F007 --> S__3_sp_invasoras_R
+    F009 --> S__3_sp_invasoras_R
+    F024 --> S__3_sp_invasoras_R
+    S__3_sp_invasoras_R --> F006
+    F007 --> S__4_corales_global_R
+    F009 --> S__4_corales_global_R
+    F025 --> S__4_corales_global_R
+    S__4_corales_global_R --> F006
+    F007 --> S__5_pasto_marino_R
+    F009 --> S__5_pasto_marino_R
+    F026 --> S__5_pasto_marino_R
+    S__5_pasto_marino_R --> F006
+    F007 --> S__6_batimetria_caracteristica_R
+    F009 --> S__6_batimetria_caracteristica_R
+    F027 --> S__6_batimetria_caracteristica_R
+    S__6_batimetria_caracteristica_R --> F006
+    F003 --> S__7_inegi_uso_suelo_R
+    F007 --> S__7_inegi_uso_suelo_R
+    F009 --> S__7_inegi_uso_suelo_R
+    F028 --> S__7_inegi_uso_suelo_R
+    S__7_inegi_uso_suelo_R --> F006
+    F007 --> S__7_madmex_uso_suelo_R
+    F009 --> S__7_madmex_uso_suelo_R
+    F028 --> S__7_madmex_uso_suelo_R
+    S__7_madmex_uso_suelo_R --> F006
+    F007 --> S__7_madmex_uso_suelo_2_R
+    F009 --> S__7_madmex_uso_suelo_2_R
+    F028 --> S__7_madmex_uso_suelo_2_R
+    S__7_madmex_uso_suelo_2_R --> F006
+    F007 --> S__7_madmex_uso_suelo_3_R
+    F009 --> S__7_madmex_uso_suelo_3_R
+    F028 --> S__7_madmex_uso_suelo_3_R
+    S__7_madmex_uso_suelo_3_R --> F006
+    F003 --> S__8_manglares_R
+    F007 --> S__8_manglares_R
+    F009 --> S__8_manglares_R
+    S__8_manglares_R --> F006
+    F001 --> S__9_condicion_dunas_R
+    F002 --> S__9_condicion_dunas_R
+    F003 --> S__9_condicion_dunas_R
+    F004 --> S__9_condicion_dunas_R
+    F005 --> S__9_condicion_dunas_R
+    S__9_condicion_dunas_R --> F006

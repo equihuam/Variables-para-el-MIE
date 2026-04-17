@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import rasterio
+import matplotlib.pyplot as plt
 from rasterio.transform import from_origin, rowcol
 from rasterio.warp import reproject, Resampling
 
@@ -250,6 +251,56 @@ def rasterize_points_to_template(
     )
 
 
+def save_histogram(
+        values: np.ndarray,
+        output_png: Path,
+        title: str,
+        xlabel: str = "IE normalizado",
+        bins: int = 50,
+) -> None:
+    valid = values[np.isfinite(values)]
+    if valid.size == 0:
+        return
+
+    output_png.parent.mkdir(parents=True, exist_ok=True)
+
+    plt.figure(figsize=(8, 5))
+    plt.hist(valid, bins=bins)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel("Frecuencia")
+    plt.tight_layout()
+    plt.savefig(output_png, dpi=150)
+    plt.close()
+
+
+def save_raster_histogram(
+            raster_path: Path,
+            output_png: Path,
+            title: str,
+            nodata_value: float = NODATA_VALUE,
+            bins: int = 50,
+    ) -> None:
+
+    with rasterio.open(raster_path) as src:
+            arr = src.read(1)
+
+    valid = arr[np.isfinite(arr) & (arr != nodata_value)]
+    if valid.size == 0:
+        return
+
+    output_png.parent.mkdir(parents=True, exist_ok=True)
+
+    plt.figure(figsize=(8, 5))
+    plt.hist(valid, bins=bins)
+    plt.title(title)
+    plt.xlabel("IE normalizado")
+    plt.ylabel("Frecuencia")
+    plt.tight_layout()
+    plt.savefig(output_png, dpi=150)
+    plt.close()
+
+
 def main() -> None:
     df = load_training_table(TRAINING_TABLE)
     ie_pred_values = load_ie_predictions(IE_PREDICTIONS_CSV)
@@ -259,6 +310,12 @@ def main() -> None:
         raise ValueError(
             f"El máximo idx ({df['idx'].max()}) excede el número de predicciones IE ({len(ie_pred_values)})"
         )
+
+    save_histogram(
+        ie_pred_values,
+        OUTPUT_DIR / "hist_ie_global.png",
+        title="Histograma global de IE normalizado"
+    )
 
     regiones = sort_regions_numerically(df["regionId"].dropna().unique().tolist())
 
@@ -273,6 +330,13 @@ def main() -> None:
             template_path=template_path,
             output_path=output_path,
             source_crs=SOURCE_CRS,
+            nodata_value=NODATA_VALUE,
+        )
+
+        save_raster_histogram(
+            raster_path=output_path,
+            output_png=OUTPUT_DIR / f"hist_eicoastal_{region}.png",
+            title=f"Histograma IE {region}",
             nodata_value=NODATA_VALUE,
         )
 

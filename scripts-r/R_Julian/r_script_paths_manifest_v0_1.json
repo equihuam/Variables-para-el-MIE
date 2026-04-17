@@ -1,0 +1,439 @@
+{
+  "1_create_reference_grid.R": {
+    "bases": {
+      "entrada": {},
+      "salida": {
+        "1": "./data/7_ref_grid_50m/"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "data",
+      "4": "3_misc_cesia"
+    },
+    "variables_ruta": {
+      "WRITEPATH": "\"./data/7_ref_grid_50m/\"",
+      "coastr_rast_aux": "coastr_rast"
+    },
+    "entra": {
+      "1": {
+        "order": 1,
+        "role": "entra",
+        "source": "rast",
+        "expression": {
+          "raw": "\"./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif\"",
+          "expr_type": "literal",
+          "variables_used": [
+            "cdv_usuev250sVII_dunas"
+          ]
+        },
+        "resolved": {
+          "path": "./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      },
+      "2": {
+        "order": 2,
+        "role": "entra",
+        "source": "vect",
+        "expression": {
+          "raw": "coastalr_reproj[i",
+          "expr_type": "mixed",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": null,
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": true
+        }
+      },
+      "3": {
+        "order": 3,
+        "role": "entra",
+        "source": "vect",
+        "expression": {
+          "raw": "dunesother_reproj",
+          "expr_type": "variable",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": null,
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": true
+        }
+      },
+      "4": {
+        "order": 4,
+        "role": "entra",
+        "source": "st_read",
+        "expression": {
+          "raw": "\"./data/3_misc_cesia/DunasCosteras.shp\"",
+          "expr_type": "literal",
+          "variables_used": [
+            "DunasCosteras"
+          ]
+        },
+        "resolved": {
+          "path": "./data/3_misc_cesia/DunasCosteras.shp",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      },
+      "5": {
+        "order": 5,
+        "role": "entra",
+        "source": "st_read",
+        "expression": {
+          "raw": "\"./data/3_misc_cesia/RegionesCosteras40km.shp\"",
+          "expr_type": "literal",
+          "variables_used": [
+            "RegionesCosteras40km"
+          ]
+        },
+        "resolved": {
+          "path": "./data/3_misc_cesia/RegionesCosteras40km.shp",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "order": 1,
+        "role": "sale",
+        "source": "writeRaster",
+        "expression": {
+          "raw": "file.path(WRITEPATH,\n                                                paste0(\"region_\",\n                                                       coastr_poly$myid[1],\n                                                       \"/ref_grid.tif\"))",
+          "expr_type": "file.path",
+          "variables_used": [
+            "WRITEPATH"
+          ]
+        },
+        "resolved": {
+          "path": null,
+          "template": "./data/7_ref_grid_50m/region_{expr}/ref_grid.tif",
+          "base": "./data/7_ref_grid_50m",
+          "relative": "region_{expr}/ref_grid.tif",
+          "dynamic": true
+        }
+      }
+    }
+  },
+  "1_create_reference_grid2.R": {
+    "bases": {
+      "entrada": {},
+      "salida": {
+        "1": "./data/8_ref_grid_50m/"
+      }
+    },
+    "componentes_recurrentes": {
+      "1": "data"
+    },
+    "variables_ruta": {
+      "WRITEPATH": "\"./data/8_ref_grid_50m/\""
+    },
+    "entra": {
+      "1": {
+        "order": 1,
+        "role": "entra",
+        "source": "rast",
+        "expression": {
+          "raw": "\"./data/5_deltavp250m/1delt_vp_250m.tif\"",
+          "expr_type": "literal",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": "./data/5_deltavp250m/1delt_vp_250m.tif",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      },
+      "2": {
+        "order": 2,
+        "role": "entra",
+        "source": "rast",
+        "expression": {
+          "raw": "\"./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif\"",
+          "expr_type": "literal",
+          "variables_used": [
+            "cdv_usuev250sVII_dunas"
+          ]
+        },
+        "resolved": {
+          "path": "./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      },
+      "3": {
+        "order": 3,
+        "role": "entra",
+        "source": "vect",
+        "expression": {
+          "raw": "coastalr_reproj[i",
+          "expr_type": "mixed",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": null,
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": true
+        }
+      },
+      "4": {
+        "order": 4,
+        "role": "entra",
+        "source": "vect",
+        "expression": {
+          "raw": "dunesother_reproj",
+          "expr_type": "variable",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": null,
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": true
+        }
+      },
+      "5": {
+        "order": 5,
+        "role": "entra",
+        "source": "st_read",
+        "expression": {
+          "raw": "\"./data/7_dunes250116/DunasCosteras250116.shp\"",
+          "expr_type": "literal",
+          "variables_used": [
+            "DunasCosteras250116"
+          ]
+        },
+        "resolved": {
+          "path": "./data/7_dunes250116/DunasCosteras250116.shp",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      },
+      "6": {
+        "order": 6,
+        "role": "entra",
+        "source": "st_read",
+        "expression": {
+          "raw": "\"./data/3_misc_cesia/RegionesCosteras40km.shp\"",
+          "expr_type": "literal",
+          "variables_used": [
+            "RegionesCosteras40km"
+          ]
+        },
+        "resolved": {
+          "path": "./data/3_misc_cesia/RegionesCosteras40km.shp",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "order": 1,
+        "role": "sale",
+        "source": "writeRaster",
+        "expression": {
+          "raw": "file.path(WRITEPATH,\n                                                paste0(\"region_\",\n                                                       coastr_poly$myid[1],\n                                                       \"/ref_grid.tif\"))",
+          "expr_type": "file.path",
+          "variables_used": [
+            "WRITEPATH"
+          ]
+        },
+        "resolved": {
+          "path": null,
+          "template": "./data/8_ref_grid_50m/region_{expr}/ref_grid.tif",
+          "base": "./data/8_ref_grid_50m",
+          "relative": "region_{expr}/ref_grid.tif",
+          "dynamic": true
+        }
+      }
+    }
+  },
+  "1_features_tasa_erosion.R": {
+    "bases": {
+      "entrada": {},
+      "salida": {}
+    },
+    "componentes_recurrentes": {},
+    "variables_ruta": {},
+    "entra": {
+      "1": {
+        "order": 1,
+        "role": "entra",
+        "source": "rast",
+        "expression": {
+          "raw": "region",
+          "expr_type": "variable",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": null,
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": true
+        }
+      },
+      "2": {
+        "order": 2,
+        "role": "entra",
+        "source": "read.csv",
+        "expression": {
+          "raw": "\"./data_crude/04_Erosion_acresion/Tasas_erosionMEX_Actualizado2018.txt\"",
+          "expr_type": "literal",
+          "variables_used": [
+            "Tasas_erosionMEX_Actualizado2018"
+          ]
+        },
+        "resolved": {
+          "path": "./data_crude/04_Erosion_acresion/Tasas_erosionMEX_Actualizado2018.txt",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      },
+      "3": {
+        "order": 3,
+        "role": "entra",
+        "source": "list.files",
+        "expression": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "expr_type": "literal",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": "./data/06_DunasCost250116_malla_ref_50m/",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "order": 1,
+        "role": "sale",
+        "source": "saveRDS",
+        "expression": {
+          "raw": "\"./data_features/1_tasa_erosion.rds\"",
+          "expr_type": "literal",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": "./data_features/1_tasa_erosion.rds",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      }
+    }
+  },
+  "2_features_estructuras.R": {
+    "bases": {
+      "entrada": {},
+      "salida": {}
+    },
+    "componentes_recurrentes": {},
+    "variables_ruta": {},
+    "entra": {
+      "1": {
+        "order": 1,
+        "role": "entra",
+        "source": "rast",
+        "expression": {
+          "raw": "region",
+          "expr_type": "variable",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": null,
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": true
+        }
+      },
+      "2": {
+        "order": 2,
+        "role": "entra",
+        "source": "vect",
+        "expression": {
+          "raw": "\"./data_crude/05_InventarioEstructuras/estructuras_final_unido_.shp\"",
+          "expr_type": "literal",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": "./data_crude/05_InventarioEstructuras/estructuras_final_unido_.shp",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      },
+      "3": {
+        "order": 3,
+        "role": "entra",
+        "source": "list.files",
+        "expression": {
+          "raw": "\"./data/06_DunasCost250116_malla_ref_50m/\"",
+          "expr_type": "literal",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": "./data/06_DunasCost250116_malla_ref_50m/",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      }
+    },
+    "sale": {
+      "1": {
+        "order": 1,
+        "role": "sale",
+        "source": "saveRDS",
+        "expression": {
+          "raw": "\"./data_features/2_infraestructura.rds\"",
+          "expr_type": "literal",
+          "variables_used": []
+        },
+        "resolved": {
+          "path": "./data_features/2_infraestructura.rds",
+          "template": null,
+          "base": null,
+          "relative": null,
+          "dynamic": false
+        }
+      }
+    }
+  }
+}
