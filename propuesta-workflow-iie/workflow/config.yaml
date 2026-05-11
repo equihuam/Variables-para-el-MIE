@@ -1,0 +1,37 @@
+data_repo: "C:/wf-ie-data"
+
+regions:
+  - region_1
+  - region_2
+  - region_3
+  - region_4
+  - region_5
+  - region_6
+  - region_7
+  - region_8
+  - region_9
+  - region_10
+  - region_11
+  - region_12
+  - region_13
+  - region_14
+
+inputs:
+  dunes_inegi_raster: "{data_repo}/raw/dunes_inegi/cdv_usuev250sVII_dunas.tif"
+  dunes_other_shp: "{data_repo}/raw/dunes_cost/DunasCosteras250116.shp"
+  coastal_regions_shp: "{data_repo}/raw/coastal_regions/RegionesCosteras40km.shp"
+  erosion_table: "{data_repo}/raw/erosion/Tasas_erosionMEX_Actualizado2018.txt"
+  corals_shp: "{data_repo}/raw/corals/coral-global.shp"
+
+results:
+  reference_dir: "{data_repo}/results/reference"
+  features_dir: "{data_repo}/results/features"
+  training_dir: "{data_repo}/results/training"
+  final_maps_dir: "{data_repo}/results/final_maps"
+
+bayes:
+  bn_input_parquet: "{data_repo}/results/training/bn_input.parquet"
+  bn_input_csv: "{data_repo}/results/training/bn_input.csv"
+  ie_predictions_csv: "{data_repo}/external/netica/ie_predictions.csv"
+  ie_prediction_column: null
+  normalization_range: "1.5,5.5"

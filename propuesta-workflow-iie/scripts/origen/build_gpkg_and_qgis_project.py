@@ -30,7 +30,7 @@ from qgis.core import (
 # CONFIGURACIÓN
 # ---------------------------------------------------------------------
 
-BASE_DIR = Path(".")
+BASE_DIR = Path("../../visualizar")
 RESULTS_DIR = BASE_DIR / "results"
 
 GPKG_PATH = RESULTS_DIR / "pkg" / "workflow_iie_outputs.gpkg"

@@ -1,3 +1,6 @@
+# Datos voluminosos
+data/
+
 # Default ignored files Pycharm
 /shelf/
 /workspace.xml
@@ -285,3 +288,4 @@ __marimo__/
 
 # python end
 *.Rproj
+/propuesta-workflow-iie/data/

@@ -1,0 +1,424 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Nombre: 18_create_ei_rasters.py
+
+Propósito:
+    Generar GeoTIFF regionales del índice de integridad ecosistémica (IE) a
+    partir de la tabla final de entrenamiento, las predicciones exportadas por
+    Netica y la colección de mallas de referencia regionales.
+
+Origen:
+    Traducción inicial a Python del script R:
+    18_create_ei_rasters.R
+
+Resumen del flujo:
+    1. Leer la tabla de entrenamiento con regionId, x, y e índice de fila.
+    2. Leer las predicciones de IE exportadas por Netica.
+    3. Normalizar las predicciones al rango 0–1.
+    4. Construir una grilla fuente regular en EPSG:4326 a partir de los puntos.
+    5. Reproyectar la grilla fuente a cada plantilla regional ref_grid.tif.
+    6. Escribir un GeoTIFF por región y generar histogramas PNG.
+
+Insumos principales:
+    - cei_final_train_v1ask.csv
+    - cei_final_ie_expected_port_5_equal_2026.csv
+    - colección regional de ref_grid.tif
+
+Salidas principales:
+    - eicoastal_region_<id>.tif
+    - hist_ie_global.png
+    - hist_eicoastal_region_<id>.png
+
+Supuestos y notas:
+    - Las coordenadas x, y de entrada están en EPSG:4326.
+    - La salida hereda el CRS y la grilla de cada raster de referencia.
+    - Se usa nodata = -9999.0.
+    - Los histogramas se generan como PNG en la misma carpeta de salida.
+    - La correspondencia entre tabla de entrenamiento y predicciones se asume
+      idéntica en longitud y orden, igual que en el script R.
+
+Fidelidad de la traducción:
+    Traducción inicial con alta fidelidad lógica respecto al script R original.
+    La secuencia analítica, los insumos principales y los productos esperados
+    buscan corresponder lo más posible con la versión en R. Cuando alguna
+    operación no tiene equivalencia directa entre bibliotecas de R y Python,
+    se adopta una implementación funcionalmente equivalente o la aproximación
+    más cercana disponible, procurando conservar el resultado analítico esperado.
+    En este caso, la traducción no replica literalmente la construcción final
+    del raster con rast(..., type="xyz"), porque esa ruta no fuerza la alineación
+    a la malla de referencia. En su lugar, se construye una grilla fuente en
+    coordenadas geográficas y luego se reproyecta a cada ref_grid.tif con
+    nearest neighbour, preservando mejor la intención analítica de generar
+    mapas regionales congruentes con las plantillas de referencia.
+
+Observaciones:
+    Este script está pensado para ejecución headless y forma parte del flujo
+    de adaptación R -> Python dentro del proyecto.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import rasterio
+from rasterio.transform import from_origin, rowcol
+from rasterio.warp import Resampling, reproject
+
+
+DROPBOX_DIR = Path(r"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/")
+TRAINING_TABLE = DROPBOX_DIR / "data" / "cei_final_train_v1ask.csv"
+IE_PREDICTIONS_CSV = DROPBOX_DIR / "BN-results" / "EII-data" / "cei_final_ie_expected_port_5_equal_2026.csv"
+REF_GRID_DIR = DROPBOX_DIR / "data" / "data_crude" / "17_mapas_ref"
+OUTPUT_DIR = DROPBOX_DIR / "BN-results" / "BN_maps" / "cei_final_ie_expected_port_5_equal_2026" / "Python"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+SOURCE_CRS = "EPSG:4326"
+NODATA_VALUE = -9999.0
+
+
+def normalize_ie_predictions(values: np.ndarray) -> np.ndarray:
+    """Normaliza valores de 1.5–5.5 a 0–1."""
+    return (values - 1.5) / (5.5 - 1.5)
+
+
+def load_training_table(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path, header=0, low_memory=False)
+
+    required = ["regionId", "x", "y"]
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise ValueError(f"Faltan columnas requeridas en training table: {missing}")
+
+    df = df[required].copy()
+    df["idx"] = np.arange(1, len(df) + 1)
+
+    df["x"] = pd.to_numeric(df["x"], errors="raise")
+    df["y"] = pd.to_numeric(df["y"], errors="raise")
+
+    return df
+
+
+def load_ie_predictions(path: Path) -> np.ndarray:
+    ie_pred_df = pd.read_csv(path, header=0, names=["ie_2026"], low_memory=False)
+
+    if ie_pred_df.empty:
+        raise ValueError(f"El archivo de predicciones de IIE está vacío: {path}")
+
+    values = pd.to_numeric(ie_pred_df["ie_2026"], errors="raise").to_numpy(dtype=float)
+    return normalize_ie_predictions(values)
+
+
+def build_reference_grid_map(ref_grid_dir: Path) -> dict[str, Path]:
+    """
+    Crea un mapa region -> ref_grid.tif usando el nombre del subdirectorio.
+    """
+    mapping: dict[str, Path] = {}
+
+    for region_dir in sorted(ref_grid_dir.iterdir()):
+        if not region_dir.is_dir():
+            continue
+
+        tif_path = region_dir / "ref_grid.tif"
+        if not tif_path.exists():
+            continue
+
+        mapping[region_dir.name.strip().lower()] = tif_path
+
+    if not mapping:
+        raise ValueError(f"No se encontraron rasters de referencia en {ref_grid_dir}")
+
+    return mapping
+
+
+def find_reference_raster(region: str, mapping: dict[str, Path]) -> Path:
+    region_key = str(region).strip().lower()
+
+    if region_key not in mapping:
+        raise FileNotFoundError(
+            f"No encontré raster de referencia para la región '{region}'. "
+            f"Disponibles: {list(mapping.keys())}"
+        )
+
+    return mapping[region_key]
+
+
+def sort_regions_numerically(regions: list[str]) -> list[str]:
+    return sorted(regions, key=lambda s: int(str(s).split("_")[-1]))
+
+
+def save_histogram(
+        values: np.ndarray,
+        output_png: Path,
+        title: str,
+        xlabel: str = "IE normalizado",
+        bins: int = 50,
+) -> None:
+    valid = values[np.isfinite(values)]
+    if valid.size == 0:
+        return
+
+    output_png.parent.mkdir(parents=True, exist_ok=True)
+
+    plt.figure(figsize=(8, 5))
+    plt.hist(valid, bins=bins)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel("Frecuencia")
+    plt.tight_layout()
+    plt.savefig(output_png, dpi=150)
+    plt.close()
+
+
+def save_array_histogram(
+        arr: np.ndarray,
+        output_png: Path,
+        title: str,
+        nodata_value: float = NODATA_VALUE,
+        bins: int = 50,
+) -> None:
+    valid = arr[np.isfinite(arr) & (arr != nodata_value)]
+    if valid.size == 0:
+        return
+
+    output_png.parent.mkdir(parents=True, exist_ok=True)
+
+    plt.figure(figsize=(8, 5))
+    plt.hist(valid, bins=bins)
+    plt.title(title)
+    plt.xlabel("IE normalizado")
+    plt.ylabel("Frecuencia")
+    plt.tight_layout()
+    plt.savefig(output_png, dpi=150)
+    plt.close()
+
+
+def build_source_grid_from_points(
+        region_df: pd.DataFrame,
+        ie_pred_values: np.ndarray,
+        nodata_value: float = NODATA_VALUE,
+) -> tuple[np.ndarray, rasterio.Affine]:
+    """
+    Construye una grilla raster en EPSG:4326 a partir de puntos x, y, z.
+    La resolución se infiere del espaciamiento mínimo positivo de x e y.
+    Si varias observaciones caen en la misma celda, promedia sus valores.
+    """
+    idx0 = region_df["idx"].to_numpy() - 1
+    z = ie_pred_values[idx0]
+
+    xs = region_df["x"].to_numpy(dtype=float)
+    ys = region_df["y"].to_numpy(dtype=float)
+
+    if len(xs) == 0:
+        raise ValueError("No hay puntos para construir la grilla fuente.")
+
+    unique_x = np.sort(np.unique(xs))
+    unique_y = np.sort(np.unique(ys))
+
+    if len(unique_x) < 2 or len(unique_y) < 2:
+        raise ValueError("No hay suficientes coordenadas únicas para inferir resolución de grilla.")
+
+    dx_candidates = np.diff(unique_x)
+    dy_candidates = np.diff(unique_y)
+
+    dx_candidates = dx_candidates[dx_candidates > 0]
+    dy_candidates = dy_candidates[dy_candidates > 0]
+
+    if len(dx_candidates) == 0 or len(dy_candidates) == 0:
+        raise ValueError("No fue posible inferir resolución positiva de la grilla fuente.")
+
+    dx = float(dx_candidates.min())
+    dy = float(dy_candidates.min())
+
+    xmin = float(xs.min())
+    xmax = float(xs.max())
+    ymin = float(ys.min())
+    ymax = float(ys.max())
+
+    width = int(round((xmax - xmin) / dx)) + 1
+    height = int(round((ymax - ymin) / dy)) + 1
+
+    transform = from_origin(
+        west=xmin - dx / 2.0,
+        north=ymax + dy / 2.0,
+        xsize=dx,
+        ysize=dy,
+    )
+
+    sums = np.zeros((height, width), dtype="float64")
+    counts = np.zeros((height, width), dtype="uint32")
+
+    rows, cols = rowcol(transform, xs, ys)
+    rows = np.asarray(rows)
+    cols = np.asarray(cols)
+
+    valid_mask = (rows >= 0) & (rows < height) & (cols >= 0) & (cols < width)
+    rows = rows[valid_mask]
+    cols = cols[valid_mask]
+    z_valid = z[valid_mask]
+
+    np.add.at(sums, (rows, cols), z_valid)
+    np.add.at(counts, (rows, cols), 1)
+
+    source_array = np.full((height, width), nodata_value, dtype="float32")
+    mask = counts > 0
+    source_array[mask] = (sums[mask] / counts[mask]).astype("float32")
+
+    return source_array, transform
+
+
+def warp_source_to_template(
+        source_array: np.ndarray,
+        source_transform,
+        template_path: Path,
+        output_path: Path,
+        histogram_png_path: Path | None = None,
+        histogram_title: str | None = None,
+        source_crs: str = SOURCE_CRS,
+        nodata_value: float = NODATA_VALUE,
+) -> tuple[int, float | None, float | None]:
+    """
+    Reproyecta una grilla fuente a la plantilla usando nearest neighbour.
+    Devuelve cantidad de celdas válidas y rango de valores válidos.
+    """
+    with rasterio.open(template_path) as src:
+        meta = src.meta.copy()
+        template_transform = src.transform
+        template_crs = src.crs
+        height = src.height
+        width = src.width
+
+        if template_crs is None:
+            raise ValueError(f"El raster plantilla no tiene CRS: {template_path}")
+
+        dest_array = np.full((height, width), nodata_value, dtype="float32")
+
+        reproject(
+            source=source_array,
+            destination=dest_array,
+            src_transform=source_transform,
+            src_crs=source_crs,
+            src_nodata=nodata_value,
+            dst_transform=template_transform,
+            dst_crs=template_crs,
+            dst_nodata=nodata_value,
+            resampling=Resampling.nearest,
+        )
+
+        valid = dest_array[dest_array != nodata_value]
+        valid_count = int(valid.size)
+        min_valid = float(valid.min()) if valid_count > 0 else None
+        max_valid = float(valid.max()) if valid_count > 0 else None
+
+        meta.update(
+            dtype="float32",
+            count=1,
+            nodata=nodata_value,
+            compress="lzw",
+        )
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if output_path.exists():
+            output_path.unlink()
+
+        with rasterio.open(output_path, "w", **meta) as dst:
+            dst.write(dest_array, 1)
+
+    if histogram_png_path is not None:
+        save_array_histogram(
+            dest_array,
+            output_png=histogram_png_path,
+            title=histogram_title or output_path.stem,
+            nodata_value=nodata_value,
+        )
+
+    return valid_count, min_valid, max_valid
+
+
+def rasterize_points_to_template(
+        region_df: pd.DataFrame,
+        ie_pred_values: np.ndarray,
+        template_path: Path,
+        output_path: Path,
+        histogram_png_path: Path | None = None,
+        histogram_title: str | None = None,
+        source_crs: str = SOURCE_CRS,
+        nodata_value: float = NODATA_VALUE,
+) -> tuple[int, float | None, float | None]:
+    """
+    Flujo completo:
+    1. arma raster fuente en CRS original de puntos
+    2. lo reproyecta a la plantilla
+    """
+    source_array, source_transform = build_source_grid_from_points(
+        region_df=region_df,
+        ie_pred_values=ie_pred_values,
+        nodata_value=nodata_value,
+    )
+
+    return warp_source_to_template(
+        source_array=source_array,
+        source_transform=source_transform,
+        template_path=template_path,
+        output_path=output_path,
+        histogram_png_path=histogram_png_path,
+        histogram_title=histogram_title,
+        source_crs=source_crs,
+        nodata_value=nodata_value,
+    )
+
+
+def main() -> None:
+    t_inicio = time.time()
+
+    df = load_training_table(TRAINING_TABLE)
+    ie_pred_values = load_ie_predictions(IE_PREDICTIONS_CSV)
+    ref_map = build_reference_grid_map(REF_GRID_DIR)
+
+    if df["idx"].max() > len(ie_pred_values):
+        raise ValueError(
+            f"El máximo idx ({df['idx'].max()}) excede el número de predicciones IE ({len(ie_pred_values)})"
+        )
+
+    save_histogram(
+        ie_pred_values,
+        OUTPUT_DIR / "hist_ie_global.png",
+        title="Histograma global de IE normalizado",
+        )
+
+    region_groups = {region: group.copy() for region, group in df.groupby("regionId", sort=False)}
+    regiones = sort_regions_numerically(list(region_groups.keys()))
+
+    for region in regiones:
+        region_df = region_groups[region]
+        template_path = find_reference_raster(region, ref_map)
+        output_path = OUTPUT_DIR / f"eicoastal_{region}.tif"
+        hist_path = OUTPUT_DIR / f"hist_eicoastal_{region}.png"
+
+        valid_count, min_valid, max_valid = rasterize_points_to_template(
+            region_df=region_df,
+            ie_pred_values=ie_pred_values,
+            template_path=template_path,
+            output_path=output_path,
+            histogram_png_path=hist_path,
+            histogram_title=f"Histograma IE {region}",
+            source_crs=SOURCE_CRS,
+            nodata_value=NODATA_VALUE,
+        )
+
+        print(
+            f"{region}: {valid_count} celdas válidas, "
+            f"rango [{min_valid}, {max_valid}] -> {output_path}"
+        )
+
+    print(f"✅ Script 18_create_ei_rasters terminado en {time.time() - t_inicio:.2f}s")
+
+
+if __name__ == "__main__":
+    main()
