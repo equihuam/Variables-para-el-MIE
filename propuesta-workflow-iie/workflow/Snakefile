@@ -1,0 +1,28 @@
+configfile: "config.yaml"
+
+def cfg(path_value):
+    return path_value.format(data_repo=config["data_repo"])
+
+REGIONS = config["regions"]
+
+REFERENCE_DIR = cfg(config["results"]["reference_dir"])
+FEATURES_DIR = cfg(config["results"]["features_dir"])
+TRAINING_DIR = cfg(config["results"]["training_dir"])
+FINAL_MAPS_DIR = cfg(config["results"]["final_maps_dir"])
+
+include: "rules/reference.smk"
+include: "rules/feature_tables.smk"
+include: "rules/training_table.smk"
+include: "rules/bayes_io.smk"
+include: "rules/final_maps.smk"
+
+rule all:
+    input:
+        expand(f"{REFERENCE_DIR}/{{region}}/ref_grid.tif", region=REGIONS),
+        expand(f"{FEATURES_DIR}/tasa_erosion/{{region}}.parquet", region=REGIONS),
+        expand(f"{FEATURES_DIR}/corales/{{region}}.parquet", region=REGIONS),
+        f"{TRAINING_DIR}/master_features.parquet",
+        cfg(config["bayes"]["bn_input_parquet"]),
+        cfg(config["bayes"]["bn_input_csv"]),
+        f"{TRAINING_DIR}/master_features_with_ie.parquet",
+        expand(f"{FINAL_MAPS_DIR}/eicoastal_{{region}}.tif", region=REGIONS),

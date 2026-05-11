@@ -3,4 +3,17 @@
   <component name="Black">
     <option name="sdkName" value="QGis_env (windows)" />
   </component>
+  <component name="RMarkdownSettings">
+    <option name="renderProfiles">
+      <map>
+        <entry key="file://$PROJECT_DIR$/propuesta-workflow-iie/docs/prepara-python/README_entorno_workflow_iie.qmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/propuesta-workflow-iie/docs/prepara-python" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
 </project>

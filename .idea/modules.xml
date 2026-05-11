@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/propuesta-workflow-iie.iml" filepath="$PROJECT_DIR$/.idea/propuesta-workflow-iie.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/workflow-iie.iml" filepath="$PROJECT_DIR$/.idea/workflow-iie.iml" />
     </modules>
   </component>
