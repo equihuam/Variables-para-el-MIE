@@ -105,36 +105,26 @@ def reproject_raster_to_crs(
     return dst, transform
 
 
-def raster_points_dataframe(arr: np.ndarray, transform) -> pd.DataFrame:
+def valid_raster_points_dataframe(arr: np.ndarray, transform) -> pd.DataFrame:
     """
-    Aproximación a as.data.frame(region_, xy = TRUE) de terra.
-    Construye una fila por celda del raster reproyectado.
+    Construye tabla xy solo para celdas válidas del raster.
+    Evita materializar toda la grilla en memoria.
     """
-    height, width = arr.shape
-    cols, rows = np.meshgrid(np.arange(width), np.arange(height))
+    valid_mask = np.isfinite(arr)
+    rows, cols = np.where(valid_mask)
+
+    if len(rows) == 0:
+        return pd.DataFrame(columns=["x", "y", "value"])
+
     xs, ys = xy(transform, rows, cols, offset="center")
 
     return pd.DataFrame(
         {
-            "x": np.asarray(xs).ravel(),
-            "y": np.asarray(ys).ravel(),
-            "value": arr.ravel(),
+            "x": np.asarray(xs),
+            "y": np.asarray(ys),
+            "value": arr[rows, cols],
         }
     )
-
-
-def filter_valid_region_points(
-        region_points: pd.DataFrame,
-        nodata_value: float | None = None,
-) -> pd.DataFrame:
-    values = pd.to_numeric(region_points["value"], errors="coerce").to_numpy()
-
-    valid_mask = np.isfinite(values)
-    if nodata_value is not None:
-        valid_mask &= values != nodata_value
-
-    out = region_points.loc[valid_mask].reset_index(drop=True).copy()
-    return out
 
 
 def rasterize_corals_on_region(shape, transform, corales: gpd.GeoDataFrame) -> np.ndarray:
@@ -217,10 +207,10 @@ def main() -> None:
 
         region_arr, region_transform = reproject_raster_to_crs(src, corales.crs)
 
-    region_points_all = raster_points_dataframe(region_arr, region_transform)
-    region_points = filter_valid_region_points(region_points_all, nodata_value=None)
+    total_points = int(region_arr.size)
+    region_points = valid_raster_points_dataframe(region_arr, region_transform)
 
-    print(f"total puntos reproyectados: {len(region_points_all)}")
+    print(f"total puntos reproyectados: {total_points}")
     print(f"puntos válidos en malla: {len(region_points)}")
 
     corales_rast = rasterize_corals_on_region(
