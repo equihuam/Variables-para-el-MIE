@@ -1,30 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-Nombre: 14_wf_create_data_table.py
-
-Propósito:
-    Integrar tablas de features congruentes por píxel en una sola tabla maestra
-    consolidada, preservando las llaves espaciales y exportando el resultado
-    en formato Parquet.
-
-Estrategia:
-    1. Detectar regiones disponibles en los directorios de features.
-    2. Leer por pares regionales (erosión + corales).
-    3. Validar esquema y alineación ligera.
-    4. Combinar por posición dentro de cada región.
-    5. Reindexar pixid por región.
-    6. Concatenar todas las regiones.
-    7. Escribir master_features.parquet.
-
-Notas:
-    - Esta versión asume que las features regionales ya fueron corregidas para
-      conservar solo celdas válidas de la malla útil.
-    - La combinación por posición se apoya en que ambas features provienen de la
-      misma malla regional y mismo orden de filas.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -36,23 +12,27 @@ import pyarrow.parquet as pq
 
 
 KEY_COLUMNS = ["regionid", "pixid", "x", "y"]
-CORALES_VALUE_COL = "corals"
-EROSION_VALUE_COL = "erosion"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Integra features congruentes por píxel en una tabla master consolidada."
+        description="Integra múltiples features congruentes por píxel en una tabla master consolidada."
     )
     parser.add_argument(
-        "--erosion-dir",
+        "--features-dir",
         required=True,
-        help="Directorio con archivos regionales .parquet de erosión.",
+        help="Directorio raíz que contiene subdirectorios por variable.",
     )
     parser.add_argument(
-        "--corales-dir",
+        "--variables",
         required=True,
-        help="Directorio con archivos regionales .parquet de corales.",
+        help="Lista separada por comas de variables a integrar, por ejemplo tasa_erosion,corales,tipo_costa",
+    )
+    parser.add_argument(
+        "--regions",
+        required=False,
+        default=None,
+        help="Lista separada por comas de regiones a integrar. Si se omite, se infiere de la primera variable.",
     )
     parser.add_argument(
         "--output",
@@ -62,80 +42,91 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def validate_input_dirs(*dirs: Path) -> None:
-    missing = [str(d) for d in dirs if not d.exists()]
-    if missing:
-        raise FileNotFoundError("Faltan directorios de entrada:\n" + "\n".join(missing))
+def validate_dir(path: Path) -> None:
+    if not path.exists():
+        raise FileNotFoundError(f"No existe el directorio requerido: {path}")
 
 
-def list_parquet_files(directory: Path) -> list[Path]:
-    files = sorted(directory.glob("*.parquet"))
+def parse_csv_list(value: str | None) -> list[str]:
+    if value is None:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def build_region_map(variable_dir: Path) -> dict[str, Path]:
+    files = sorted(variable_dir.glob("*.parquet"))
     if not files:
-        raise FileNotFoundError(f"No se encontraron archivos .parquet en {directory}")
-    return files
+        raise FileNotFoundError(f"No se encontraron .parquet en {variable_dir}")
+    return {path.stem: path for path in files}
 
 
-def build_region_map(directory: Path) -> dict[str, Path]:
-    files = list_parquet_files(directory)
-    region_map: dict[str, Path] = {}
-    for path in files:
-        region_map[path.stem] = path
-    return region_map
-
-
-def validate_columns(df: pd.DataFrame, feature_name: str, value_col: str) -> None:
-    required = KEY_COLUMNS + [value_col]
-    missing = [c for c in required if c not in df.columns]
-    if missing:
-        raise ValueError(
-            f"La feature '{feature_name}' no cumple el contrato mínimo. "
-            f"Faltan columnas: {missing}"
-        )
-
-
-def read_parquet_safe(path: Path, feature_name: str) -> pd.DataFrame:
-    print(f"Leyendo {feature_name}: {path}")
+def read_parquet_safe(path: Path, label: str) -> pd.DataFrame:
+    print(f"Leyendo {label}: {path}")
     table = pq.read_table(path, use_threads=False)
     df = table.to_pandas()
     print(f"  -> shape {df.shape}")
     return df
 
 
-def lightweight_alignment_check(erosion: pd.DataFrame, corales: pd.DataFrame) -> None:
-    if len(erosion) != len(corales):
+def validate_contract(df: pd.DataFrame, label: str) -> None:
+    missing = [c for c in KEY_COLUMNS if c not in df.columns]
+    if missing:
         raise ValueError(
-            f"Las features no tienen el mismo número de filas: "
-            f"erosion={len(erosion)}, corales={len(corales)}"
+            f"La feature '{label}' no cumple el contrato mínimo. "
+            f"Faltan columnas: {missing}"
         )
 
-    if len(erosion) == 0:
+
+def get_value_columns(df: pd.DataFrame) -> list[str]:
+    return [c for c in df.columns if c not in KEY_COLUMNS]
+
+
+def lightweight_alignment_check(base: pd.DataFrame, other: pd.DataFrame, label: str) -> None:
+    if len(base) != len(other):
+        raise ValueError(
+            f"La feature '{label}' no tiene el mismo número de filas que la base: "
+            f"base={len(base)}, other={len(other)}"
+        )
+
+    if len(base) == 0:
         return
 
-    if erosion["regionid"].iloc[0] != corales["regionid"].iloc[0]:
+    if base["regionid"].iloc[0] != other["regionid"].iloc[0]:
         raise ValueError(
-            f"Las features no pertenecen a la misma región: "
-            f"{erosion['regionid'].iloc[0]} vs {corales['regionid'].iloc[0]}"
+            f"La feature '{label}' no pertenece a la misma región que la base: "
+            f"{base['regionid'].iloc[0]} vs {other['regionid'].iloc[0]}"
         )
 
-    sample_idx = [0, len(erosion) // 2, len(erosion) - 1]
+    sample_idx = [0, len(base) // 2, len(base) - 1]
     for idx in sample_idx:
-        if idx < 0 or idx >= len(erosion):
+        if idx < 0 or idx >= len(base):
             continue
 
-        e = erosion.iloc[idx]
-        c = corales.iloc[idx]
+        b = base.iloc[idx]
+        o = other.iloc[idx]
 
         for col in KEY_COLUMNS:
-            if e[col] != c[col]:
+            if b[col] != o[col]:
                 raise ValueError(
-                    f"Desalineación detectada en fila {idx}, columna {col}: "
-                    f"{e[col]} != {c[col]}"
+                    f"Desalineación con '{label}' en fila {idx}, columna {col}: "
+                    f"{b[col]} != {o[col]}"
                 )
 
 
-def combine_by_position(erosion: pd.DataFrame, corales: pd.DataFrame) -> pd.DataFrame:
-    out = erosion[KEY_COLUMNS + [EROSION_VALUE_COL]].copy()
-    out[CORALES_VALUE_COL] = corales[CORALES_VALUE_COL].to_numpy()
+def append_value_columns(base: pd.DataFrame, other: pd.DataFrame, label: str) -> pd.DataFrame:
+    out = base.copy()
+    value_cols = get_value_columns(other)
+
+    if not value_cols:
+        raise ValueError(f"La feature '{label}' no tiene columnas temáticas.")
+
+    for col in value_cols:
+        if col in out.columns:
+            raise ValueError(
+                f"La columna '{col}' de la feature '{label}' ya existe en la base."
+            )
+        out[col] = other[col].to_numpy()
+
     return out
 
 
@@ -158,64 +149,69 @@ def save_output(df: pd.DataFrame, output_path: Path) -> None:
 def main() -> None:
     args = parse_args()
 
-    erosion_dir = Path(args.erosion_dir)
-    corales_dir = Path(args.corales_dir)
+    features_dir = Path(args.features_dir)
     output_path = Path(args.output)
+    variables = parse_csv_list(args.variables)
+    requested_regions = parse_csv_list(args.regions)
 
-    print(f"erosion_dir: {erosion_dir}")
-    print(f"corales_dir: {corales_dir}")
+    validate_dir(features_dir)
+
+    if not variables:
+        raise ValueError("Debes indicar al menos una variable en --variables")
+
+    print(f"features_dir: {features_dir}")
+    print(f"variables: {variables}")
     print(f"output: {output_path}")
 
-    validate_input_dirs(erosion_dir, corales_dir)
-    print("1) directorios validados")
+    variable_maps: dict[str, dict[str, Path]] = {}
 
-    erosion_map = build_region_map(erosion_dir)
-    corales_map = build_region_map(corales_dir)
+    for var in variables:
+        var_dir = features_dir / var
+        validate_dir(var_dir)
+        variable_maps[var] = build_region_map(var_dir)
 
-    erosion_regions = set(erosion_map.keys())
-    corales_regions = set(corales_map.keys())
+    base_var = variables[0]
+    base_regions = set(variable_maps[base_var].keys())
 
-    if erosion_regions != corales_regions:
-        missing_in_corales = sorted(erosion_regions - corales_regions)
-        missing_in_erosion = sorted(corales_regions - erosion_regions)
-        raise ValueError(
-            "Las regiones disponibles no coinciden entre features.\n"
-            f"Faltan en corales: {missing_in_corales}\n"
-            f"Faltan en erosion: {missing_in_erosion}"
-        )
+    if requested_regions:
+        region_names = sorted(requested_regions, key=lambda s: int(s.split("_")[-1]))
+    else:
+        region_names = sorted(base_regions, key=lambda s: int(s.split("_")[-1]))
 
-    region_names = sorted(erosion_regions, key=lambda s: int(s.split("_")[-1]))
-    print(f"2) regiones detectadas: {region_names}")
+    for var in variables:
+        available = set(variable_maps[var].keys())
+        missing = [r for r in region_names if r not in available]
+        if missing:
+            raise ValueError(
+                f"La variable '{var}' no tiene todas las regiones solicitadas. "
+                f"Faltan: {missing}"
+            )
+
+    print(f"1) regiones a integrar: {region_names}")
 
     merged_regions: list[pd.DataFrame] = []
 
     for region in region_names:
         print(f"\nProcesando región: {region}")
 
-        erosion = read_parquet_safe(erosion_map[region], "erosion")
-        validate_columns(erosion, "erosion", EROSION_VALUE_COL)
-        print("  -> esquema erosión OK")
+        base = read_parquet_safe(variable_maps[base_var][region], base_var)
+        validate_contract(base, base_var)
+        print(f"  -> base '{base_var}' OK")
 
-        corales = read_parquet_safe(corales_map[region], "corales")
-        validate_columns(corales, "corales", CORALES_VALUE_COL)
-        print("  -> esquema corales OK")
+        for var in variables[1:]:
+            other = read_parquet_safe(variable_maps[var][region], var)
+            validate_contract(other, var)
+            lightweight_alignment_check(base, other, var)
+            print(f"  -> alineación '{var}' OK")
+            base = append_value_columns(base, other, var)
+            print(f"  -> agregado '{var}': {base.shape}")
 
-        lightweight_alignment_check(erosion, corales)
-        print("  -> alineación ligera OK")
+        base = reindex_pixid(base)
+        print(f"  -> reindexado regional: {base.shape}")
 
-        dat_region = combine_by_position(erosion, corales)
-        print(f"  -> combinación regional: {dat_region.shape}")
+        merged_regions.append(base)
 
-        dat_region = reindex_pixid(dat_region)
-        print(f"  -> reindexado regional: {dat_region.shape}")
-
-        merged_regions.append(dat_region)
-
-        del erosion
-        del corales
-        del dat_region
-
-    print("\n3) concatenando regiones...")
+    print("\n2) concatenando regiones...")
     dat = pd.concat(merged_regions, ignore_index=True)
     print(f"  -> shape master: {dat.shape}")
 

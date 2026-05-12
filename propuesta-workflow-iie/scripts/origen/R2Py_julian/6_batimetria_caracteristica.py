@@ -67,7 +67,7 @@ from sklearn.neighbors import NearestNeighbors
 
 
 DROPBOX_DIR = Path(r"C:/Users/equih/1 Nubes/Dropbox/ei-coastal")
-BAT_RASTER = DROPBOX_DIR / "data_crude" / "13_Batimetría" / "01_GEBCO2020_SIMAR.tif"
+BATIMETRIA = DROPBOX_DIR / "data_crude" / "13_Batimetría" / "01_GEBCO2020_SIMAR.tif"
 REF_GRID_DIR = DROPBOX_DIR / "data" / "06_DunasCost250116_malla_ref_50m"
 OUTPUT_PKL = DROPBOX_DIR / "data_features" / "6_batimetria_charact.pkl"
 
@@ -235,7 +235,7 @@ def main() -> None:
     c_list = list_reference_grids(REF_GRID_DIR)
     df_list: list[pd.DataFrame] = []
 
-    with load_bathymetry(BAT_RASTER) as bat_src:
+    with load_bathymetry(BATIMETRIA) as bat_src:
         if bat_src.crs is None:
             raise ValueError("El raster batimétrico no tiene CRS definido.")
 

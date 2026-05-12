@@ -376,6 +376,162 @@ El resultado final esperado del workflow es un conjunto de **mapas raster region
 
 Dicho resultado debe ser trazable, reproducible, escalable y suficientemente estable para sostener tanto análisis posteriores como validación cartográfica y modelado adicional.
 
+
+# Hallazgos operativos de la fase de ensayos en laptop
+
+La fase de ensayos sobre una laptop Windows con 16 GB de RAM permitió validar la arquitectura general del workflow, detectar defectos lógicos importantes en la traducción inicial de scripts R a Python y ajustar decisiones operativas relevantes para su ejecución estable.
+
+## Hallazgo 1. La congruencia por píxel debe construirse solo sobre celdas válidas
+
+El principal defecto lógico detectado en la traducción inicial de algunos scripts Python fue que, después de reproyectar el `ref_grid` regional, se estaban convirtiendo **todas las celdas** de la grilla reproyectada a observaciones tabulares, incluyendo celdas sin datos o fuera de la máscara útil.
+
+Eso provocó una inflación artificial severa en las tablas de features. En una región de prueba se observaron del orden de más de cien millones de filas cuando la malla válida real contenía solo unos cientos de miles de celdas útiles.
+
+### Decisión adoptada
+
+A partir de esta observación, los scripts de features deben:
+
+1. reproyectar el raster de referencia;
+2. identificar primero las celdas válidas;
+3. calcular coordenadas `x`, `y` solo para esas celdas válidas;
+4. exportar únicamente esas observaciones.
+
+### Implicación
+
+La tabla tabular congruente por píxel no debe entenderse como “todas las celdas del raster reproyectado”, sino como “todas las celdas válidas de la malla útil regional”.
+
+## Hallazgo 2. No debe materializarse la grilla completa antes del filtrado
+
+En regiones grandes, incluso el paso intermedio de construir coordenadas para toda la grilla reproyectada resultó inviable por memoria.
+
+### Decisión adoptada
+
+Los scripts de features deben evitar patrones de este tipo:
+
+- creación de `meshgrid` completo;
+- transformación a coordenadas para toda la matriz;
+- filtrado posterior.
+
+En su lugar, deben trabajar así:
+
+1. detectar índices de celdas válidas;
+2. generar coordenadas solo para esas posiciones;
+3. construir la tabla final directamente a partir de ese subconjunto.
+
+Esto volvió viable la ejecución regional incluso en regiones con grillas reproyectadas muy grandes.
+
+## Hallazgo 3. La organización de `raw/` como carpeta plana no escala bien
+
+Durante los ensayos operativos se comprobó que una carpeta `raw/` plana se vuelve rápidamente confusa y poco manejable, tanto por mezcla de tipos de archivo como por dificultad para ubicar insumos base.
+
+### Decisión adoptada
+
+Se recomienda organizar el repositorio de datos por subcarpetas temáticas o por fuente, por ejemplo:
+
+```text
+raw/
+  dunes_inegi/
+  dunes_cost/
+  coastal_regions/
+  erosion/
+  corals/
+external/
+  netica/
+results/
+  reference/
+  features/
+  training/
+  final_maps/
+```
+
+Esta estructura debe reflejarse explícitamente en `config.yaml`, evitando rutas hardcodeadas dentro de los scripts.
+
+## Hallazgo 4. En Windows conviene usar una raíz corta del repositorio de datos
+
+Durante la integración con Snakemake en Windows se observaron fricciones asociadas a rutas largas, espacios en nombres y metadatos internos del workflow.
+
+### Decisión adoptada
+
+Se adoptó una raíz operativa corta para el repositorio de datos:
+
+```text
+C:/wf-ie-data
+```
+
+La ubicación física real de los datos puede estar en otra ruta, incluso sincronizada por nube, pero operativamente conviene usar una ruta corta y estable, idealmente mediante `symlink` cuando haga falta.
+
+## Hallazgo 5. La tabla maestra consolidada sí es viable una vez corregidos los features
+
+En una fase intermedia se ensayó una estrategia de ensamblado regional por temor a exceder memoria. Esa decisión fue útil para aislar el problema, pero una vez corregida la inflación de filas en los scripts de features, volvió a ser viable producir una tabla maestra consolidada.
+
+### Decisión adoptada
+
+Se conserva el enfoque:
+
+- features regionales por variable;
+- ensamblado final consolidado en `master_features.parquet`.
+
+Internamente, el ensamblado sigue haciéndose por región para mayor robustez, pero el producto esperado del workflow vuelve a ser una tabla maestra global.
+
+## Hallazgo 6. La salida del motor bayesiano debe incorporarse por compaginación posicional
+
+La salida externa de Netica no necesariamente contiene llaves espaciales suficientes para hacer un `merge` relacional seguro.
+
+### Decisión adoptada
+
+Mientras la salida de inferencia consista en una secuencia de predicciones sin llaves explícitas, la integración debe hacerse por **correspondencia posicional**, bajo estas condiciones:
+
+1. la tabla de entrada a Netica debe preservar un orden estable;
+2. la salida de predicciones debe tener exactamente el mismo número de filas;
+3. no deben introducirse reordenamientos intermedios entre exportación e integración.
+
+Esto implica que la vinculación entre tabla base y predicciones no debe depender de un `merge` clásico, sino de congruencia en longitud y orden.
+
+## Hallazgo 7. La validación del vertical mínimo fue exitosa y escaló bien a 14 regiones
+
+Se realizó una fase de ensayo inicial con 3 regiones y posteriormente una corrida con las 14 regiones previstas. Una vez corregidos los scripts de features, la tabla `master_features.parquet` quedó en un orden de magnitud prácticamente idéntico al del flujo original en R.
+
+### Implicación
+
+Esto constituye una validación fuerte de que la traducción Python:
+
+- ya preserva de forma razonable la lógica espacial del flujo original;
+- ya produce un número de observaciones congruente con el flujo R;
+- y ya puede sostenerse como base del workflow reproducible en Snakemake.
+
+## Hallazgo 8. La laptop es útil para depuración, pero la plataforma objetivo debe ser más robusta
+
+La laptop permitió encontrar errores lógicos importantes y validar la arquitectura del workflow, pero también mostró límites claros de memoria y rendimiento para ciertas regiones o pasos costosos.
+
+### Decisión adoptada
+
+Se distinguen dos contextos de operación:
+
+#### Laptop Windows
+Adecuada para:
+
+- depuración;
+- ensayos incrementales;
+- validación de scripts;
+- corridas parciales o regionales.
+
+#### Equipo de escritorio con WSL
+Adecuado para:
+
+- corridas formales del workflow completo;
+- mayor paralelización con Snakemake;
+- validación final del pipeline;
+- eventual crecimiento del número de variables o regiones.
+
+## Recomendaciones derivadas para implementación
+
+1. Mantener el enfoque **headless-first**.
+2. Preservar rutas parametrizadas y evitar hardcodeo de ubicaciones.
+3. Validar siempre el número de celdas válidas frente al tamaño total de la grilla reproyectada.
+4. Favorecer productos regionales intermedios y consolidación final explícita.
+5. Documentar claramente cuándo una integración es por llave y cuándo es por posición.
+6. Usar la laptop como entorno de depuración y WSL como entorno preferente de ejecución completa.
+
 # Bibliotecas requeridas
 
 Para facilitar la operación se sugiere crear un ambiente virtual de trabajo con la especificación que se anota en seguida. Para mayires detalles vease el [texto guía](README_entorno_workflow_iie.qmd) que hemos preoarado para eso

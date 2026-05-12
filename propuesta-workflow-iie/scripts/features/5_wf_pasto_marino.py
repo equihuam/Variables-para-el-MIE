@@ -2,16 +2,50 @@
 # -*- coding: utf-8 -*-
 
 """
-Nombre: 4_wf_corales_global.py
+Nombre: 5_wf_pasto_marino.py
 
 Propósito:
-    Calcular, para una región específica, la distancia al coral global más cercano
-    para cada píxel válido de un raster de referencia y exportarla como tabla
-    tabular congruente por píxel.
+    Calcular, para una región específica, la distancia al pasto marino más
+    cercano para cada píxel válido del raster de referencia y exportar el
+    resultado como tabla congruente por píxel en formato Parquet.
 
 Origen:
-    Refactorización para workflow de la traducción inicial a Python del script R:
-    4_corales_global.R
+    Adaptación a workflow del script Python inicial:
+    5_pasto_marino.py
+
+Resumen del flujo:
+    1. Leer el shapefile de pasto marino.
+    2. Leer el ref_grid.tif de una región.
+    3. Reproyectar el raster regional al CRS del shapefile.
+    4. Extraer solo los centros de píxel válidos de la malla regional.
+    5. Rasterizar el pasto marino sobre la plantilla regional.
+    6. Calcular la distancia al pasto marino más cercano para cada píxel válido.
+    7. Reemplazar el valor centinela 999, cuando no hay pasto en la región,
+       por 1.5 * max_dist de la región.
+    8. Exportar la tabla regional en Parquet.
+
+Insumos principales:
+    - shapefile de pasto marino
+    - ref_grid.tif regional
+
+Salida principal:
+    - tabla .parquet con columnas:
+      regionid, pixid, x, y, pasto
+
+Supuestos y notas:
+    - La distancia se calcula en el CRS del shapefile de pasto marino.
+    - La reproyección del raster regional usa vecino más cercano para seguir
+      la lógica del flujo original.
+    - Solo se conservan celdas válidas de la malla regional.
+    - La distancia final se aproxima como distancia euclidiana al vecino más cercano.
+    - Se conserva el valor centinela 999 a nivel regional y se sustituye al final
+      por 1.5 * max_dist, igual que en el flujo original.
+
+Observaciones:
+    - Este script está diseñado para integrarse en un workflow Snakemake.
+    - La ejecución es por región y con rutas parametrizadas.
+    - La salida es compatible con el contrato mínimo del proyecto para tablas
+      de features congruentes por píxel.
 """
 
 from __future__ import annotations
@@ -30,17 +64,18 @@ from rasterio.warp import calculate_default_transform, reproject, Resampling
 from scipy.spatial import cKDTree
 
 
-CORALS_SENTINEL = 999.0
+PASTO_SENTINEL = 999.0
+OUTPUT_FIELD = "d_pastosmarinos"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Calcula distancia a corales por píxel para una región específica."
+        description="Calcula distancia a pasto marino por píxel para una región específica."
     )
     parser.add_argument(
-        "--corals-shp",
+        "--pasto-marino-shp",
         required=True,
-        help="Ruta al shapefile global de corales.",
+        help="Ruta al shapefile de pasto marino.",
     )
     parser.add_argument(
         "--ref-grid",
@@ -50,7 +85,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--region-id",
         required=True,
-        help="Identificador de la región, por ejemplo region_7.",
+        help="Identificador de la región, por ejemplo region_1.",
     )
     parser.add_argument(
         "--output",
@@ -60,25 +95,26 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def validate_inputs(corals_shp: Path, ref_grid: Path) -> None:
-    missing = [str(p) for p in [corals_shp, ref_grid] if not p.exists()]
+def validate_inputs(*paths: Path) -> None:
+    missing = [str(p) for p in paths if not p.exists()]
     if missing:
         raise FileNotFoundError("Faltan insumos:\n" + "\n".join(missing))
 
 
-def load_corals(path: Path) -> gpd.GeoDataFrame:
-    corales = gpd.read_file(path)
+def load_pasto_marino(path: Path) -> gpd.GeoDataFrame:
+    pasto = gpd.read_file(path)
 
-    if corales.empty:
-        raise ValueError(f"El shapefile de corales está vacío: {path}")
-    if corales.crs is None:
-        raise ValueError(f"El shapefile de corales no tiene CRS: {path}")
+    if pasto.empty:
+        raise ValueError(f"El shapefile de pasto marino está vacío: {path}")
+    if pasto.crs is None:
+        raise ValueError(f"El shapefile de pasto marino no tiene CRS: {path}")
 
-    return corales
+    return pasto
 
 
 def reproject_raster_to_crs(
-        src: rasterio.io.DatasetReader, dst_crs
+        src: rasterio.io.DatasetReader,
+        dst_crs,
 ) -> tuple[np.ndarray, rasterio.Affine]:
     transform, width, height = calculate_default_transform(
         src.crs,
@@ -106,10 +142,6 @@ def reproject_raster_to_crs(
 
 
 def valid_raster_points_dataframe(arr: np.ndarray, transform) -> pd.DataFrame:
-    """
-    Construye tabla xy solo para celdas válidas del raster.
-    Evita materializar toda la grilla en memoria.
-    """
     valid_mask = np.isfinite(arr)
     rows, cols = np.where(valid_mask)
 
@@ -127,10 +159,10 @@ def valid_raster_points_dataframe(arr: np.ndarray, transform) -> pd.DataFrame:
     )
 
 
-def rasterize_corals_on_region(shape, transform, corales: gpd.GeoDataFrame) -> np.ndarray:
+def rasterize_pasto_on_region(shape, transform, pasto: gpd.GeoDataFrame) -> np.ndarray:
     shapes = (
         (geom, 1)
-        for geom in corales.geometry
+        for geom in pasto.geometry
         if geom is not None and not geom.is_empty
     )
 
@@ -145,8 +177,8 @@ def rasterize_corals_on_region(shape, transform, corales: gpd.GeoDataFrame) -> n
     return arr
 
 
-def coral_points_from_raster(corales_rast: np.ndarray, transform) -> pd.DataFrame:
-    valid_mask = np.isfinite(corales_rast)
+def pasto_points_from_raster(pasto_rast: np.ndarray, transform) -> pd.DataFrame:
+    valid_mask = np.isfinite(pasto_rast)
     rows, cols = np.where(valid_mask)
 
     if len(rows) == 0:
@@ -154,28 +186,30 @@ def coral_points_from_raster(corales_rast: np.ndarray, transform) -> pd.DataFram
 
     xs, ys = xy(transform, rows, cols, offset="center")
 
-    coral_points = pd.DataFrame(
+    return pd.DataFrame(
         {
             "x": np.asarray(xs),
             "y": np.asarray(ys),
             "part": 1,
         }
     )
-    return coral_points
 
 
-def nearest_distance_column(points_xy: np.ndarray, coral_points: pd.DataFrame) -> np.ndarray:
-    coords = coral_points[["x", "y"]].to_numpy(dtype=float)
+def nearest_distance_column(points_xy: np.ndarray, pasto_points: pd.DataFrame) -> np.ndarray:
+    coords = pasto_points[["x", "y"]].to_numpy(dtype=float)
     tree = cKDTree(coords)
     distances, _ = tree.query(points_xy, k=1)
     return distances.astype(float)
 
 
-def finalize_corals(distances: np.ndarray) -> np.ndarray:
-    out = distances.copy()
-    if np.any(out == CORALS_SENTINEL):
-        max_dist = float(np.max(out))
-        out[out == CORALS_SENTINEL] = 1.5 * max_dist
+def finalize_pasto(values: np.ndarray) -> np.ndarray:
+    out = values.copy()
+    sentinel_mask = out == PASTO_SENTINEL
+
+    if np.any(~sentinel_mask):
+        max_dist = float(np.nanmax(out[~sentinel_mask]))
+        out[sentinel_mask] = 1.5 * max_dist
+
     return out
 
 
@@ -188,24 +222,25 @@ def save_output(df: pd.DataFrame, output_path: Path) -> None:
         )
 
     df.to_parquet(output_path, index=False, engine="pyarrow")
+    print(f"OK -> {output_path}")
 
 
 def main() -> None:
     args = parse_args()
 
-    corals_path = Path(args.corals_shp)
+    pasto_path = Path(args.pasto_marino_shp)
     ref_grid_path = Path(args.ref_grid)
     output_path = Path(args.output)
     region_id = str(args.region_id).strip()
 
-    validate_inputs(corals_path, ref_grid_path)
-    corales = load_corals(corals_path)
+    validate_inputs(pasto_path, ref_grid_path)
+    pasto = load_pasto_marino(pasto_path)
 
     with rasterio.open(ref_grid_path) as src:
         if src.crs is None:
             raise ValueError(f"El raster de referencia no tiene CRS: {ref_grid_path}")
 
-        region_arr, region_transform = reproject_raster_to_crs(src, corales.crs)
+        region_arr, region_transform = reproject_raster_to_crs(src, pasto.crs)
 
     total_points = int(region_arr.size)
     region_points = valid_raster_points_dataframe(region_arr, region_transform)
@@ -213,24 +248,24 @@ def main() -> None:
     print(f"total puntos reproyectados: {total_points}")
     print(f"puntos válidos en malla: {len(region_points)}")
 
-    corales_rast = rasterize_corals_on_region(
+    distances = np.full(len(region_points), PASTO_SENTINEL, dtype=float)
+
+    pasto_rast = rasterize_pasto_on_region(
         shape=region_arr.shape,
         transform=region_transform,
-        corales=corales,
+        pasto=pasto,
     )
 
-    distances = np.full(len(region_points), CORALS_SENTINEL, dtype=float)
+    if np.isfinite(pasto_rast).sum() > 0:
+        pasto_points = pasto_points_from_raster(pasto_rast, region_transform)
 
-    if np.isfinite(corales_rast).sum() > 0:
-        coral_points = coral_points_from_raster(corales_rast, region_transform)
-
-        if len(coral_points) == 1:
-            coral_points = pd.concat([coral_points, coral_points], ignore_index=True)
+        if len(pasto_points) == 1:
+            pasto_points = pd.concat([pasto_points, pasto_points], ignore_index=True)
 
         pred_xy = region_points[["x", "y"]].to_numpy(dtype=float)
-        distances = nearest_distance_column(pred_xy, coral_points)
+        distances = nearest_distance_column(pred_xy, pasto_points)
 
-    distances = finalize_corals(distances)
+    distances = finalize_pasto(distances)
 
     out = pd.DataFrame(
         {
@@ -238,12 +273,11 @@ def main() -> None:
             "pixid": np.arange(1, len(region_points) + 1),
             "x": region_points["x"].to_numpy(),
             "y": region_points["y"].to_numpy(),
-            "d_corales": distances,
+            OUTPUT_FIELD: distances,
         }
     )
 
     save_output(out, output_path)
-    print(f"OK -> {output_path}")
 
 
 if __name__ == "__main__":

@@ -98,7 +98,7 @@ DEFAULT_ORDER = [
     "windspeed",
     "zvh",
     "escollera",
-    "espigon",
+    "espigon",     
     "muro",
     "rompeolas",
     "puerto",

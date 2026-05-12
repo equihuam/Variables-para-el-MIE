@@ -3,25 +3,42 @@ data_repo: "C:/wf-ie-data"
 regions:
   - region_1
   - region_2
-  - region_3
-  - region_4
-  - region_5
-  - region_6
-  - region_7
-  - region_8
-  - region_9
-  - region_10
-  - region_11
-  - region_12
-  - region_13
-  - region_14
+#  - region_3
+#  - region_4
+#  - region_5
+#  - region_6
+#  - region_7
+#  - region_8
+#  - region_9
+#  - region_10
+#  - region_11
+#  - region_12
+#  - region_13
+#  - region_14
 
 inputs:
-  dunes_inegi_raster: "{data_repo}/raw/dunes_inegi/cdv_usuev250sVII_dunas.tif"
-  dunes_other_shp: "{data_repo}/raw/dunes_cost/DunasCosteras250116.shp"
-  coastal_regions_shp: "{data_repo}/raw/coastal_regions/RegionesCosteras40km.shp"
-  erosion_table: "{data_repo}/raw/erosion/Tasas_erosionMEX_Actualizado2018.txt"
-  corals_shp: "{data_repo}/raw/corals/coral-global.shp"
+  corals_shp: "{data_repo}/varsIni/corals/coral-global.shp"
+  coastal_regions_shp: "{data_repo}/varsIni/coastal_regions/RegionesCosteras40km.shp"
+  dunes_inegi_raster: "{data_repo}/varsIni/dunes_inegi/cdv_usuev250sVII_dunas.tif"
+  dunes_other_shp: "{data_repo}/varsIni/dunes_cost_2014/DunasCosteras250116.shp"
+  erosion_table: "{data_repo}/varsIni/erosion/Tasas_erosionMEX_Actualizado2018.txt"
+  coast_types_shp: "{data_repo}/varsIni/tipo_de_costa/TipoCosta.SHP"
+  mangroves_shp: "{data_repo}/varsIni/manglares/cm-conabio.shp"
+  zvh_raster: "{data_repo}/varsIni/zonas_de_vida/zvh_mx3gw.tif"
+  estructuras_shp: "{data_repo}/varsIni/estructuras/estructuras_final_unido_.shp"
+  wind_nc: "{data_repo}/varsIni/velocidad_del_viento/wind-speed_monthly-mean_era5_1979-2018_v1.0.nc"
+  species_points_csv: "{data_repo}/varsIni/plantas_snib/plantas_invasoras.csv"
+  pasto_marino_shp: "{data_repo}/varsIni/pastos_marinos/seagrasses-pol-simar.shp"
+
+#  pasto_marino_shp: "{data_repo}/varsIni/pastos_marinos/pasto_marino.shp...."
+
+#  spp_invasoras: "{data_repo}/varsIni/spp_invasoras/...."
+#  batimetria: "{data_repo}/varsIni/batimetria/01_GEBCO2020_SIMAR.tif...."
+#  dunas_2024: "{data_repo}/varsIni/dunas_2024/...."
+#  huracanes: "{data_repo}/varsIni/huracanes/...."
+#  linea_de_costa: "{data_repo}/varsIni/linea_de_costa/...."
+#  uso_suelo_shp: "{data_repo}/varsIni/madmex/cdv_usuev250sVII_cnal_s.tif..."
+#  madmex_raster: "{data_repo}/varsIni/madmex/madmex_landsat_2017_31tif..."
 
 results:
   reference_dir: "{data_repo}/results/reference"

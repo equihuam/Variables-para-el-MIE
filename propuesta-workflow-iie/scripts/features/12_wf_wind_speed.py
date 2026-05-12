@@ -65,7 +65,7 @@ from rasterio.transform import xy
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 
 
-OUTPUT_FIELD = "wind_speed"
+OUTPUT_FIELD = "windspeed"
 
 
 def parse_args() -> argparse.Namespace:
@@ -163,20 +163,22 @@ def reproject_raster_to_crs(
     return dst, transform
 
 
-def build_time_mean_from_nc(nc_path: Path) -> tuple[np.ndarray, dict]:
+def build_time_mean_from_nc(nc_path: Path, fallback_crs: str = "EPSG:4326") -> tuple[np.ndarray, dict]:
     """
     Abre el NetCDF con rasterio, lee todas las bandas y calcula la media temporal.
     Replica conceptualmente:
       wspeed <- rast(...)
       wspeed_mean <- app(wspeed, mean)
+
+    Si el NetCDF no reporta CRS explícito, usa fallback_crs.
     """
     with rasterio.open(nc_path) as src:
-        if src.crs is None:
-            raise ValueError("El NetCDF de viento no tiene CRS definido.")
+        src_crs = src.crs if src.crs is not None else fallback_crs
+
         if src.count < 1:
             raise ValueError("El NetCDF de viento no contiene bandas.")
 
-        arr = src.read().astype(np.float32)  # shape: (bands, rows, cols)
+        arr = src.read().astype(np.float32)
 
         nodata = src.nodata
         if nodata is not None:
@@ -190,6 +192,7 @@ def build_time_mean_from_nc(nc_path: Path) -> tuple[np.ndarray, dict]:
             count=1,
             dtype="float32",
             nodata=np.nan,
+            crs=src_crs,
         )
 
     return mean_arr, profile
