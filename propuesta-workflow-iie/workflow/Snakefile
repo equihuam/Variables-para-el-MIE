@@ -29,6 +29,7 @@ rule all:
         expand(f"{FEATURES_DIR}/pasto_marino/{{region}}.parquet", region=REGIONS),
         expand(f"{FEATURES_DIR}/batimetria/{{region}}.parquet", region=REGIONS),
         expand(f"{FEATURES_DIR}/madmex_uso_suelo/{{region}}.parquet", region=REGIONS),
+        expand(f"{FEATURES_DIR}/manglares/{{region}}.parquet", region=REGIONS),
         f"{TRAINING_DIR}/master_features.parquet",
         cfg(config["bayes"]["bn_input_parquet"]),
         cfg(config["bayes"]["bn_input_csv"]),

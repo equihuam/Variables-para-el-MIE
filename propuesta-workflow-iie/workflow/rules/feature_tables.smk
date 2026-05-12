@@ -134,3 +134,15 @@ rule feature_madmex_uso_suelo:
             --madmex-raster {input.madmex_raster} \
             --base-table {input.base_table} \
             --output {output}"
+
+rule feature_manglares:
+    input:
+        mangroves_shp=lambda wc: cfg(config["inputs"]["mangroves_shp"]),
+        base_table=FEATURES_DIR + "/tasa_erosion/{region}.parquet",
+    output:
+        FEATURES_DIR + "/manglares/{region}.parquet"
+    shell:
+        "python ../scripts/features/8_wf_manglares.py \
+            --mangroves-shp {input.mangroves_shp} \
+            --base-table {input.base_table} \
+            --output {output}"

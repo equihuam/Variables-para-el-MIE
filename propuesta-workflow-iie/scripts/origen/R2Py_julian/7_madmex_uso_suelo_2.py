@@ -82,7 +82,7 @@ K_NEIGHBORS = 1000
 def load_madmex(path: Path):
     if not path.exists():
         raise FileNotFoundError(f"No existe el raster MADMEX: {path}")
-    return rasterio.open(path)
+    return rasterio.open(path) 
 
 
 def list_reference_grids(ref_grid_dir: Path) -> list[Path]:
