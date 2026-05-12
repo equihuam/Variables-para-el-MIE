@@ -13,13 +13,11 @@ rule create_ie_rasters:
         ),
         normalization_range=config["bayes"].get("normalization_range", "1.5,5.5"),
     shell:
-        r"""
-        python ../scripts/features/18_wf_create_ie_raster.py \
-          --training-table {input.training_table} \
-          --predictions {input.predictions} \
-          --ref-grid-dir {REFERENCE_DIR} \
-          --output-dir {FINAL_MAPS_DIR} \
-          --output-table {TRAINING_DIR}/master_features_with_ie.parquet \
-          --normalize-from {params.normalization_range} \
-          {params.prediction_column_arg}
-        """
+        "python ../scripts/features/18_wf_create_ie_raster.py "
+        "--training-table {input.training_table} "
+        "--predictions {input.predictions} "
+        "--ref-grid-dir {REFERENCE_DIR} "
+        "--output-dir {FINAL_MAPS_DIR} "
+        "--output-table {TRAINING_DIR}/master_features_with_ie.parquet "
+        "--normalize-from {params.normalization_range} "
+        "{params.prediction_column_arg}"

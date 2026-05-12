@@ -17,6 +17,8 @@ Este documento define el caso de uso, los requerimientos funcionales y no funcio
 
 El objetivo final del proceso es generar, por región de análisis, un conjunto de productos congruentes entre sí y trazables, culminando en la producción de **mapas raster del índice de integridad ecosistémica** y sus insumos tabulares intermedios.
 
+En el estado actual del proyecto, el tramo **validado y considerado canónico** llega hasta la producción de la tabla de entrada a Netica (`bn_input.csv`). La reincorporación automática de predicciones externas de Netica al flujo geoespacial se considera aún **provisional**, pues hoy no existe garantía suficiente de congruencia fila a fila entre la tabla exportada por Python y la tabla de predicciones devuelta por Netica.
+
 # Caso de uso
 
 ## Nombre del caso de uso
@@ -64,9 +66,9 @@ El flujo produce:
 - una colección de **rasters de referencia** por región;
 - una colección de **features tabulares congruentes** por región o globales;
 - una **tabla final integrada** de variables por píxel;
-- una **salida de inferencia** del índice;
-- un conjunto de **GeoTIFF finales del Índice de Integridad Ecosistémica**;
-- opcionalmente, productos auxiliares como histogramas, tablas CSV y proyectos QGIS.
+- una **tabla de entrada a inferencia bayesiana**;
+- opcionalmente, una **salida de inferencia** del índice y su reconstrucción espacial;
+- un conjunto potencial de **GeoTIFF finales del Índice de Integridad Ecosistémica**.
 
 # Alcance
 
@@ -76,8 +78,8 @@ El flujo produce:
 - generación de variables espaciales a partir de insumos vectoriales y raster;
 - integración tabular de variables congruentes;
 - preparación de tablas para modelado;
-- reconstrucción cartográfica del índice final;
-- validación estructural y pruebas automáticas del flujo.
+- validación estructural y pruebas operativas del flujo;
+- preparación de insumos para el motor bayesiano externo.
 
 ## No incluye
 
@@ -85,7 +87,8 @@ El flujo produce:
 - definición científica de cada variable o de sus umbrales;
 - captura primaria de datos de campo;
 - desarrollo de interfaces gráficas como requisito principal;
-- operación manual interactiva como mecanismo central del flujo.
+- operación manual interactiva como mecanismo central del flujo;
+- cierre definitivo de la retrointegración automática de predicciones externas cuando no exista congruencia verificable entre tabla base y salida del motor probabilístico.
 
 # Objetivo general
 
@@ -97,8 +100,8 @@ Implementar un flujo reproducible y escalable que permita estimar y mapear el Í
 2. Generar variables espaciales derivadas a partir de insumos geográficos heterogéneos.
 3. Convertir las variables espaciales en **series tabulares congruentes por píxel**.
 4. Construir una tabla final apta para entrenamiento, inferencia o exportación a motores externos.
-5. Integrar la salida del modelo probabilístico con la geometría espacial de referencia.
-6. Reconstruir el mapa final del índice como raster por región.
+5. Preparar una tabla canónica de entrada para inferencia bayesiana.
+6. Integrar la salida del modelo probabilístico con la geometría espacial de referencia cuando exista congruencia verificable.
 7. Garantizar reproducibilidad, escalabilidad y validación automatizada.
 
 # Supuestos del proceso
@@ -107,8 +110,9 @@ Implementar un flujo reproducible y escalable que permita estimar y mapear el Í
 - Cada región cuenta o puede contar con un raster de referencia que fija CRS, resolución, extensión y alineación.
 - Las variables derivadas pueden expresarse finalmente de forma raster o tabular por píxel.
 - La congruencia espacial entre variables es un requisito central.
-- La salida del modelo probabilístico preserva el orden o la clave necesaria para reasignar predicciones a los píxeles correctos.
-- Los productos intermedios pueden almacenarse temporalmente en disco en formatos serializados como `PKL`, `CSV` o `GeoTIFF`.
+- Los productos intermedios se almacenan preferentemente en **Parquet** para tablas y en **GeoTIFF** para rasters.
+- La salida del modelo probabilístico solo puede reincorporarse automáticamente si preserva una correspondencia inequívoca con la tabla base.
+- El orden de filas y la longitud total de las tablas son parte del contrato operativo cuando interviene un motor externo sin llaves espaciales explícitas.
 
 # Requerimientos funcionales
 
@@ -132,7 +136,8 @@ El sistema debe permitir generar coberturas raster congruentes por región a par
 
 - datos vectoriales rasterizados;
 - datos raster reproyectados y recortados;
-- interpolaciones o transformaciones espaciales.
+- interpolaciones o transformaciones espaciales;
+- muestreos o distancias evaluadas sobre una base tabular canónica cuando esto resulte más estable que rederivar la malla desde un raster reproyectado.
 
 ## RF-04. Conversión de coberturas a series numéricas congruentes
 
@@ -145,7 +150,7 @@ El sistema debe convertir las coberturas congruentes a tablas o series numérica
 
 ## RF-05. Almacenamiento serializado intermedio
 
-Para las tablas intermedias y finales, se recomienda adoptar **Parquet** como formato base de almacenamiento tabular, por las siguientes razones:
+Para las tablas intermedias y finales, se adopta **Parquet** como formato base de almacenamiento tabular, por las siguientes razones:
 
 - mayor eficiencia de lectura y escritura;
 - mejor compresión;
@@ -163,7 +168,7 @@ El sistema debe producir una tabla de entrada apta para ser consumida por un mot
 
 ## RF-08. Integración de predicciones del modelo
 
-El sistema debe poder leer una salida de inferencia generada por Netica o por otro motor compatible y asociarla correctamente con los píxeles de la tabla base.
+El sistema debe poder leer una salida de inferencia generada por Netica o por otro motor compatible y asociarla correctamente con los píxeles de la tabla base **solo si** se cumple una congruencia verificable en orden y número de filas.
 
 ## RF-09. Reconstrucción raster del índice final
 
@@ -239,37 +244,39 @@ Se construyen las regiones y sus plantillas raster de referencia. Esta etapa fij
 
 Se generan capas raster o equivalentes para variables derivadas a partir de datos vectoriales o raster.
 
-**Producto principal:** coberturas raster congruentes o datos preparados para su conversión tabular.
+**Producto principal:** features regionales tabulares congruentes o insumos preparados para su conversión tabular.
 
 ## Etapa 3. Conversión a series congruentes
 
 Cada variable se transforma a una tabla de observaciones por píxel con las mismas llaves espaciales.
 
-**Producto principal:** archivos serializados por variable, idealmente con columnas como `regionid`, `pixid`, `x`, `y` y la variable temática.
+**Producto principal:** archivos serializados por variable, con columnas como `regionid`, `pixid`, `x`, `y` y la variable temática.
 
 ## Etapa 4. Integración tabular
 
 Se ensamblan todas las variables en una sola tabla maestra.
 
-**Producto principal:** tabla integrada de entrenamiento o inferencia.
+**Producto principal:** `master_features.parquet`.
 
-## Etapa 5. Modelado e inferencia
+## Etapa 5. Preparación para modelado e inferencia
 
-Se prepara la tabla final para el motor bayesiano, se ejecuta la inferencia y se obtienen predicciones por observación.
+Se prepara la tabla final para el motor bayesiano externo.
 
-**Producto principal:** tabla o archivo de predicciones por píxel.
+**Producto principal:** `bn_input.parquet` y `bn_input.csv`.
 
-## Etapa 6. Reconstrucción cartográfica final
+## Etapa 6. Inferencia externa y reconstrucción cartográfica
 
-Las predicciones del índice se reinsertan sobre la geometría raster de referencia y se generan los mapas finales por región.
+Se leen predicciones del motor externo y, si existe congruencia verificable, se reconstruyen mapas raster finales por región.
 
-**Producto principal:** raster final del Índice de Integridad Ecosistémica.
+**Producto principal esperado:** `master_features_with_ie.parquet` y `GeoTIFF` regionales del índice.
+
+**Estado actual:** esta etapa se considera **no cerrada** mientras no se garantice correspondencia inequívoca entre `bn_input.csv` e `ie_predictions.csv`.
 
 # Contrato mínimo de datos intermedios
 
 ## Contrato para tablas de features
 
-Toda tabla serializada de features debería incluir como mínimo:
+Toda tabla serializada de features debe incluir como mínimo:
 
 - `regionid`
 - `pixid`
@@ -277,6 +284,17 @@ Toda tabla serializada de features debería incluir como mínimo:
 - `y`
 
 más una o varias columnas temáticas.
+
+## Contrato para tablas base canónicas
+
+Cuando una feature se construya usando una **tabla base regional** para preservar alineación, esa tabla base debe cumplir el mismo contrato mínimo:
+
+- `regionid`
+- `pixid`
+- `x`
+- `y`
+
+y debe representar la malla canónica que ya fue validada por el flujo.
 
 ## Contrato para rasters congruentes
 
@@ -292,10 +310,14 @@ Todo raster congruente debe ser compatible con el raster de referencia regional 
 # Reglas de integridad del flujo
 
 1. Ninguna variable debe perder su correspondencia espacial con la plantilla regional.
-2. La unión entre variables debe preservar una llave espacial consistente.
+2. La unión entre variables debe preservar una llave espacial consistente o una alineación posicional previamente validada.
 3. La reconstrucción raster final debe usar la misma plantilla de referencia que originó la congruencia del resto del análisis.
 4. Los productos intermedios deben ser suficientemente explícitos para permitir depuración y recomputación parcial.
 5. Las salidas del modelo probabilístico deben poder vincularse sin ambigüedad con la tabla base.
+6. Debe distinguirse explícitamente entre:
+   - **clave estructural de feature**: nombre de carpeta o regla en `results/features/`;
+   - **nombre temático de columna**: nombre final exportado dentro de la tabla.
+7. No debe asumirse que el nombre de la carpeta de una feature y el nombre de su columna temática son idénticos.
 
 # Estrategia de implementación recomendada
 
@@ -306,7 +328,7 @@ Se recomienda implementar el flujo mediante **Snakemake**, organizando reglas po
 - `reference`
 - `feature_tables`
 - `training_table`
-- `bayes_model`
+- `bayes_io`
 - `final_maps`
 
 ## Desarrollo de scripts
@@ -316,82 +338,121 @@ Se recomienda que cada script:
 - reciba rutas parametrizadas;
 - pueda ejecutarse por región cuando sea razonable;
 - tenga entradas y salidas explícitas;
-- no dependa de rutas hardcodeadas como única opción operativa.
+- no dependa de rutas hardcodeadas como única opción operativa;
+- documente si usa como base un `ref_grid.tif` o una tabla base regional ya alineada.
 
 ## Pruebas automatizadas
 
 Se recomienda una batería de pruebas en **pytest** en tres niveles:
 
 ### Unitarias
+
 Para funciones puras:
+
 - normalización;
 - discretización;
 - construcción de llaves;
 - ordenamiento de regiones;
-- validación de contratos.
+- validación de contratos;
+- normalización de nombres de columnas o categorías.
 
 ### Integración por script
+
 Para mini-casos sintéticos:
+
 - creación de `ref_grid`;
 - rasterización simple;
-- generación de `.pkl`;
-- ensamblado tabular.
+- generación de `.parquet`;
+- ensamblado tabular;
+- alineación ligera entre features.
 
 ### Integración de workflow
+
 Para un DAG mínimo:
+
 - una región;
 - un subconjunto pequeño de variables;
 - ensamblado final;
-- reconstrucción raster del índice.
+- preparación de `bn_input.csv`.
 
 # Riesgos y puntos críticos
 
 ## Riesgo 1. Desalineación espacial
-Si una variable no respeta el raster de referencia, toda la integración posterior puede quedar sesgada.
+
+Si una variable no respeta la malla canónica regional, toda la integración posterior puede quedar sesgada.
 
 ## Riesgo 2. Dependencia implícita del orden de filas
-El flujo requiere especial cuidado cuando un motor externo devuelve predicciones por fila. Debe preservarse una correspondencia inequívoca entre observación y píxel.
+
+El flujo requiere especial cuidado cuando un motor externo devuelve predicciones por fila. Debe preservarse una correspondencia inequívoca entre observación y píxel. El problema sigue vigente en la interfaz con Netica y hoy constituye el principal límite funcional del tramo final. El README previo ya señalaba este riesgo y ahora se considera confirmado operativamente. 
 
 ## Riesgo 3. Inconsistencia de nombres y columnas
+
 El ensamblado final puede fallar si no existe una convención estable de nombres para archivos y columnas.
 
 ## Riesgo 4. Divergencias entre implementaciones R y Python
+
 Algunas operaciones pueden no tener equivalencia exacta entre bibliotecas. Eso debe documentarse explícitamente y validarse empíricamente cuando haya datos disponibles.
+
+## Riesgo 5. Reproyección que altera la malla útil
+
+En algunas variables, derivar la tabla de salida a partir de un `ref_grid` reproyectado puede cambiar el número de filas válidas. Cuando eso ocurra, conviene usar una tabla base regional ya alineada como malla canónica.
+
+## Riesgo 6. Sincronización entre máquinas y placeholders de nube
+
+Cuando el repositorio de datos se sincroniza mediante Dropbox u otro servicio de nube, un archivo puede “existir” pero no estar materializado localmente. Esto puede romper lecturas con `pyarrow` o `pandas`, especialmente en Parquet, aunque Snakemake vea el archivo. El problema se observó en una segunda máquina Windows y se resolvió materializando localmente los archivos relevantes antes de ejecutar reglas finales.
+
+## Riesgo 7. Metadatos locales de Snakemake
+
+Los metadatos de Snakemake viven en el proyecto local, no en el repositorio de datos. Al trabajar entre varias máquinas, es normal que existan outputs válidos pero sin metadata local asociada. Esto afecta la riqueza de `snakemake --report`, pero no invalida los archivos.
 
 # Criterios de aceptación
 
-El flujo se considerará funcionalmente aceptable cuando cumpla al menos lo siguiente:
+El flujo se considerará funcionalmente aceptable en su estado actual cuando cumpla al menos lo siguiente:
 
 1. genera un raster de referencia válido por región;
 2. genera variables intermedias congruentes y serializadas;
 3. construye una tabla final con una fila por píxel y una columna por variable;
-4. acepta o produce una salida de inferencia por píxel;
-5. reconstruye correctamente un GeoTIFF final del índice por región;
+4. produce correctamente `master_features.parquet`;
+5. produce correctamente `bn_input.parquet` y `bn_input.csv`;
 6. permite reejecutar parcialmente etapas del flujo;
-7. cuenta con pruebas automatizadas mínimas para validar componentes críticos.
+7. cuenta con validaciones mínimas para identificar desalineación, duplicados e inconsistencias de esquema.
 
-# Resultado final esperado
+La reincorporación de inferencia externa y la reconstrucción de mapas finales se considera aún **provisional** y no forma parte del criterio de aceptación cerrado mientras no exista correspondencia verificable con la salida de Netica.
 
-El resultado final esperado del workflow es un conjunto de **mapas raster regionales del Índice de Integridad Ecosistémica**, derivados de una tubería reproducible que integra datos geográficos vectoriales y raster, variables espaciales congruentes, una tabla maestra por píxel y una etapa de inferencia probabilística.
+# Estado validado actual del workflow
 
-Dicho resultado debe ser trazable, reproducible, escalable y suficientemente estable para sostener tanto análisis posteriores como validación cartográfica y modelado adicional.
+En su estado actual, el workflow ya integra de forma congruente al menos las siguientes familias de variables:
 
+- `tasa_erosion`
+- `corales`
+- `tipo_costa`
+- `zvh`
+- `velocidad_del_viento`
+- `estructuras_costeras`
+- `spp_invasoras`
+- `pasto_marino`
+- `batimetria`
+- `madmex_uso_suelo`
+- `manglares`
+- `movimiento_dunas`
 
-# Hallazgos operativos de la fase de ensayos en laptop
+En una corrida validada con dos regiones de prueba, el ensamblado produjo `master_features.parquet` con **546223 filas** y **20 columnas**, confirmando que las nuevas variables se integran sin romper la alineación regional cuando respetan la malla canónica del workflow. :contentReference[oaicite:2]{index=2}
 
-La fase de ensayos sobre una laptop Windows con 16 GB de RAM permitió validar la arquitectura general del workflow, detectar defectos lógicos importantes en la traducción inicial de scripts R a Python y ajustar decisiones operativas relevantes para su ejecución estable.
+# Hallazgos operativos de la fase de ensayos y consolidación
+
+La fase de ensayos sobre laptop Windows y la posterior validación en una segunda máquina permitieron validar la arquitectura general del workflow, detectar defectos lógicos importantes en la traducción inicial de scripts R a Python y ajustar decisiones operativas relevantes para su ejecución estable.
 
 ## Hallazgo 1. La congruencia por píxel debe construirse solo sobre celdas válidas
 
 El principal defecto lógico detectado en la traducción inicial de algunos scripts Python fue que, después de reproyectar el `ref_grid` regional, se estaban convirtiendo **todas las celdas** de la grilla reproyectada a observaciones tabulares, incluyendo celdas sin datos o fuera de la máscara útil.
 
-Eso provocó una inflación artificial severa en las tablas de features. En una región de prueba se observaron del orden de más de cien millones de filas cuando la malla válida real contenía solo unos cientos de miles de celdas útiles.
+Eso provocó una inflación artificial severa en las tablas de features.
 
 ### Decisión adoptada
 
-A partir de esta observación, los scripts de features deben:
+Los scripts de features deben:
 
-1. reproyectar el raster de referencia;
+1. reproyectar el raster de referencia cuando aplique;
 2. identificar primero las celdas válidas;
 3. calcular coordenadas `x`, `y` solo para esas celdas válidas;
 4. exportar únicamente esas observaciones.
@@ -406,7 +467,7 @@ En regiones grandes, incluso el paso intermedio de construir coordenadas para to
 
 ### Decisión adoptada
 
-Los scripts de features deben evitar patrones de este tipo:
+Los scripts de features deben evitar:
 
 - creación de `meshgrid` completo;
 - transformación a coordenadas para toda la matriz;
@@ -418,144 +479,32 @@ En su lugar, deben trabajar así:
 2. generar coordenadas solo para esas posiciones;
 3. construir la tabla final directamente a partir de ese subconjunto.
 
-Esto volvió viable la ejecución regional incluso en regiones con grillas reproyectadas muy grandes.
-
 ## Hallazgo 3. La organización de `raw/` como carpeta plana no escala bien
 
-Durante los ensayos operativos se comprobó que una carpeta `raw/` plana se vuelve rápidamente confusa y poco manejable, tanto por mezcla de tipos de archivo como por dificultad para ubicar insumos base.
+Durante los ensayos operativos se comprobó que una carpeta `raw/` plana se vuelve rápidamente confusa y poco manejable.
 
 ### Decisión adoptada
 
-Se recomienda organizar el repositorio de datos por subcarpetas temáticas o por fuente, por ejemplo:
+La organización canónica de insumos se movió a una estructura temática bajo `varsIni/`, sustituyendo el uso previo de `raw/` como convención principal. La estructura actual recomendada es del tipo:
 
 ```text
-raw/
-  dunes_inegi/
-  dunes_cost/
+varsIni/
+  batimetria/
   coastal_regions/
-  erosion/
   corals/
-external/
-  netica/
+  dunes_cost_2014/
+  dunes_inegi/
+  erosion/
+  estructuras/
+  madmex/
+  manglares/
+  pastos_marinos/
+  plantas_snib/
+  velocidad_del_viento/
 results/
   reference/
   features/
   training/
   final_maps/
-```
-
-Esta estructura debe reflejarse explícitamente en `config.yaml`, evitando rutas hardcodeadas dentro de los scripts.
-
-## Hallazgo 4. En Windows conviene usar una raíz corta del repositorio de datos
-
-Durante la integración con Snakemake en Windows se observaron fricciones asociadas a rutas largas, espacios en nombres y metadatos internos del workflow.
-
-### Decisión adoptada
-
-Se adoptó una raíz operativa corta para el repositorio de datos:
-
-```text
-C:/wf-ie-data
-```
-
-La ubicación física real de los datos puede estar en otra ruta, incluso sincronizada por nube, pero operativamente conviene usar una ruta corta y estable, idealmente mediante `symlink` cuando haga falta.
-
-## Hallazgo 5. La tabla maestra consolidada sí es viable una vez corregidos los features
-
-En una fase intermedia se ensayó una estrategia de ensamblado regional por temor a exceder memoria. Esa decisión fue útil para aislar el problema, pero una vez corregida la inflación de filas en los scripts de features, volvió a ser viable producir una tabla maestra consolidada.
-
-### Decisión adoptada
-
-Se conserva el enfoque:
-
-- features regionales por variable;
-- ensamblado final consolidado en `master_features.parquet`.
-
-Internamente, el ensamblado sigue haciéndose por región para mayor robustez, pero el producto esperado del workflow vuelve a ser una tabla maestra global.
-
-## Hallazgo 6. La salida del motor bayesiano debe incorporarse por compaginación posicional
-
-La salida externa de Netica no necesariamente contiene llaves espaciales suficientes para hacer un `merge` relacional seguro.
-
-### Decisión adoptada
-
-Mientras la salida de inferencia consista en una secuencia de predicciones sin llaves explícitas, la integración debe hacerse por **correspondencia posicional**, bajo estas condiciones:
-
-1. la tabla de entrada a Netica debe preservar un orden estable;
-2. la salida de predicciones debe tener exactamente el mismo número de filas;
-3. no deben introducirse reordenamientos intermedios entre exportación e integración.
-
-Esto implica que la vinculación entre tabla base y predicciones no debe depender de un `merge` clásico, sino de congruencia en longitud y orden.
-
-## Hallazgo 7. La validación del vertical mínimo fue exitosa y escaló bien a 14 regiones
-
-Se realizó una fase de ensayo inicial con 3 regiones y posteriormente una corrida con las 14 regiones previstas. Una vez corregidos los scripts de features, la tabla `master_features.parquet` quedó en un orden de magnitud prácticamente idéntico al del flujo original en R.
-
-### Implicación
-
-Esto constituye una validación fuerte de que la traducción Python:
-
-- ya preserva de forma razonable la lógica espacial del flujo original;
-- ya produce un número de observaciones congruente con el flujo R;
-- y ya puede sostenerse como base del workflow reproducible en Snakemake.
-
-## Hallazgo 8. La laptop es útil para depuración, pero la plataforma objetivo debe ser más robusta
-
-La laptop permitió encontrar errores lógicos importantes y validar la arquitectura del workflow, pero también mostró límites claros de memoria y rendimiento para ciertas regiones o pasos costosos.
-
-### Decisión adoptada
-
-Se distinguen dos contextos de operación:
-
-#### Laptop Windows
-Adecuada para:
-
-- depuración;
-- ensayos incrementales;
-- validación de scripts;
-- corridas parciales o regionales.
-
-#### Equipo de escritorio con WSL
-Adecuado para:
-
-- corridas formales del workflow completo;
-- mayor paralelización con Snakemake;
-- validación final del pipeline;
-- eventual crecimiento del número de variables o regiones.
-
-## Recomendaciones derivadas para implementación
-
-1. Mantener el enfoque **headless-first**.
-2. Preservar rutas parametrizadas y evitar hardcodeo de ubicaciones.
-3. Validar siempre el número de celdas válidas frente al tamaño total de la grilla reproyectada.
-4. Favorecer productos regionales intermedios y consolidación final explícita.
-5. Documentar claramente cuándo una integración es por llave y cuándo es por posición.
-6. Usar la laptop como entorno de depuración y WSL como entorno preferente de ejecución completa.
-
-# Bibliotecas requeridas
-
-Para facilitar la operación se sugiere crear un ambiente virtual de trabajo con la especificación que se anota en seguida. Para mayires detalles vease el [texto guía](README_entorno_workflow_iie.qmd) que hemos preoarado para eso
-
-``` yaml
-name: workflow-iie
-channels:
-  - conda-forge
-dependencies:
-  - python=3.11
-  - numpy
-  - pandas
-  - pyarrow
-  - rasterio
-  - geopandas
-  - shapely
-  - pyproj
-  - pyogrio
-  - scipy
-  - scikit-learn
-  - matplotlib
-  - snakemake
-  - pytest
-  - pip
-  - pip:
-      - pgmpy
-```
+external/
+  netica/
