@@ -29,15 +29,17 @@ inputs:
   wind_nc: "{data_repo}/varsIni/velocidad_del_viento/wind-speed_monthly-mean_era5_1979-2018_v1.0.nc"
   species_points_csv: "{data_repo}/varsIni/plantas_snib/plantas_invasoras.csv"
   pasto_marino_shp: "{data_repo}/varsIni/pastos_marinos/seagrasses-pol-simar.shp"
+  batimetria_raster: "{data_repo}/varsIni/batimetria/01_GEBCO2020_SIMAR.tif"
+  madmex_raster: "{data_repo}/varsIni/madmex/madmex_landsat_2017_31.tif"
+
+#  uso_suelo_shp: "{data_repo}/varsIni/madmex/cdv_usuev250sVII_cnal_s.tif..."
 
 #  pasto_marino_shp: "{data_repo}/varsIni/pastos_marinos/pasto_marino.shp...."
-
 #  spp_invasoras: "{data_repo}/varsIni/spp_invasoras/...."
 #  batimetria: "{data_repo}/varsIni/batimetria/01_GEBCO2020_SIMAR.tif...."
 #  dunas_2024: "{data_repo}/varsIni/dunas_2024/...."
 #  huracanes: "{data_repo}/varsIni/huracanes/...."
 #  linea_de_costa: "{data_repo}/varsIni/linea_de_costa/...."
-#  uso_suelo_shp: "{data_repo}/varsIni/madmex/cdv_usuev250sVII_cnal_s.tif..."
 #  madmex_raster: "{data_repo}/varsIni/madmex/madmex_landsat_2017_31tif..."
 
 results:

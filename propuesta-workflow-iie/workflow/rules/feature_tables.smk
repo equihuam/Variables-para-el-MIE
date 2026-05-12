@@ -66,8 +66,10 @@ rule feature_wind_speed:
     shell:
         "python ../scripts/features/12_wf_wind_speed.py \
             --structures-shp {input.estructuras_shp} \
-            --wind-nc {input.wind_nc} --ref-grid {input.ref_grid} \
-            --region-id {wildcards.region} --output {output}"
+            --wind-nc {input.wind_nc} \
+            --ref-grid {input.ref_grid} \
+            --region-id {wildcards.region} \
+            --output {output}"
 
 rule feature_estructuras_costeras:
     input:
@@ -106,4 +108,29 @@ rule feature_pasto_marino:
             --pasto-marino-shp {input.pasto_marino_shp} \
             --ref-grid {input.ref_grid} \
             --region-id {wildcards.region} \
+            --output {output}"
+
+rule feature_batimetria:
+    input:
+        batimetria_raster=lambda wc: cfg(config["inputs"]["batimetria_raster"]),
+        ref_grid=REFERENCE_DIR + "/{region}/ref_grid.tif",
+    output:
+        FEATURES_DIR + "/batimetria/{region}.parquet"
+    shell:
+        "python ../scripts/features/6_wf_batimetria_caracteristica.py \
+            --batimetria-raster {input.batimetria_raster} \
+            --ref-grid {input.ref_grid} \
+            --region-id {wildcards.region} \
+            --output {output}"
+
+rule feature_madmex_uso_suelo:
+    input:
+        madmex_raster=lambda wc: cfg(config["inputs"]["madmex_raster"]),
+        base_table=FEATURES_DIR + "/tasa_erosion/{region}.parquet",
+    output:
+        FEATURES_DIR + "/madmex_uso_suelo/{region}.parquet"
+    shell:
+        "python ../scripts/features/7_wf_madmex_uso_suelo_3.py \
+            --madmex-raster {input.madmex_raster} \
+            --base-table {input.base_table} \
             --output {output}"

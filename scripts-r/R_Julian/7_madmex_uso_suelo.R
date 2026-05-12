@@ -1,4 +1,4 @@
-library("terra")
+   library("terra")
 library("sf")
 
 # Load madmex LULC
