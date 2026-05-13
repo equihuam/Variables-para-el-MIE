@@ -36,3 +36,5 @@ rule all:
         cfg(config["bayes"]["bn_input_csv"]),
         f"{TRAINING_DIR}/master_features_with_ie.parquet",
         expand(f"{FINAL_MAPS_DIR}/eicoastal_{{region}}.tif", region=REGIONS),
+
+
