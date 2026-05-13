@@ -84,18 +84,32 @@ rule feature_estructuras_costeras:
             --region-id {wildcards.region} \
             --output {output}"
 
+rule spp_invasoras_global_stats:
+    input:
+        species_points_csv=lambda wc: cfg(config["inputs"]["species_points_csv"]),
+        ref_grids=expand(REFERENCE_DIR + "/{region}/ref_grid.tif", region=REGIONS),
+    output:
+        FEATURES_DIR + "/spp_invasoras/_global_stats.csv"
+    shell:
+        "python ../scripts/features/3_wf_spp_invasoras_global_stats.py "
+        "--species-points-csv {input.species_points_csv} "
+        "--ref-grids {input.ref_grids} "
+        "--output {output}"
+
 rule feature_spp_invasoras:
     input:
         species_points_csv=lambda wc: cfg(config["inputs"]["species_points_csv"]),
         ref_grid=REFERENCE_DIR + "/{region}/ref_grid.tif",
+        normalization_stats=FEATURES_DIR + "/spp_invasoras/_global_stats.csv",
     output:
         FEATURES_DIR + "/spp_invasoras/{region}.parquet"
     shell:
-        "python ../scripts/features/3_wf_spp_invasoras.py \
-            --species-points-csv {input.species_points_csv} \
-            --ref-grid {input.ref_grid} \
-            --region-id {wildcards.region} \
-            --output {output}"
+        "python ../scripts/features/3_wf_spp_invasoras.py "
+        "--species-points-csv {input.species_points_csv} "
+        "--ref-grid {input.ref_grid} "
+        "--region-id {wildcards.region} "
+        "--normalization-stats {input.normalization_stats} "
+        "--output {output}"
 
 rule feature_pasto_marino:
     input:
