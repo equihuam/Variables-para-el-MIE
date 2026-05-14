@@ -18,7 +18,6 @@ Salida principal:
 from __future__ import annotations
 
 import argparse
-import warnings
 from pathlib import Path
 from typing import Any
 
@@ -141,13 +140,7 @@ def build_time_mean_from_nc(nc_path: Path, fallback_crs: str = "EPSG:4326") -> t
         if nodata is not None:
             arr[arr == nodata] = np.nan
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message="Mean of empty slice",
-                category=RuntimeWarning,
-            )
-            mean_arr = np.nanmean(arr, axis=0).astype(np.float32)
+        mean_arr = np.nanmean(arr, axis=0).astype(np.float32)
         profile = src.profile.copy()
         profile.update(
             driver="GTiff",

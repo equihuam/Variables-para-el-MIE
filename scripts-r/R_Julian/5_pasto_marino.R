@@ -17,7 +17,6 @@ c_list <- list.files("./data/06_DunasCost250116_malla_ref_50m/",
 df_list <- list()
 counter = 0
 for (region in c_list){
-  region <- c_list[10]
     print(region)
 
     region_ <- rast(region)

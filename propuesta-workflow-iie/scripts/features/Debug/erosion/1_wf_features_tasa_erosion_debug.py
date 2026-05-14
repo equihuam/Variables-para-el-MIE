@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Nombre: 1_wf_features_tasa_erosion.py
+Nombre: 1_wf_features_tasa_erosion_debug_v4.py
 
 Propósito:
     Calcular, para una región específica, la variable de tasa de erosión sobre
@@ -21,12 +21,11 @@ Resumen del flujo:
     5. Estimar la erosión en cada píxel válido mediante una emulación de kknn de R.
     6. Exportar la tabla resultante en Parquet.
 
-Modo diagnóstico opcional:
-    El script es compatible con Snakemake sin argumentos de depuración.
+Modo diagnóstico:
     Opcionalmente exporta una tabla de grilla con ref_value y metadatos de
     reproyección para comparar contra la salida de referencia generada en R.
 
-Modo kNN canónico:
+Modo kNN v4:
     Por defecto usa una emulación de kknn::kknn(Tasa ~ x + y, ...,
     k = 3, distance = 2, kernel = "optimal", scale = TRUE).
 
@@ -123,15 +122,6 @@ def parse_args() -> argparse.Namespace:
             "Método de predicción. kknn_optimal emula kknn de R con "
             "k=3, distance=2, kernel='optimal', scale=TRUE. "
             "idw_legacy conserva el promedio ponderado 1/distancia^2 de versiones previas."
-        ),
-    )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help=(
-            "Imprime diagnósticos de grilla y kNN en consola. "
-            "Por defecto el script sólo imprime la confirmación final, "
-            "para mantener limpia la salida de Snakemake."
         ),
     )
     return parser.parse_args()
@@ -588,36 +578,29 @@ def main() -> None:
         )
 
     total_points = int(region_arr.size)
-    if args.verbose:
-        print(f"total puntos GeoTIFF original: {source_counts['src_total_cells']}")
+    print(f"total puntos GeoTIFF original: {source_counts['src_total_cells']}")
+    print(f"puntos válidos GeoTIFF original masked: {source_counts['src_valid_masked_points']}")
+    print(f"puntos finitos GeoTIFF original: {source_counts['src_finite_points']}")
+    print(f"puntos válidos máscara GDAL original: {source_counts['src_gdal_mask_valid_points']}")
+    print(f"total puntos reproyectados: {total_points}")
+    print(f"modo de validez: {args.validity_mode}")
+    print(f"puntos finitos: {finite_points}")
+    print(f"puntos no-NaN: {non_nan_points}")
+    print(f"puntos válidos por máscara GDAL: {mask_valid_points}")
+    print(f"puntos válidos usados en malla: {len(region_points)}")
+    if len(region_points) > 0:
         print(
-            "puntos válidos GeoTIFF original masked: "
-            f"{source_counts['src_valid_masked_points']}"
+            "rango x/y válido: "
+            f"x=[{region_points['x'].min()}, {region_points['x'].max()}], "
+            f"y=[{region_points['y'].min()}, {region_points['y'].max()}]"
         )
-        print(f"puntos finitos GeoTIFF original: {source_counts['src_finite_points']}")
-        print(
-            "puntos válidos máscara GDAL original: "
-            f"{source_counts['src_gdal_mask_valid_points']}"
-        )
-        print(f"total puntos reproyectados: {total_points}")
-        print(f"modo de validez: {args.validity_mode}")
-        print(f"puntos finitos: {finite_points}")
-        print(f"puntos no-NaN: {non_nan_points}")
-        print(f"puntos válidos por máscara GDAL: {mask_valid_points}")
-        print(f"puntos válidos usados en malla: {len(region_points)}")
-        if len(region_points) > 0:
-            print(
-                "rango x/y válido: "
-                f"x=[{region_points['x'].min()}, {region_points['x'].max()}], "
-                f"y=[{region_points['y'].min()}, {region_points['y'].max()}]"
-            )
 
-        print(f"modo kNN: {args.knn_mode}")
-        if args.knn_mode == "kknn_optimal":
-            print(
-                "pesos kernel optimal k=3,d=2: "
-                f"{kknn_optimal_kernel_weights(K_NEIGHBORS, d=2).tolist()}"
-            )
+    print(f"modo kNN: {args.knn_mode}")
+    if args.knn_mode == "kknn_optimal":
+        print(
+            "pesos kernel optimal k=3,d=2: "
+            f"{kknn_optimal_kernel_weights(K_NEIGHBORS, d=2).tolist()}"
+        )
 
     predictions = predict_erosion(
         train_df=tasa_ero,

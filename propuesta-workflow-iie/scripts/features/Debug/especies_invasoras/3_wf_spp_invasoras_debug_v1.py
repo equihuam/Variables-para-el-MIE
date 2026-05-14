@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Nombre: 3_wf_spp_invasoras.py
+Nombre: 3_wf_spp_invasoras_debug_v1.py
 
 Propósito:
     Calcular, para una región específica, el potencial agregado de especies
@@ -13,9 +13,10 @@ Propósito:
 
 Notas de validación:
     - Por defecto usa distancia kknn escalada, no distancia cruda.
-    - La normalización canónica es global: las distancias por especie se
-      normalizan con min/max calculados previamente sobre todas las regiones,
-      replicando la lógica del script R original después de bind_rows().
+    - La normalización por defecto es regional para facilitar validación por región.
+      El script R original normaliza después de unir todas las regiones, por lo que
+      para equivalencia global estricta se deben proporcionar estadísticos globales
+      por especie mediante --normalization-stats.
     - La salida productiva conserva sólo: regionid, pixid, x, y, sp_inv_pot.
     - Los archivos debug opcionales pueden guardar grilla, metadatos, resumen de
       especies y distancias/scores por especie.
@@ -58,7 +59,7 @@ def parse_args() -> argparse.Namespace:
                         help="Criterio de celdas válidas tras reproyección. Default: finite.")
     parser.add_argument("--distance-mode", choices=["kknn_scaled", "raw"], default="kknn_scaled",
                         help="Modo de distancia. Default: kknn_scaled para emular kknn(scale=TRUE).")
-    parser.add_argument("--normalization-mode", choices=["region", "global_stats", "none"], default="global_stats",
+    parser.add_argument("--normalization-mode", choices=["region", "global_stats", "none"], default="region",
                         help=("Normalización de distancias. 'region' normaliza con min/max de la región; "
                               "'global_stats' usa --normalization-stats; 'none' no normaliza y exporta suma de distancias."))
     parser.add_argument("--normalization-stats", default=None,
@@ -340,12 +341,6 @@ def main() -> None:
     validate_inputs(species_points_path, ref_grid_path, stats_path)
     sp_inv = load_invasive_points(species_points_path)
     normalization_stats = load_normalization_stats(stats_path)
-
-    if args.normalization_mode == "global_stats" and stats_path is None:
-        raise ValueError(
-            "La normalización global requiere --normalization-stats. "
-            "Use --normalization-mode region sólo para validación regional."
-        )
 
     with rasterio.open(ref_grid_path) as src:
         if src.crs is None:

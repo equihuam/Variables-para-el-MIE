@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Debug: 12_wf_wind_speed_debug_v2.py
+Debug: 12_wf_wind_speed_debug_v1.py
 
 Valida la extracción de velocidad media del viento por región contra el flujo R:
   wspeed <- rast(nc)
   wspeed_mean <- app(wspeed, mean)
   wspeed_reproj <- project(wspeed_mean, y = crs(struct), method = "near")
-  wspeed_reproj <- crop(wspeed_reproj, struct)  # recorte por extensión, no máscara
+  wspeed_reproj <- crop(wspeed_reproj, struct)
   region_ <- project(region_, y = crs(struct), method = "near")
   extracted <- extract(wspeed_reproj, as.points(region_))
 
@@ -18,7 +18,6 @@ Salida principal:
 from __future__ import annotations
 
 import argparse
-import warnings
 from pathlib import Path
 from typing import Any
 
@@ -28,7 +27,7 @@ import pandas as pd
 import pyarrow  # noqa: F401
 import rasterio
 from rasterio.io import MemoryFile
-from rasterio.windows import from_bounds
+from rasterio.mask import mask
 from rasterio.transform import xy
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 
@@ -141,13 +140,7 @@ def build_time_mean_from_nc(nc_path: Path, fallback_crs: str = "EPSG:4326") -> t
         if nodata is not None:
             arr[arr == nodata] = np.nan
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message="Mean of empty slice",
-                category=RuntimeWarning,
-            )
-            mean_arr = np.nanmean(arr, axis=0).astype(np.float32)
+        mean_arr = np.nanmean(arr, axis=0).astype(np.float32)
         profile = src.profile.copy()
         profile.update(
             driver="GTiff",
@@ -195,30 +188,17 @@ def reproject_and_crop_wind_mean(
                 nodata=np.nan,
             )
 
-    # terra::crop(raster, vector) recorta por la extensión del vector; no aplica
-    # máscara geométrica. Por eso aquí usamos únicamente el bounding box de
-    # struct_gdf y leemos esa ventana del raster reproyectado.
     with MemoryFile() as memfile_reproj:
         with memfile_reproj.open(**reproj_profile) as reproj_src:
             reproj_src.write(reproj_arr, 1)
-
-            minx, miny, maxx, maxy = struct_gdf.total_bounds
-            window = from_bounds(
-                left=float(minx),
-                bottom=float(miny),
-                right=float(maxx),
-                top=float(maxy),
-                transform=reproj_src.transform,
-            ).round_offsets().round_lengths()
-
-            cropped_arr = reproj_src.read(
-                1,
-                window=window,
-                boundless=True,
-                fill_value=np.nan,
-            ).astype(np.float32)
-            cropped_transform = reproj_src.window_transform(window)
-
+            cropped, cropped_transform = mask(
+                reproj_src,
+                struct_gdf.geometry,
+                crop=True,
+                filled=True,
+                nodata=np.nan,
+            )
+            cropped_arr = cropped[0].astype(np.float32)
             cropped_profile = reproj_profile.copy()
             cropped_profile.update(
                 height=cropped_arr.shape[0],

@@ -13,20 +13,33 @@ rule feature_tasa_erosion:
           --output {output}
         """
 
+rule corales_global_stats:
+    input:
+        corals_shp=lambda wc: cfg(config["inputs"]["corals_shp"]),
+        ref_grids=expand(REFERENCE_DIR + "/{region}/ref_grid.tif", region=REGIONS),
+    output:
+        FEATURES_DIR + "/corales/_global_stats.csv"
+    shell:
+        "python ../scripts/features/4_wf_corales_global_stats.py "
+        "--corals-shp {input.corals_shp} "
+        "--ref-grids {input.ref_grids} "
+        "--output {output}"
+
 rule feature_corales:
     input:
         corals_shp=lambda wc: cfg(config["inputs"]["corals_shp"]),
-        ref_grid=lambda wc: f"{REFERENCE_DIR}/{wc.region}/ref_grid.tif",
+        ref_grid=REFERENCE_DIR + "/{region}/ref_grid.tif",
+        corals_global_stats=FEATURES_DIR + "/corales/_global_stats.csv",
     output:
         FEATURES_DIR + "/corales/{region}.parquet"
     shell:
-        """
-        python ../scripts/features/4_wf_corales_global.py \
-          --corals-shp {input.corals_shp} \
-          --ref-grid {input.ref_grid} \
-          --region-id {wildcards.region} \
-          --output {output}
-        """
+        "python ../scripts/features/4_wf_corales_global.py "
+        "--corals-shp {input.corals_shp} "
+        "--ref-grid {input.ref_grid} "
+        "--region-id {wildcards.region} "
+        "--corals-global-stats {input.corals_global_stats} "
+        "--sentinel-mode global "
+        "--output {output}"
 
 rule feature_tipo_costa:
     input:
@@ -84,31 +97,60 @@ rule feature_estructuras_costeras:
             --region-id {wildcards.region} \
             --output {output}"
 
+rule spp_invasoras_global_stats:
+    input:
+        species_points_csv=lambda wc: cfg(config["inputs"]["species_points_csv"]),
+        ref_grids=expand(REFERENCE_DIR + "/{region}/ref_grid.tif", region=REGIONS),
+    output:
+        FEATURES_DIR + "/spp_invasoras/_global_stats.csv"
+    shell:
+        "python ../scripts/features/3_wf_spp_invasoras_global_stats.py "
+        "--species-points-csv {input.species_points_csv} "
+        "--ref-grids {input.ref_grids} "
+        "--output {output}"
+
 rule feature_spp_invasoras:
     input:
         species_points_csv=lambda wc: cfg(config["inputs"]["species_points_csv"]),
         ref_grid=REFERENCE_DIR + "/{region}/ref_grid.tif",
+        normalization_stats=FEATURES_DIR + "/spp_invasoras/_global_stats.csv",
     output:
         FEATURES_DIR + "/spp_invasoras/{region}.parquet"
     shell:
-        "python ../scripts/features/3_wf_spp_invasoras.py \
-            --species-points-csv {input.species_points_csv} \
-            --ref-grid {input.ref_grid} \
-            --region-id {wildcards.region} \
-            --output {output}"
+        "python ../scripts/features/3_wf_spp_invasoras.py "
+        "--species-points-csv {input.species_points_csv} "
+        "--ref-grid {input.ref_grid} "
+        "--region-id {wildcards.region} "
+        "--normalization-stats {input.normalization_stats} "
+        "--output {output}"
+
+rule pasto_marino_global_stats:
+    input:
+        pasto_marino_shp=lambda wc: cfg(config["inputs"]["pasto_marino_shp"]),
+        ref_grids=expand(REFERENCE_DIR + "/{region}/ref_grid.tif", region=REGIONS),
+    output:
+        FEATURES_DIR + "/pasto_marino/_global_stats.csv"
+    shell:
+        "python ../scripts/features/5_wf_pasto_marino_global_stats.py "
+        "--pasto-marino-shp {input.pasto_marino_shp} "
+        "--ref-grids {input.ref_grids} "
+        "--output {output}"
 
 rule feature_pasto_marino:
     input:
         pasto_marino_shp=lambda wc: cfg(config["inputs"]["pasto_marino_shp"]),
         ref_grid=REFERENCE_DIR + "/{region}/ref_grid.tif",
+        pasto_global_stats=FEATURES_DIR + "/pasto_marino/_global_stats.csv",
     output:
         FEATURES_DIR + "/pasto_marino/{region}.parquet"
     shell:
-        "python ../scripts/features/5_wf_pasto_marino.py \
-            --pasto-marino-shp {input.pasto_marino_shp} \
-            --ref-grid {input.ref_grid} \
-            --region-id {wildcards.region} \
-            --output {output}"
+        "python ../scripts/features/5_wf_pasto_marino.py "
+        "--pasto-marino-shp {input.pasto_marino_shp} "
+        "--ref-grid {input.ref_grid} "
+        "--region-id {wildcards.region} "
+        "--pasto-global-stats {input.pasto_global_stats} "
+        "--sentinel-mode global "
+        "--output {output}"
 
 rule feature_batimetria:
     input:
@@ -138,14 +180,15 @@ rule feature_madmex_uso_suelo:
 rule feature_manglares:
     input:
         mangroves_shp=lambda wc: cfg(config["inputs"]["mangroves_shp"]),
-        base_table=FEATURES_DIR + "/tasa_erosion/{region}.parquet",
+        ref_grid=REFERENCE_DIR + "/{region}/ref_grid.tif",
     output:
         FEATURES_DIR + "/manglares/{region}.parquet"
     shell:
-        "python ../scripts/features/8_wf_manglares.py \
-            --mangroves-shp {input.mangroves_shp} \
-            --base-table {input.base_table} \
-            --output {output}"
+        "python ../scripts/features/8_wf_manglares.py "
+        "--mangroves-shp {input.mangroves_shp} "
+        "--ref-grid {input.ref_grid} "
+        "--region-id {wildcards.region} "
+        "--output {output}"
 
 rule feature_movimiento_dunas:
     input:

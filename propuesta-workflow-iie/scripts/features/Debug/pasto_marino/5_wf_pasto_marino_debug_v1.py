@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Debug/canonical-compatible script for coral distance feature.
+Debug/canonical-compatible script for seagrass distance feature.
 
-Replicates the R workflow in 4_corales_global.R as closely as practical:
-- reproject regional ref_grid to coral CRS with nearest-neighbor resampling
-- rasterize coral geometries on the regional grid
-- convert rasterized coral cells to point centers
+Replicates the R workflow in 5_pasto_marino.R as closely as practical:
+- reproject regional ref_grid to seagrass CRS with nearest-neighbor resampling
+- rasterize seagrass geometries on the regional grid
+- convert rasterized seagrass cells to point centers
 - compute k=1 nearest-neighbor distances using kknn-like scaled coordinates
 - optionally replace sentinel 999 using a global fill value
 
-Output columns: regionid, pixid, x, y, d_corales
+Output columns: regionid, pixid, x, y, d_pastosmarinos
 """
 from __future__ import annotations
 
@@ -28,18 +28,18 @@ from rasterio.transform import xy
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from scipy.spatial import cKDTree
 
-CORALS_SENTINEL = 999.0
-OUTPUT_FIELD = "d_corales"
+PASTO_SENTINEL = 999.0
+OUTPUT_FIELD = "d_pastosmarinos"
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Calcula distancia a corales por pixel para una region.")
-    p.add_argument("--corals-shp", required=True, help="Ruta al shapefile global de corales.")
+    p = argparse.ArgumentParser(description="Calcula distancia a pasto por pixel para una region.")
+    p.add_argument("--pasto-marino-shp", required=True, help="Ruta al shapefile de pasto marino.")
     p.add_argument("--ref-grid", required=True, help="Ruta al ref_grid.tif de la region.")
     p.add_argument("--region-id", required=True, help="Identificador de region, por ejemplo region_1.")
     p.add_argument("--output", required=True, help="Ruta de salida .parquet.")
     p.add_argument(
-        "--corals-global-stats",
+        "--pasto-global-stats",
         default=None,
         help="CSV con global_raw_max/global_fill_value para reemplazo global del sentinel 999.",
     )
@@ -68,7 +68,7 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--debug-grid-output", default=None, help="CSV debug de grilla.")
     p.add_argument("--debug-metadata-output", default=None, help="CSV debug de metadatos.")
-    p.add_argument("--debug-coral-points-output", default=None, help="CSV debug de puntos coral rasterizados.")
+    p.add_argument("--debug-pasto-points-output", default=None, help="CSV debug de puntos pasto rasterizados.")
     p.add_argument("--verbose", action="store_true", help="Imprimir diagnosticos detallados.")
     return p.parse_args()
 
@@ -84,16 +84,16 @@ def log(msg: str, verbose: bool) -> None:
         print(msg)
 
 
-def load_corals(path: Path) -> gpd.GeoDataFrame:
-    corales = gpd.read_file(path)
-    if corales.empty:
-        raise ValueError(f"El shapefile de corales esta vacio: {path}")
-    if corales.crs is None:
-        raise ValueError(f"El shapefile de corales no tiene CRS: {path}")
-    corales = corales[corales.geometry.notna() & ~corales.geometry.is_empty].copy()
-    if corales.empty:
-        raise ValueError("No quedaron geometrías válidas de corales.")
-    return corales
+def load_pasto(path: Path) -> gpd.GeoDataFrame:
+    pasto = gpd.read_file(path)
+    if pasto.empty:
+        raise ValueError(f"El shapefile de pasto esta vacio: {path}")
+    if pasto.crs is None:
+        raise ValueError(f"El shapefile de pasto no tiene CRS: {path}")
+    pasto = pasto[pasto.geometry.notna() & ~pasto.geometry.is_empty].copy()
+    if pasto.empty:
+        raise ValueError("No quedaron geometrías válidas de pasto.")
+    return pasto
 
 
 def reproject_raster_to_crs(src: rasterio.io.DatasetReader, dst_crs) -> tuple[np.ndarray, rasterio.Affine, dict]:
@@ -148,8 +148,8 @@ def valid_raster_points_dataframe(arr: np.ndarray, transform, validity_mode: str
     )
 
 
-def rasterize_corals_on_region(shape, transform, corales: gpd.GeoDataFrame, all_touched: bool = False) -> np.ndarray:
-    shapes = ((geom, 1.0) for geom in corales.geometry if geom is not None and not geom.is_empty)
+def rasterize_pasto_on_region(shape, transform, pasto: gpd.GeoDataFrame, all_touched: bool = False) -> np.ndarray:
+    shapes = ((geom, 1.0) for geom in pasto.geometry if geom is not None and not geom.is_empty)
     return rasterize(
         shapes=shapes,
         out_shape=shape,
@@ -160,8 +160,8 @@ def rasterize_corals_on_region(shape, transform, corales: gpd.GeoDataFrame, all_
     )
 
 
-def coral_points_from_raster(corales_rast: np.ndarray, transform) -> pd.DataFrame:
-    rows, cols = np.where(np.isfinite(corales_rast))
+def pasto_points_from_raster(pasto_rast: np.ndarray, transform) -> pd.DataFrame:
+    rows, cols = np.where(np.isfinite(pasto_rast))
     if len(rows) == 0:
         return pd.DataFrame(columns=["row", "col", "x", "y", "part"])
     xs, ys = xy(transform, rows, cols, offset="center")
@@ -182,11 +182,11 @@ def scale_train_test(train_xy: np.ndarray, pred_xy: np.ndarray) -> tuple[np.ndar
     return train_xy / sd, pred_xy / sd, (float(sd[0]), float(sd[1]))
 
 
-def nearest_distance(points_xy: np.ndarray, coral_points: pd.DataFrame, distance_mode: str) -> tuple[np.ndarray, tuple[float, float]]:
-    if coral_points.empty:
-        return np.full(points_xy.shape[0], CORALS_SENTINEL, dtype=float), (np.nan, np.nan)
+def nearest_distance(points_xy: np.ndarray, pasto_points: pd.DataFrame, distance_mode: str) -> tuple[np.ndarray, tuple[float, float]]:
+    if pasto_points.empty:
+        return np.full(points_xy.shape[0], PASTO_SENTINEL, dtype=float), (np.nan, np.nan)
 
-    cp = coral_points.copy()
+    cp = pasto_points.copy()
     if len(cp) == 1:
         cp = pd.concat([cp, cp], ignore_index=True)
 
@@ -212,16 +212,16 @@ def read_global_fill_value(path: Path) -> float:
     raise ValueError("El CSV de estadisticas globales requiere global_fill_value o global_raw_max.")
 
 
-def finalize_corals(distances: np.ndarray, mode: str, global_stats: Path | None) -> np.ndarray:
+def finalize_pasto(distances: np.ndarray, mode: str, global_stats: Path | None) -> np.ndarray:
     out = distances.copy()
-    sentinel_mask = out == CORALS_SENTINEL
+    sentinel_mask = out == PASTO_SENTINEL
     if not np.any(sentinel_mask) or mode == "none":
         return out
     if mode == "local":
         fill = 1.5 * float(np.max(out))
     elif mode == "global":
         if global_stats is None:
-            raise ValueError("--sentinel-mode global requiere --corals-global-stats")
+            raise ValueError("--sentinel-mode global requiere --pasto-global-stats")
         fill = read_global_fill_value(global_stats)
     else:
         raise ValueError(f"Modo sentinel no reconocido: {mode}")
@@ -232,7 +232,7 @@ def finalize_corals(distances: np.ndarray, mode: str, global_stats: Path | None)
 def write_debug_outputs(
     region_id: str,
     region_points: pd.DataFrame,
-    coral_points: pd.DataFrame,
+    pasto_points: pd.DataFrame,
     metadata: dict,
     distances: np.ndarray,
     args: argparse.Namespace,
@@ -247,13 +247,13 @@ def write_debug_outputs(
         dbg.to_csv(p, index=False)
         log(f"debug grid -> {p}", args.verbose)
 
-    if args.debug_coral_points_output:
-        p = Path(args.debug_coral_points_output)
+    if args.debug_pasto_points_output:
+        p = Path(args.debug_pasto_points_output)
         p.parent.mkdir(parents=True, exist_ok=True)
-        dbg = coral_points.copy()
+        dbg = pasto_points.copy()
         dbg.insert(0, "regionid", region_id)
         dbg.to_csv(p, index=False)
-        log(f"debug coral points -> {p}", args.verbose)
+        log(f"debug pasto points -> {p}", args.verbose)
 
     if args.debug_metadata_output:
         p = Path(args.debug_metadata_output)
@@ -267,7 +267,7 @@ def write_debug_outputs(
                 "sentinel_mode": args.sentinel_mode,
                 "all_touched": bool(args.all_touched),
                 "valid_points": int(len(region_points)),
-                "coral_points": int(len(coral_points)),
+                "pasto_points": int(len(pasto_points)),
                 "distance_raw_min": float(np.nanmin(distances)) if len(distances) else np.nan,
                 "distance_raw_max": float(np.nanmax(distances)) if len(distances) else np.nan,
                 "sd_x": sd[0],
@@ -287,19 +287,19 @@ def save_output(df: pd.DataFrame, output_path: Path) -> None:
 
 def main() -> None:
     args = parse_args()
-    corals_path = Path(args.corals_shp)
+    pasto_path = Path(args.pasto_marino_shp)
     ref_grid_path = Path(args.ref_grid)
     output_path = Path(args.output)
-    global_stats_path = Path(args.corals_global_stats) if args.corals_global_stats else None
-    validate_inputs(corals_path, ref_grid_path, global_stats_path)
+    global_stats_path = Path(args.pasto_global_stats) if args.pasto_global_stats else None
+    validate_inputs(pasto_path, ref_grid_path, global_stats_path)
 
     region_id = str(args.region_id).strip()
-    corales = load_corals(corals_path)
+    pasto = load_pasto(pasto_path)
 
     with rasterio.open(ref_grid_path) as src:
         if src.crs is None:
             raise ValueError(f"El raster de referencia no tiene CRS: {ref_grid_path}")
-        region_arr, region_transform, metadata = reproject_raster_to_crs(src, corales.crs)
+        region_arr, region_transform, metadata = reproject_raster_to_crs(src, pasto.crs)
 
     region_points = valid_raster_points_dataframe(region_arr, region_transform, args.validity_mode)
     log(f"total puntos GeoTIFF original: {metadata['src_total_points']}", args.verbose)
@@ -307,24 +307,24 @@ def main() -> None:
     log(f"total puntos reproyectados: {metadata['dst_total_points']}", args.verbose)
     log(f"puntos válidos usados en malla: {len(region_points)}", args.verbose)
 
-    corales_rast = rasterize_corals_on_region(
+    pasto_rast = rasterize_pasto_on_region(
         shape=region_arr.shape,
         transform=region_transform,
-        corales=corales,
+        pasto=pasto,
         all_touched=args.all_touched,
     )
-    coral_points = coral_points_from_raster(corales_rast, region_transform)
+    pasto_points = pasto_points_from_raster(pasto_rast, region_transform)
 
     pred_xy = region_points[["x", "y"]].to_numpy(dtype=float)
-    raw_distances, sd = nearest_distance(pred_xy, coral_points, args.distance_mode)
-    final_distances = finalize_corals(raw_distances, args.sentinel_mode, global_stats_path)
+    raw_distances, sd = nearest_distance(pred_xy, pasto_points, args.distance_mode)
+    final_distances = finalize_pasto(raw_distances, args.sentinel_mode, global_stats_path)
 
     log(f"modo distancia: {args.distance_mode}", args.verbose)
     log(f"modo sentinel: {args.sentinel_mode}", args.verbose)
-    log(f"coral points rasterizados: {len(coral_points)}", args.verbose)
-    log(f"sd coral points: ({sd[0]}, {sd[1]})", args.verbose)
+    log(f"pasto points rasterizados: {len(pasto_points)}", args.verbose)
+    log(f"sd pasto points: ({sd[0]}, {sd[1]})", args.verbose)
 
-    write_debug_outputs(region_id, region_points, coral_points, metadata, raw_distances, args, sd)
+    write_debug_outputs(region_id, region_points, pasto_points, metadata, raw_distances, args, sd)
 
     out = pd.DataFrame(
         {

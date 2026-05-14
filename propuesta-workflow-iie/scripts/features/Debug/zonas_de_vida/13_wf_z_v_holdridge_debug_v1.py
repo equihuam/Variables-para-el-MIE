@@ -2,22 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Nombre: 13_wf_z_v_holdridge.py
-
-Propósito:
-    Clasificar, para una región específica, la zona de vida Holdridge más
-    cercana para cada píxel válido del raster de referencia y exportar el
-    resultado como tabla congruente por píxel en formato Parquet.
-
-Origen:
-    Versión canónica validada contra 13_z_v_holdridge.R.
-
-Resumen:
-    Reproyecta ref_grid y raster ZVH al CRS de manglares, recorta ZVH a la
-    región, convierte las celdas categóricas a puntos de entrenamiento y
-    clasifica por 1-NN categórico emulando kknn(scale=TRUE).
-
-
+Debug v1 para 13_z_v_holdridge.
 
 Replica la lógica funcional del R:
   zvh <- project(zvh, y = crs(manglares), method = "near")
@@ -39,15 +24,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import warnings
-# Evita que GDAL ensucie la salida productiva de Snakemake con el aviso
-# sobre UseExceptions/DontUseExceptions. La llamada explícita se hace
-# también al importar osgeo.gdal dentro de read_category_names().
-warnings.filterwarnings(
-    "ignore",
-    message=r"Neither gdal\.UseExceptions\(\) nor gdal\.DontUseExceptions\(\).*",
-    category=FutureWarning,
-)
 from pathlib import Path
 from typing import Any
 
@@ -125,19 +101,7 @@ def read_category_names(path: Path) -> dict[int, str]:
     """Intenta leer nombres categóricos GDAL; si no existen, regresa {}."""
     mapping_out: dict[int, str] = {}
     try:
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message=r"Neither gdal\.UseExceptions\(\) nor gdal\.DontUseExceptions\(\).*",
-                category=FutureWarning,
-            )
-            from osgeo import gdal  # type: ignore
-            # Hacer explícito el comportamiento requerido por GDAL 4.
-            # Esto evita el FutureWarning y mantiene la salida limpia.
-            try:
-                gdal.UseExceptions()
-            except Exception:
-                pass
+        from osgeo import gdal  # type: ignore
 
         ds = gdal.Open(str(path))
         if ds is None:
@@ -284,8 +248,7 @@ def main() -> None:
     with rasterio.open(ref_grid_path) as ref_src:
         if ref_src.crs is None:
             raise ValueError(f"El raster de referencia no tiene CRS: {ref_grid_path}")
-        ref_masked = ref_src.read(1, masked=True)
-        original_valid = int((~np.ma.getmaskarray(ref_masked) & np.isfinite(np.asarray(ref_masked, dtype=float))).sum())
+        original_valid = int(np.isfinite(ref_src.read(1, masked=True).filled(np.nan)).sum())
         region_arr, region_transform = reproject_raster_to_crs(ref_src, target_crs)
 
     region_points = valid_raster_points_dataframe(region_arr, region_transform, value_col="ref_value")
