@@ -180,14 +180,15 @@ rule feature_madmex_uso_suelo:
 rule feature_manglares:
     input:
         mangroves_shp=lambda wc: cfg(config["inputs"]["mangroves_shp"]),
-        base_table=FEATURES_DIR + "/tasa_erosion/{region}.parquet",
+        ref_grid=REFERENCE_DIR + "/{region}/ref_grid.tif",
     output:
         FEATURES_DIR + "/manglares/{region}.parquet"
     shell:
-        "python ../scripts/features/8_wf_manglares.py \
-            --mangroves-shp {input.mangroves_shp} \
-            --base-table {input.base_table} \
-            --output {output}"
+        "python ../scripts/features/8_wf_manglares.py "
+        "--mangroves-shp {input.mangroves_shp} "
+        "--ref-grid {input.ref_grid} "
+        "--region-id {wildcards.region} "
+        "--output {output}"
 
 rule feature_movimiento_dunas:
     input:

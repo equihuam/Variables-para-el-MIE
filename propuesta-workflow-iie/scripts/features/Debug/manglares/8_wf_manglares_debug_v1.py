@@ -2,29 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """
-Nombre: 8_wf_manglares.py
+Debug v1 para 8_manglares.
 
-Propósito:
-    Calcular, para una región específica, la probabilidad de manglar
-    (`p_manglares`) en cada pixel válido de la malla regional y exportar
-    una tabla Parquet congruente por pixel.
+Replica la lógica del R:
+  1. Reproyectar ref_grid al CRS de manglares.
+  2. Rasterizar manglares sobre esa grilla.
+  3. Etiquetar celdas válidas de la región como 1/0.
+  4. Estimar probabilidad con kNN k=30, distance=2, kernel="optimal", scale=TRUE.
 
-Lógica validada contra R:
-    1. Leer shapefile de manglares.
-    2. Leer `ref_grid.tif` regional.
-    3. Reproyectar la malla regional al CRS de manglares con vecino cercano.
-    4. Rasterizar manglares sobre esa malla.
-    5. Etiquetar celdas válidas de la región como manglar/no manglar (1/0).
-    6. Estimar probabilidad con una emulación de
-       `kknn(layer ~ x + y, k = 30, distance = 2, kernel = "optimal", scale = TRUE)`.
-    7. Exportar `regionid, pixid, x, y, p_manglares`.
-
-Notas de compatibilidad:
-    - La interfaz canónica usa `--ref-grid` y `--region-id`.
-    - Para compatibilidad transitoria con reglas antiguas de Snakemake, también
-      acepta `--base-table` y deriva de ahí la ruta esperada del `ref_grid.tif`
-      cuando `--ref-grid` no se proporciona.
-    - La ejecución productiva es silenciosa por defecto y sólo imprime `OK -> ...`.
+Salida principal:
+  regionid, pixid, x, y, p_manglares
 """
 
 from __future__ import annotations
@@ -51,16 +38,11 @@ POINTS_SOURCE_CRS = "EPSG:4326"
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Calcula probabilidad de manglares por píxel para una región específica."
+        description="Calcula probabilidad de manglares por píxel para validación R-Python."
     )
     parser.add_argument("--mangroves-shp", required=True, help="Ruta al shapefile de manglares.")
-    parser.add_argument("--ref-grid", default=None, help="Ruta al ref_grid.tif regional.")
-    parser.add_argument("--region-id", default=None, help="Identificador regional, por ejemplo region_1.")
-    parser.add_argument(
-        "--base-table",
-        default=None,
-        help="Ruta opcional a tabla base regional; usada sólo para derivar ref_grid si --ref-grid no se proporciona.",
-    )
+    parser.add_argument("--ref-grid", required=True, help="Ruta al ref_grid.tif regional.")
+    parser.add_argument("--region-id", required=True, help="Identificador regional, por ejemplo region_1.")
     parser.add_argument("--output", required=True, help="Ruta de salida .parquet.")
     parser.add_argument(
         "--debug-grid-output",
@@ -91,19 +73,6 @@ def validate_inputs(*paths: Path) -> None:
     missing = [str(p) for p in paths if not p.exists()]
     if missing:
         raise FileNotFoundError("Faltan insumos:\n" + "\n".join(missing))
-
-
-def derive_ref_grid_from_base_table(base_table: Path) -> Path:
-    """Deriva results/reference/<region>/ref_grid.tif desde results/features/<feature>/<region>.parquet."""
-    region = base_table.stem
-    try:
-        data_repo = base_table.parents[3]
-    except IndexError as exc:
-        raise ValueError(
-            "No se pudo derivar data_repo desde --base-table. "
-            "Proporciona --ref-grid explícitamente."
-        ) from exc
-    return data_repo / "results" / "reference" / region / "ref_grid.tif"
 
 
 def log(verbose: bool, msg: str) -> None:
@@ -245,19 +214,9 @@ def main() -> None:
     args = parse_args()
 
     mangroves_path = Path(args.mangroves_shp)
+    ref_grid_path = Path(args.ref_grid)
     output_path = Path(args.output)
-
-    if args.ref_grid:
-        ref_grid_path = Path(args.ref_grid)
-    elif args.base_table:
-        ref_grid_path = derive_ref_grid_from_base_table(Path(args.base_table))
-    else:
-        raise ValueError("Debes proporcionar --ref-grid o --base-table.")
-
-    if args.region_id:
-        region_id = str(args.region_id).strip()
-    else:
-        region_id = ref_grid_path.parent.name
+    region_id = str(args.region_id).strip()
 
     validate_inputs(mangroves_path, ref_grid_path)
     manglares = load_mangroves(mangroves_path)
