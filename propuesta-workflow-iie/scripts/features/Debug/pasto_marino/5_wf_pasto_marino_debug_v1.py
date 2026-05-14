@@ -3,10 +3,10 @@
 """
 Debug/canonical-compatible script for seagrass distance feature.
 
-Replicates the R workflow in 4_pasto_global.R as closely as practical:
-- reproject regional ref_grid to pasto CRS with nearest-neighbor resampling
-- rasterize pasto geometries on the regional grid
-- convert rasterized pasto cells to point centers
+Replicates the R workflow in 5_pasto_marino.R as closely as practical:
+- reproject regional ref_grid to seagrass CRS with nearest-neighbor resampling
+- rasterize seagrass geometries on the regional grid
+- convert rasterized seagrass cells to point centers
 - compute k=1 nearest-neighbor distances using kknn-like scaled coordinates
 - optionally replace sentinel 999 using a global fill value
 
@@ -34,7 +34,7 @@ OUTPUT_FIELD = "d_pastosmarinos"
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Calcula distancia a pasto por pixel para una region.")
-    p.add_argument("--pasto-marino-shp", required=True, help="Ruta al shapefile global de pasto marino.")
+    p.add_argument("--pasto-marino-shp", required=True, help="Ruta al shapefile de pasto marino.")
     p.add_argument("--ref-grid", required=True, help="Ruta al ref_grid.tif de la region.")
     p.add_argument("--region-id", required=True, help="Identificador de region, por ejemplo region_1.")
     p.add_argument("--output", required=True, help="Ruta de salida .parquet.")
@@ -84,7 +84,7 @@ def log(msg: str, verbose: bool) -> None:
         print(msg)
 
 
-def load_pasto_marino(path: Path) -> gpd.GeoDataFrame:
+def load_pasto(path: Path) -> gpd.GeoDataFrame:
     pasto = gpd.read_file(path)
     if pasto.empty:
         raise ValueError(f"El shapefile de pasto esta vacio: {path}")
@@ -294,7 +294,7 @@ def main() -> None:
     validate_inputs(pasto_path, ref_grid_path, global_stats_path)
 
     region_id = str(args.region_id).strip()
-    pasto = load_pasto_marino(pasto_path)
+    pasto = load_pasto(pasto_path)
 
     with rasterio.open(ref_grid_path) as src:
         if src.crs is None:

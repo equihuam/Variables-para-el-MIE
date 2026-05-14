@@ -13,20 +13,33 @@ rule feature_tasa_erosion:
           --output {output}
         """
 
+rule corales_global_stats:
+    input:
+        corals_shp=lambda wc: cfg(config["inputs"]["corals_shp"]),
+        ref_grids=expand(REFERENCE_DIR + "/{region}/ref_grid.tif", region=REGIONS),
+    output:
+        FEATURES_DIR + "/corales/_global_stats.csv"
+    shell:
+        "python ../scripts/features/4_wf_corales_global_stats.py "
+        "--corals-shp {input.corals_shp} "
+        "--ref-grids {input.ref_grids} "
+        "--output {output}"
+
 rule feature_corales:
     input:
         corals_shp=lambda wc: cfg(config["inputs"]["corals_shp"]),
-        ref_grid=lambda wc: f"{REFERENCE_DIR}/{wc.region}/ref_grid.tif",
+        ref_grid=REFERENCE_DIR + "/{region}/ref_grid.tif",
+        corals_global_stats=FEATURES_DIR + "/corales/_global_stats.csv",
     output:
         FEATURES_DIR + "/corales/{region}.parquet"
     shell:
-        """
-        python ../scripts/features/4_wf_corales_global.py \
-          --corals-shp {input.corals_shp} \
-          --ref-grid {input.ref_grid} \
-          --region-id {wildcards.region} \
-          --output {output}
-        """
+        "python ../scripts/features/4_wf_corales_global.py "
+        "--corals-shp {input.corals_shp} "
+        "--ref-grid {input.ref_grid} "
+        "--region-id {wildcards.region} "
+        "--corals-global-stats {input.corals_global_stats} "
+        "--sentinel-mode global "
+        "--output {output}"
 
 rule feature_tipo_costa:
     input:
@@ -111,18 +124,33 @@ rule feature_spp_invasoras:
         "--normalization-stats {input.normalization_stats} "
         "--output {output}"
 
+rule pasto_marino_global_stats:
+    input:
+        pasto_marino_shp=lambda wc: cfg(config["inputs"]["pasto_marino_shp"]),
+        ref_grids=expand(REFERENCE_DIR + "/{region}/ref_grid.tif", region=REGIONS),
+    output:
+        FEATURES_DIR + "/pasto_marino/_global_stats.csv"
+    shell:
+        "python ../scripts/features/5_wf_pasto_marino_global_stats.py "
+        "--pasto-marino-shp {input.pasto_marino_shp} "
+        "--ref-grids {input.ref_grids} "
+        "--output {output}"
+
 rule feature_pasto_marino:
     input:
         pasto_marino_shp=lambda wc: cfg(config["inputs"]["pasto_marino_shp"]),
         ref_grid=REFERENCE_DIR + "/{region}/ref_grid.tif",
+        pasto_global_stats=FEATURES_DIR + "/pasto_marino/_global_stats.csv",
     output:
         FEATURES_DIR + "/pasto_marino/{region}.parquet"
     shell:
-        "python ../scripts/features/5_wf_pasto_marino.py \
-            --pasto-marino-shp {input.pasto_marino_shp} \
-            --ref-grid {input.ref_grid} \
-            --region-id {wildcards.region} \
-            --output {output}"
+        "python ../scripts/features/5_wf_pasto_marino.py "
+        "--pasto-marino-shp {input.pasto_marino_shp} "
+        "--ref-grid {input.ref_grid} "
+        "--region-id {wildcards.region} "
+        "--pasto-global-stats {input.pasto_global_stats} "
+        "--sentinel-mode global "
+        "--output {output}"
 
 rule feature_batimetria:
     input:
