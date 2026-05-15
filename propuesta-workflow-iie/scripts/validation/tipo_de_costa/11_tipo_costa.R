@@ -3,8 +3,8 @@ library(dplyr)
 library(readr)
 library(kknn)
 
-ref_grid <- "C:/wf-ie-data/results/reference/region_1/ref_grid.tif"
-coast_shp <- "C:/wf-ie-data/varsIni/tipo_de_costa/TipoCosta.SHP"
+ref_grid <- "../../../../../../../../wf-ie-data/results/reference/region_1/ref_grid.tif"
+coast_shp <- "../../../../../../../../wf-ie-data/varsIni/tipo_de_costa/TipoCosta.SHP"
 
 costas <- vect(coast_shp)
 

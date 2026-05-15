@@ -3,8 +3,8 @@ library(dplyr)
 library(readr)
 library(kknn)
 
-ref_grid <- "C:/wf-ie-data/results/reference/region_1/ref_grid.tif"
-species_csv <- "C:/wf-ie-data/varsIni/plantas_snib/plantas_invasoras.csv"
+ref_grid <- "../../../../../../../../wf-ie-data/results/reference/region_1/ref_grid.tif"
+species_csv <- "../../../../../../../../wf-ie-data/varsIni/plantas_snib/plantas_invasoras.csv"
 
 normalize <- function(x) {
   (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))

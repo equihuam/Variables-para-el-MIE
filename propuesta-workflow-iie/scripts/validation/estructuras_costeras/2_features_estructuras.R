@@ -4,8 +4,8 @@ library(readr)
 library(kknn)
 
 # Insumos
-ref_grid <- "C:/wf-ie-data/results/reference/region_1/ref_grid.tif"
-structures_shp <- "C:/wf-ie-data/varsIni/estructuras/estructuras_final_unido_.shp"
+ref_grid <- "../../../../../../../../wf-ie-data/results/reference/region_1/ref_grid.tif"
+structures_shp <- "../../../../../../../../wf-ie-data/varsIni/estructuras/estructuras_final_unido_.shp"
 
 # Cargar estructuras
 struct <- vect(structures_shp)

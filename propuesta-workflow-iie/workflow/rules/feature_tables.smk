@@ -201,3 +201,15 @@ rule feature_movimiento_dunas:
             --dunes-shp {input.dunes_shp} \
             --base-table {input.base_table} \
             --output {output}"
+
+rule feature_condicion_dunas:
+    input:
+        dunes_shp=lambda wc: cfg(config["inputs"]["dunes_other_shp"]),
+        base_table=FEATURES_DIR + "/tasa_erosion/{region}.parquet",
+    output:
+        FEATURES_DIR + "/condicion_dunas/{region}.parquet"
+    shell:
+        "python ../scripts/features/9_wf_condicion_dunas.py "
+        "--dunes-shp {input.dunes_shp} "
+        "--base-table {input.base_table} "
+        "--output {output}"

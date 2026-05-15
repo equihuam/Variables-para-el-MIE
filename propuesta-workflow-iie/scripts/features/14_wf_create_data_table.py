@@ -13,6 +13,34 @@ import pyarrow.parquet as pq
 
 KEY_COLUMNS = ["regionid", "pixid", "x", "y"]
 
+# Estas columnas deben conservarse como variables continuas / numéricas.
+# El integrador NO discretiza, NO redondea y NO recodifica estas columnas.
+CONTINUOUS_COLUMNS = {
+    "erosion",
+    "windspeed",
+    "escollera",
+    "espigon",
+    "muro",
+    "rompeolas",
+    "puerto",
+    "sp_inv_pot",
+    "d_corales",
+    "d_pastosmarinos",
+    "bati_char",
+    "d_grassland",
+    "d_agriculture",
+    "d_urban",
+    "p_manglares",
+}
+
+# Estas columnas son discretas/categóricas por definición y se escriben como
+# texto nullable estable para evitar errores de PyArrow por mezcla string/NaN.
+CATEGORICAL_COLUMNS = {
+    "NESTB_EDO",
+    "tipo_costa",
+    "zvh",
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -39,6 +67,11 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Ruta de salida .parquet para la tabla master consolidada.",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Imprime diagnóstico de tipos de columnas antes de guardar.",
+    )
     return parser.parse_args()
 
 
@@ -60,11 +93,13 @@ def build_region_map(variable_dir: Path) -> dict[str, Path]:
     return {path.stem: path for path in files}
 
 
-def read_parquet_safe(path: Path, label: str) -> pd.DataFrame:
-    print(f"Leyendo {label}: {path}")
+def read_parquet_safe(path: Path, label: str, verbose: bool = False) -> pd.DataFrame:
+    if verbose:
+        print(f"Leyendo {label}: {path}")
     table = pq.read_table(path, use_threads=False)
     df = table.to_pandas()
-    print(f"  -> shape {df.shape}")
+    if verbose:
+        print(f"  -> shape {df.shape}")
     return df
 
 
@@ -136,13 +171,67 @@ def reindex_pixid(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def save_output(df: pd.DataFrame, output_path: Path) -> None:
+def stringify_nullable_value(value):
+    if pd.isna(value):
+        return pd.NA
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+    return str(value)
+
+
+def normalize_output_dtypes(df: pd.DataFrame, verbose: bool = False) -> pd.DataFrame:
+    """Prepara tipos para Parquet sin discretizar variables continuas.
+
+    - Las columnas continuas conocidas se escriben como numéricas.
+    - Las columnas categóricas conocidas se escriben como string nullable.
+    - Otras columnas object se intentan convertir a numéricas; si no se puede,
+      se escriben como string nullable.
+    """
+    out = df.copy()
+
+    # Claves: mantener contrato estable.
+    if "regionid" in out.columns:
+        out["regionid"] = out["regionid"].map(stringify_nullable_value).astype("string")
+    if "pixid" in out.columns:
+        out["pixid"] = pd.to_numeric(out["pixid"], errors="raise").astype("Int64")
+    for col in ["x", "y"]:
+        if col in out.columns:
+            out[col] = pd.to_numeric(out[col], errors="raise").astype("float64")
+
+    for col in sorted(CONTINUOUS_COLUMNS & set(out.columns)):
+        out[col] = pd.to_numeric(out[col], errors="coerce").astype("float64")
+
+    for col in sorted(CATEGORICAL_COLUMNS & set(out.columns)):
+        out[col] = out[col].map(stringify_nullable_value).astype("string")
+
+    # Resolver cualquier object restante sin tocar columnas ya tipadas.
+    for col in out.select_dtypes(include=["object"]).columns:
+        if col in CATEGORICAL_COLUMNS:
+            continue
+        numeric_candidate = pd.to_numeric(out[col], errors="coerce")
+        non_na_original = out[col].notna()
+        non_na_numeric = numeric_candidate.notna()
+        # Si todos los no-NA son convertibles, mantener como numérico.
+        if bool((non_na_numeric[non_na_original]).all()):
+            out[col] = numeric_candidate.astype("float64")
+        else:
+            out[col] = out[col].map(stringify_nullable_value).astype("string")
+
+    if verbose:
+        print("Tipos de salida:")
+        print(out.dtypes.to_string())
+
+    return out
+
+
+def save_output(df: pd.DataFrame, output_path: Path, verbose: bool = False) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if output_path.suffix.lower() != ".parquet":
         raise ValueError(f"Este script requiere salida .parquet. Recibido: {output_path.suffix}")
 
-    df.to_parquet(output_path, index=False, engine="pyarrow")
+    df_out = normalize_output_dtypes(df, verbose=verbose)
+    df_out.to_parquet(output_path, index=False, engine="pyarrow")
     print(f"OK -> {output_path}")
 
 
@@ -159,9 +248,10 @@ def main() -> None:
     if not variables:
         raise ValueError("Debes indicar al menos una variable en --variables")
 
-    print(f"features_dir: {features_dir}")
-    print(f"variables: {variables}")
-    print(f"output: {output_path}")
+    if args.verbose:
+        print(f"features_dir: {features_dir}")
+        print(f"variables: {variables}")
+        print(f"output: {output_path}")
 
     variable_maps: dict[str, dict[str, Path]] = {}
 
@@ -187,35 +277,34 @@ def main() -> None:
                 f"Faltan: {missing}"
             )
 
-    print(f"1) regiones a integrar: {region_names}")
+    if args.verbose:
+        print(f"1) regiones a integrar: {region_names}")
 
     merged_regions: list[pd.DataFrame] = []
 
     for region in region_names:
-        print(f"\nProcesando región: {region}")
+        if args.verbose:
+            print(f"\nProcesando región: {region}")
 
-        base = read_parquet_safe(variable_maps[base_var][region], base_var)
+        base = read_parquet_safe(variable_maps[base_var][region], base_var, verbose=args.verbose)
         validate_contract(base, base_var)
-        print(f"  -> base '{base_var}' OK")
 
         for var in variables[1:]:
-            other = read_parquet_safe(variable_maps[var][region], var)
+            other = read_parquet_safe(variable_maps[var][region], var, verbose=args.verbose)
             validate_contract(other, var)
             lightweight_alignment_check(base, other, var)
-            print(f"  -> alineación '{var}' OK")
             base = append_value_columns(base, other, var)
-            print(f"  -> agregado '{var}': {base.shape}")
 
         base = reindex_pixid(base)
-        print(f"  -> reindexado regional: {base.shape}")
-
         merged_regions.append(base)
 
-    print("\n2) concatenando regiones...")
+    if args.verbose:
+        print("\n2) concatenando regiones...")
     dat = pd.concat(merged_regions, ignore_index=True)
-    print(f"  -> shape master: {dat.shape}")
+    if args.verbose:
+        print(f"  -> shape master: {dat.shape}")
 
-    save_output(dat, output_path)
+    save_output(dat, output_path, verbose=args.verbose)
 
 
 if __name__ == "__main__":

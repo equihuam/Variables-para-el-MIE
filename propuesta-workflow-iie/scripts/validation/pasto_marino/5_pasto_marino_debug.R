@@ -3,8 +3,8 @@ library(dplyr)
 library(readr)
 library(kknn)
 
-ref_grid <- "C:/wf-ie-data/results/reference/region_1/ref_grid.tif"
-pasto_shp <- "C:/wf-ie-data/varsIni/pastos_marinos/seagrasses-pol-simar.shp"
+ref_grid <- "../../../../../../../../wf-ie-data/results/reference/region_1/ref_grid.tif"
+pasto_shp <- "../../../../../../../../wf-ie-data/varsIni/pastos_marinos/seagrasses-pol-simar.shp"
 
 grass <- vect(pasto_shp)
 

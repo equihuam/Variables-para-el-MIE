@@ -8,10 +8,10 @@ library("data.table")
 setwd("C:/wf-ie-data/")
 
 # Load manglares shapefile.
-manglares <- vect("./varsIni/manglares/cm-conabio.shp")
+manglares <- vect("../../../../../../../../wf-ie-data/varsIni/manglares/cm-conabio.shp")
 crs(manglares)
 # List coastal refetence grids.
-c_list <- list.files("./results/reference",
+c_list <- list.files("../../../../../../../../wf-ie-data/results/reference",
                      pattern = "\\.tif$",
                      full.names = TRUE,
                      recursive = TRUE)

@@ -2,15 +2,15 @@ library(terra)
 library(dplyr)
 library(readr)
 
-wspeed <- rast("C:/wf-ie-data/varsIni/velocidad_del_viento/wind-speed_monthly-mean_era5_1979-2018_v1.0.nc")
+wspeed <- rast("../../../../../../../../wf-ie-data/varsIni/velocidad_del_viento/wind-speed_monthly-mean_era5_1979-2018_v1.0.nc")
 wspeed_mean <- app(wspeed, mean)
 
-struct <- vect("C:/wf-ie-data/varsIni/estructuras/estructuras_final_unido_.shp")
+struct <- vect("../../../../../../../../wf-ie-data/varsIni/estructuras/estructuras_final_unido_.shp")
 
 wspeed_reproj <- project(wspeed_mean, y = crs(struct), method = "near")
 wspeed_reproj <- crop(wspeed_reproj, struct)
 
-region_1 <- rast("C:/wf-ie-data/results/reference/region_1/ref_grid.tif")
+region_1 <- rast("../../../../../../../../wf-ie-data/results/reference/region_1/ref_grid.tif")
 region_1_pr <- project(region_1, y = crs(struct), method = "near")
 
 region_points <- as.data.frame(region_1_pr, xy = TRUE, na.rm = TRUE)

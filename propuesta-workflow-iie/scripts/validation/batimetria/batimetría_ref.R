@@ -3,8 +3,8 @@ library(dplyr)
 library(readr)
 library(kknn)
 
-ref_grid <- "C:/wf-ie-data/results/reference/region_1/ref_grid.tif"
-bat_file <- "C:/wf-ie-data/varsIni/batimetria/01_GEBCO2020_SIMAR.tif"
+ref_grid <- "../../../../../../../../wf-ie-data/results/reference/region_1/ref_grid.tif"
+bat_file <- "../../../../../../../../wf-ie-data/varsIni/batimetria/01_GEBCO2020_SIMAR.tif"
 
 bat <- rast(bat_file)
 

@@ -10,13 +10,14 @@ FEATURES_DIR = cfg(config["results"]["features_dir"])
 TRAINING_DIR = cfg(config["results"]["training_dir"])
 FINAL_MAPS_DIR = cfg(config["results"]["final_maps_dir"])
 VECTOR_EXPORTS_DIR = f"{config['data_repo']}/results/vector_exports"
+FEATURE_GEOTIFFS_DIR = f"{config['data_repo']}/results/feature_geotiffs"
 
 include: "rules/reference.smk"
 include: "rules/feature_tables.smk"
 include: "rules/training_table.smk"
 include: "rules/bayes_io.smk"
 include: "rules/final_maps.smk"
-include: "rules/vector_exports.smk"
+include: "rules/feature_exports_geotiff.smk"
 
 rule all:
     input:
@@ -33,6 +34,7 @@ rule all:
         expand(f"{FEATURES_DIR}/madmex_uso_suelo/{{region}}.parquet", region=REGIONS),
         expand(f"{FEATURES_DIR}/manglares/{{region}}.parquet", region=REGIONS),
         expand(f"{FEATURES_DIR}/movimiento_dunas/{{region}}.parquet", region=REGIONS),
+        expand(f"{FEATURES_DIR}/condicion_dunas/{{region}}.parquet", region=REGIONS),
         f"{TRAINING_DIR}/master_features.parquet",
         cfg(config["bayes"]["bn_input_parquet"]),
         cfg(config["bayes"]["bn_input_csv"]),

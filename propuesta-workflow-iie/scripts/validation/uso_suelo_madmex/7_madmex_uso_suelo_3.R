@@ -11,8 +11,8 @@ library(readr)
 library(arrow)
 library(kknn)
 
-madmex_file <- "C:/wf-ie-data/varsIni/madmex/madmex_landsat_2017_31.tif"
-base_file <- "C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet"
+madmex_file <- "../../../../../../../../wf-ie-data/varsIni/madmex/madmex_landsat_2017_31.tif"
+base_file <- "../../../../../../../../wf-ie-data/results/features/tasa_erosion/region_1.parquet"
 
 madmex <- rast(madmex_file)
 

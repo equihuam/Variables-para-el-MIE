@@ -3,7 +3,7 @@ library("sf")
 library("kknn")
 
 # Load tasa de erosion
-tasa_ero <- read.csv("C:/wf-ie-data/varsIni/erosion/Tasas_erosionMEX_Actualizado2018.txt",
+tasa_ero <- read.csv("../../../../../../../../wf-ie-data/varsIni/erosion/Tasas_erosionMEX_Actualizado2018.txt",
                      sep = ",", header = TRUE)
 
 names(tasa_ero)[2] <- "x"
@@ -14,7 +14,7 @@ tasa_ero_spat <- st_as_sf(tasa_ero, coords = c("x", "y"))
 st_crs(tasa_ero_spat) <- 4326
 
 # List coastal refetence grids.
-c_list <- list.files("C:/wf-ie-data/results/reference",
+c_list <- list.files("../../../../../../../../wf-ie-data/results/reference",
                      pattern = "\\.tif$",
                      full.names = TRUE,
                      recursive = TRUE)

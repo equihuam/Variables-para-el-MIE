@@ -6,7 +6,7 @@ library("stringr")
 library("data.table")
 
 # Load sea grass shapefile.
-grass <- vect("C:/wf-ie-data/varsIni/pastos_marinos/seagrasses-pol-simar.shp")
+grass <- vect("../../../../../../../../wf-ie-data/varsIni/pastos_marinos/seagrasses-pol-simar.shp")
 
 # List coastal refetence grids.
 c_list <- list.files("C:/wf-ie-data/results/reference/",
