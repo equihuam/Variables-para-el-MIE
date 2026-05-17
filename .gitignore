@@ -1,6 +1,10 @@
 # Datos voluminosos
 data/
 
+# Workflow
+.snakemake/
+**/ .snakemake/
+
 # Default ignored files Pycharm
 /shelf/
 /workspace.xml
