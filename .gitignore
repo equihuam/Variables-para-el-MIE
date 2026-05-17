@@ -1,5 +1,8 @@
 # Datos voluminosos
 data/
+.snakemake/
+**/ .snakemake/
+
 
 # Default ignored files Pycharm
 /shelf/
