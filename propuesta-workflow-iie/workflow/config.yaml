@@ -36,6 +36,7 @@ results:
   reference_dir: "{data_repo}/results/reference"
   features_dir: "{data_repo}/results/features"
   training_dir: "{data_repo}/results/training"
+  feature_geotiffs_dir: "{data_repo}/results/feature_geotiffs"
   final_maps_dir: "{data_repo}/results/final_maps"
 
 bayes:
@@ -43,4 +44,10 @@ bayes:
   bn_input_csv: "{data_repo}/results/training/bn_input.csv"
   ie_predictions_csv: "{data_repo}/external/netica/ie_predictions.csv"
   ie_prediction_column: null
-  normalization_range: "1.5,5.5"
+  normalization_range: "1,5"
+
+validation:
+  ie_maps_dir: "{data_repo}/validar/ie_maps"
+  ie_reference_map_dir: "{data_repo}/results/feature_geotiffs/condicion_dunas"
+  ie_base_map_dir: "{data_repo}/results/final_maps"
+  ie_alterna_map_dir: "{data_repo}/validar/15_ie_estimada/final_maps_B"  

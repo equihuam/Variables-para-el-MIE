@@ -16,3 +16,5 @@ dependencies:
   - statsmodels
   - scikit-learn
   - matplotlib
+  - setuptools          
+  - ydata-profiling     

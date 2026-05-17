@@ -1,0 +1,34 @@
+---
+title: "Rutas reconocibles en scripts R"
+format:
+  html:
+    toc: true
+    embed-resources: true
+---
+
+## Llamado breve
+
+Se consolidaron las rutas reconocibles extraídas de los scripts R compartidos para apoyar la revisión de consistencia, la identificación de familias operativas y la futura definición de una estructura canónica de datos y resultados. La tabla adjunta reúne rutas concretas, plantillas dinámicas y orígenes de colección detectados por el manifest analítico.
+
+## Resumen
+
+- Total de registros: **57**
+- Rutas concretas: **48**
+- Plantillas dinámicas: **6**
+- Orígenes de colección: **3**
+
+## Archivo CSV
+
+- [Descargar CSV](rutas_reconocibles_scripts.csv)
+
+## Tabla de rutas
+
+```{=html}
+<object data="rutas_reconocibles_scripts.csv" type="text/plain" width="100%" height="600">
+  <p>El navegador no pudo incrustar el CSV. Usa el enlace de descarga.</p>
+</object>
+```
+
+## Nota
+
+La categoría `ruta_concreta` corresponde a archivos o directorios reconocibles tal como aparecen o pueden ensamblarse de forma estable. `plantilla_dinamica` corresponde a salidas o entradas parametrizadas. `origen_coleccion` identifica directorios desde los cuales el script llama una colección seleccionada de archivos.

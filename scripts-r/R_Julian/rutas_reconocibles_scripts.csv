@@ -1,0 +1,58 @@
+tipo_ruta,ruta
+ruta_concreta,./R/misc_functions.R
+ruta_concreta,./data/06_DunasCost250116_malla_ref_50m/
+ruta_concreta,./data/3_misc_cesia/DunasCosteras.shp
+ruta_concreta,./data/3_misc_cesia/RegionesCosteras40km.shp
+ruta_concreta,./data/5_deltavp250m/1delt_vp_250m.tif
+ruta_concreta,./data/6_inegiSVII_dunes/cdv_usuev250sVII_dunas.tif
+ruta_concreta,./data/7_dunes250116/DunasCosteras250116.shp
+ruta_concreta,./data_crude/02_cm-conabio/cm-conabio.shp
+ruta_concreta,./data_crude/03_seagrasses-pol-simar/seagrasses-pol-simar.shp
+ruta_concreta,./data_crude/04_Erosion_acresion/Tasas_erosionMEX_Actualizado2018.txt
+ruta_concreta,./data_crude/05_InventarioEstructuras/estructuras_final_unido_.shp
+ruta_concreta,./data_crude/07_zvh_mx3gw/zvh_mx3gw.tif
+ruta_concreta,./data_crude/08_coral-global/coral-global.shp
+ruta_concreta,./data_crude/11_dataset-sis-biodiversity-era5-global/wind-speed_monthly-mean_era5_1979-2018_v1.0.nc
+ruta_concreta,./data_crude/12_Tipo_de_costa/TipoCosta.SHP
+ruta_concreta,./data_crude/13_Batimetría/01_GEBCO2020_SIMAR.tif
+ruta_concreta,./data_crude/15_plantas_snib/especies_invasoras.xlsx
+ruta_concreta,./data_crude/15_plantas_snib/plantas_invasoras.csv
+ruta_concreta,./data_crude/16_madmex/cdv_usuev250sVII_cnal_s.tif
+ruta_concreta,./data_crude/16_madmex/madmex_landsat_2017_31.tif
+ruta_concreta,./data_features/
+ruta_concreta,./data_features/10_movimiento_dunas.rds
+ruta_concreta,./data_features/11_tipo_costa.rds
+ruta_concreta,./data_features/12_avg_windspeed.rds
+ruta_concreta,./data_features/13_zvh.rds
+ruta_concreta,./data_features/1_tasa_erosion.rds
+ruta_concreta,./data_features/2_infraestructura.rds
+ruta_concreta,./data_features/3_sp_inv_potential.rds
+ruta_concreta,./data_features/4_coral_distance.rds
+ruta_concreta,./data_features/5_seagrass_distance.rds
+ruta_concreta,./data_features/6_batimetria_charact.rds
+ruta_concreta,./data_features/7_inegi_landuse.rds
+ruta_concreta,./data_features/7_madmex_landuse.rds
+ruta_concreta,./data_features/7_madmex_landuse_3_1_10_12.rds
+ruta_concreta,./data_features/8_manglares.rds
+ruta_concreta,./data_features/9_condicion_dunas.rds
+ruta_concreta,./data_training_tables/cei_final_train_v1.csv
+ruta_concreta,./data_training_tables/cei_final_train_v1.rds
+ruta_concreta,./data_training_tables/cei_final_train_v1ask.csv
+ruta_concreta,./data_training_tables/cei_final_train_v1d.csv
+ruta_concreta,./data_training_tables/train_dat_2c.rds
+ruta_concreta,./data_training_tables/train_dat_2c_eieqint.rds
+ruta_concreta,./data_training_tables/train_dat_2c_eiqnint.rds
+ruta_concreta,./data_training_tables/train_dat_2c_loglik.rds
+ruta_concreta,C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data/cei_final_ie_expected_port_5_equal_2026.csv
+ruta_concreta,C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/cei_final_train_v1ask.csv
+ruta_concreta,C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales/coral-global.shp
+ruta_concreta,C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m/
+plantilla_dinamica,./data/06_DunasCost250116_malla_ref_50m/{archivo_lista}
+plantilla_dinamica,./data/7_ref_grid_50m/region_{expr}/ref_grid.tif
+plantilla_dinamica,./data/8_ref_grid_50m/region_{expr}/ref_grid.tif
+plantilla_dinamica,./data_features/{archivo_lista}
+plantilla_dinamica,C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R/eicoastal_{expr}.tif
+plantilla_dinamica,C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m/{archivo_lista}
+origen_coleccion,./data/06_DunasCost250116_malla_ref_50m/
+origen_coleccion,./data_features/
+origen_coleccion,C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m/

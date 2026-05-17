@@ -289,3 +289,4 @@ __marimo__/
 # python end
 *.Rproj
 /propuesta-workflow-iie/data/
+.positai

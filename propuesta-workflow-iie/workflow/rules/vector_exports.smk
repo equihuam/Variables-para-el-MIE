@@ -11,6 +11,7 @@ FEATURE_EXPORT_VARS = [
     "madmex_uso_suelo",
     "manglares",
     "movimiento_dunas",
+    "condicion_dunas"
 ]
 
 rule export_feature_geopackage:
