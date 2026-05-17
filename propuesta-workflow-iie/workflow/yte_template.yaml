@@ -1,0 +1,8 @@
+__definitions__:
+- import os
+
+Workflow name: Test Workflow
+Workdir: "?os.getcwd()"
+Contributors:
+  - Test Contributor
+  - Another Contributor
