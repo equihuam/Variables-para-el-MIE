@@ -18,6 +18,7 @@ include: "rules/training_table.smk"
 include: "rules/bayes_io.smk"
 include: "rules/final_maps.smk"
 include: "rules/feature_exports_geotiff.smk"
+include: "rules/ie_map_validation.smk"
 
 rule all:
     input:

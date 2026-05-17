@@ -188,6 +188,21 @@ También puedes probar sólo el módulo Python:
 python -c "from qgis.core import QgsApplication; print('QGIS Python OK')"
 ```
 
+### QGIS Python en ambiente Conda Windows
+
+Aunque el paquete `qgis` esté instalado en el ambiente Conda, el Python del ambiente puede no encontrar `qgis.core` si no se agregan las rutas internas de QGIS al `PYTHONPATH`.
+
+Se resolvió agregando, al activar `qgis_env`, las rutas:
+
+`%CONDA_PREFIX%\Library\python`
+`%CONDA_PREFIX%\Library\python\site-packages`
+
+Con esto, la prueba:
+
+```powershell
+conda activate qgis_env
+python -c "import qgis.core; print('qgis.core OK')"
+
 ## 3) Instalación en WSL
 
 Microsoft indica que en Windows 11 puedes instalar WSL con `wsl --install`, que las instalaciones nuevas quedan en **WSL 2** por defecto, y que **WSLg** permite ejecutar aplicaciones GUI Linux integradas en Windows. Eso significa que, si quieres, también puedes lanzar `qgis` con interfaz desde WSL en Windows 11. ([Microsoft Learn][5])

@@ -45,3 +45,9 @@ bayes:
   ie_predictions_csv: "{data_repo}/external/netica/ie_predictions.csv"
   ie_prediction_column: null
   normalization_range: "1,5"
+
+validation:
+  ie_maps_dir: "{data_repo}/validar/ie_maps"
+  ie_reference_map_dir: "{data_repo}/results/feature_geotiffs/condicion_dunas"
+  ie_base_map_dir: "{data_repo}/results/final_maps"
+  ie_alterna_map_dir: "{data_repo}/validar/15_ie_estimada/final_maps_B"  
