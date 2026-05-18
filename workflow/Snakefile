@@ -1,6 +1,6 @@
 configfile: "config.yaml"
 
-report: "report/workflow.rst"
+report: "report/home.rst"
 
 def cfg(path_value):
     return path_value.format(data_repo=config["data_repo"])
@@ -44,3 +44,4 @@ rule all:
         cfg(config["bayes"]["bn_input_csv"]),
         f"{TRAINING_DIR}/master_features_with_ie.parquet",
         expand(f"{FINAL_MAPS_DIR}/eicoastal_{{region}}.tif", region=REGIONS),
+        

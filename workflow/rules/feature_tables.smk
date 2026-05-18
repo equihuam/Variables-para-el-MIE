@@ -16,12 +16,12 @@ rule corales_global_stats:
         corals_shp=lambda wc: cfg(config["inputs"]["corals_shp"]),
         ref_grids=expand(REFERENCE_DIR + "/{region}/ref_grid.tif", region=REGIONS),
     output:
-        FEATURES_DIR + "/corales/_global_stats.csv"
+        stats=FEATURES_DIR + "/corales_global_stats.csv"
     shell:
         "python {SCRIPTS_DIR}/features/4_wf_corales_global_stats.py "
         "--corals-shp {input.corals_shp} "
         "--ref-grids {input.ref_grids} "
-        "--output {output}"
+        "--output {output.stats}"
 
 rule feature_corales:
     input:

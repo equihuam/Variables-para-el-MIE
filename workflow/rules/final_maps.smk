@@ -5,7 +5,7 @@ rule create_ie_rasters:
         ref_grids=expand(REFERENCE_DIR + "/{region}/ref_grid.tif", region=REGIONS),
     output:
         maps=expand(cfg(config["results"]["final_maps_dir"]) + "/eicoastal_{region}.tif", region=REGIONS),
-        output_table=cfg(config["results"]["training_dir"]) + "/master_features_with_ie.parquet",
+        output_table=cfg(config["results"]["training_dir"]) + "/master_features_with_ie.parquet"
     params:
         ref_grid_dir=REFERENCE_DIR,
         output_dir=cfg(config["results"]["final_maps_dir"]),

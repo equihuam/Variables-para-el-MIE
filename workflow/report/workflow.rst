@@ -21,4 +21,4 @@ Productos principales
 * Entrada para red bayesiana.
 * Mapas finales `eicoastal_region_1.tif` a `eicoastal_region_14.tif`.
 * Tabla `master_features_with_ie.parquet`.
-* Reportes analíticos de las variables `iie-training-profile-py.html` e `iie-training-profile-R`.html
+* Reportes analíticos de las variables ``iie-training-profile-py.html`` e ``iie-training-profile-R.html``

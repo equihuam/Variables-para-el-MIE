@@ -1,11 +1,4 @@
 /* Branding superior del reporte */
-#brand {
-  min-height: 110px;
-  background-image: url("report/assets/logos.png");
-  background-repeat: no-repeat;
-  background-position: left center;
-  background-size: auto 100px;
-}
 
 /* Evita que imágenes, SVG o tablas se desborden */
 img,
