@@ -1,0 +1,7 @@
+# Arhivo auxiliar para navegar el árbol del proyeco pyproject.toml
+[tool.pytest.ini_options]
+pythonpath = [
+    "propuesta-workflow-iie/scripts/headless_r2py",
+    "propuesta-workflow-iie/scripts/headless_qgis"
+]
+testpaths = ["propuesta-workflow-iie/tests"]

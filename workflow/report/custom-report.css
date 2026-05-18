@@ -1,0 +1,34 @@
+/* Branding superior del reporte */
+#brand {
+  min-height: 110px;
+  background-image: url("report/assets/logos.png");
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: auto 100px;
+}
+
+/* Evita que imágenes, SVG o tablas se desborden */
+img,
+svg,
+table {
+  max-width: 100%;
+}
+
+/* Permite scroll horizontal en bloques muy anchos, como DAGs o tablas */
+pre,
+.table,
+.dataframe,
+svg {
+  overflow-x: auto;
+}
+
+/* No fuerces anchos globales del body */
+body {
+  overflow-x: auto;
+}
+
+/* Evita logos gigantes */
+#brand img {
+  max-height: 56px;
+  width: auto;
+}
