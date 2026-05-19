@@ -1,5 +1,5 @@
 ---
-title: "Configuración del Entorno de Trabajo Multiusuario y Remoto en WSL"
+title: "Configuración WSL: Multiusuario y Remoto"
 subtitle: "Estructura de alto rendimiento para el equipo IIE"
 author: "Miguel Equihua Zamora"
 date: "2026-05-19"
@@ -9,7 +9,7 @@ format:
     toc: true
     toc-depth: 3
     code-fold: false
-    self-contained:
+    embed-resources: true
 ---
 
 ## Resumen Ejecutivo
@@ -27,6 +27,8 @@ Para maximizar el rendimiento del sistema sin comprometer la capacidad de almace
 
 ---
 
+
+
 ## 2. Configuración del Espacio de Trabajo y Permisos en Linux
 
 Se creó el directorio del proyecto bajo el estándar `/srv` y se estableció un sistema de permisos basado en herencia para permitir la colaboración sin conflictos de acceso.
@@ -43,3 +45,236 @@ sudo chown -R :analistas /srv/iie
 
 # Configurar permisos con SetGID (2) para forzar herencia de grupo en nuevos archivos
 sudo chmod -R 2775 /srv/iie
+```
+
+### Permisos automáticos
+
+Por defecto en Linux, si el usuario_A crea un archivo, el usuario_B no siempre puede editarlo. Para evitar que tengan que usar chmod a cada rato, activaremos el bit SetGID (2 al principio del chmod). Esto obliga a que cualquier archivo o carpeta nueva herede automáticamente el grupo analistas.
+
+```bash
+# Asignar lectura, escritura y ejecución para dueño y grupo + SetGID
+sudo chmod -R 2775 /srv/compartido
+```
+
+### Dar de alta a los colaboradores
+
+Para cada compañero de equipo, debes crearle su propio usuario de Linux y meterlo al grupo que creamos.
+
+```bash
+# 1. Crear el usuario (te pedirá asignarle una contraseña)
+sudo adduser nombre_colaborador
+
+# 2. Agregar al colaborador al grupo compartido
+sudo usermod -aG analistas nombre_colaborador
+```
+
+Ajustar el umask (Evita bloqueos de archivos)
+Hay un último detalle técnico: por defecto, Linux crea archivos nuevos con permisos que impiden que otros miembros del grupo los editen, aunque pertenezcan al mismo grupo (los crea como `rw-r--r--`).
+
+Para solucionar esto, debemos cambiar el umask del sistema a 002 para todos los usuarios. Así, cada archivo nuevo nacerá con permisos `rw-rw-r--` (el grupo podrá editar).
+
+Edita el archivo de configuración global de Bash:
+
+```bash
+sudo nano /etc/bash.bashrc
+```
+Ve al final del archivo y agrega esta línea:
+
+```bash
+umask 002
+```
+
+Guarda (En nano: Ctrl + O, Enter) y sale (Ctrl + X).
+
+
+### Configurar el disco D: para que respete a los usuarios de Linux
+
+Por defecto, los archivos en /mnt/d/ (que es formato NTFS de Windows) no entienden de usuarios de Linux, lo que rompería la configuración de colaboradores que planeas hacer. Para solucionar esto y poder usar ambos discos compartidos, haz lo siguiente:
+
+Entra a tu terminal de WSL y edita el archivo de configuración global:
+
+```bash
+sudo nano /etc/wsl.conf
+```
+Asegúrate de que tenga estas líneas (si ya tenías algo en [automount], solo añade las opciones):
+
+```bash
+Ini, TOML
+   [automount]
+   enabled = true
+   options = "metadata,umask=002,fmask=111"
+   
+```
+Guarda (Ctrl + O, Enter) y sal (Ctrl + X).
+
+
+## 3. Configurar el servidor SSH dentro de WSL
+
+Por defecto, el servicio SSH que viene preinstalado en WSL está limitado. Vamos a reinstalar la versión completa del servidor OpenSSH.
+
+Abre tu terminal de WSL y ejecuta:
+
+```bash
+sudo apt update
+sudo apt remove openssh-server -y && sudo apt install openssh-server -y
+```
+
+Ahora debemos editar la configuración de SSH para permitir que los usuarios se conecten mediante su contraseña. Abre el archivo de configuración:
+
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+Busca las siguientes líneas en el archivo (si tienen un símbolo # al principio, bórralo para activarlas) y asegúrate de que queden exactamente así:
+
+```bash
+Plaintext
+Port 2222
+ListenAddress 0.0.0.0
+PasswordAuthentication yes
+```
+
+Nota: Cambiamos el puerto al 2222 porque el puerto 22 por defecto suele estar reservado o en conflicto con los servicios del propio Windows.
+
+Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X).
+
+
+Inicia el servicio SSH en Linux:
+
+```bash
+sudo service ssh restart
+```
+
+### El puente en Windows (Port Forwarding)
+Como WSL está escondido detrás de Windows, necesitamos decirle a tu sistema operativo Windows: "Cualquier conexión que llegue desde la red local al puerto 2222, mándala directo a WSL".
+
+Para automatizar esto (ya que la IP interna de WSL cambia cada vez que reinicias la computadora), utilizaremos un pequeño script en PowerShell.
+
+En Windows, busca **PowerShell**, haz clic derecho sobre él y selecciona Ejecutar como Administrador.
+
+Copia y pega el siguiente bloque de comandos y presiona Enter:
+
+```powershell
+# 1. Obtener la IP interna actual de WSL
+$wslIp = (wsl exec hostname -I).Split(" ")[0]
+
+# 2. Definir el puerto de escucha
+$port = 2222
+
+# 3. Eliminar cualquier regla previa en ese puerto para evitar conflictos
+netsh interface portproxy delete v4tov4 listenport=$port listenaddress=0.0.0.0
+
+# 4. Crear el puente de Windows hacia la IP de WSL
+netsh interface portproxy add v4tov4 listenport=$port listenaddress=0.0.0.0 connectport=$port connectaddress=$wslIp
+
+# 5. Abrir el puerto en el Firewall de Windows para que permita conexiones entrantes
+New-NetFirewallRule -DisplayName "WSL SSH" -Direction Inbound -Action Allow -Protocol TCP -LocalPort $port -ErrorAction SilentlyContinue
+
+Write-Host "Puente configurado con éxito hacia la IP de WSL: $wslIp" -ForegroundColor Green
+
+```
+
+Nota operativa: Como la IP de WSL cambia al reiniciar la máquina, si un día tus colaboradores no pueden conectarse, solo debes volver a abrir PowerShell como Administrador y ejecutar estas líneas para actualizar el puente.
+
+
+### ¿Cómo se conectan los colaboradores?
+
+Para que tus compañeros puedan acceder desde sus computadoras, necesitan dos datos que tú les vas a proporcionar:
+
+Tu IP en la red local (la de tu Windows). La puedes averiguar en Windows ejecutando `ipconfig` (ejemplo: 172.19.48.xxx).
+
+Su usuario y contraseña de Linux: Los mismos que creamos previamente (ejemplo: usuario_colaborador).
+
+Desde su terminal (Linux/Mac o Git Bash/PowerShell en Windows):
+Ellos solo tendrán que ejecutar el siguiente comando en sus propias computadoras para acceder directo a tu WSL:
+
+```bash
+ssh -p 2222 usuario_colaborador@IP_DE_TU_WINDOWS
+```
+
+
+### Limpiar y regenerar las llaves del servidor
+
+A veces, al instalar o reinstalar OpenSSH, las llaves criptográficas del servidor no se generan correctamente o se quedan corruptas. Forcemos su creación:
+
+```bash
+sudo rm -f /etc/ssh/ssh_host_*
+sudo dpkg-reconfigure openssh-server
+```
+Ahora, ajusta el archivo `sshd_config`. OpenSSH por defecto es muy estricto con quién lo intenta contactar. Vamos a asegurarnos de que no esté bloqueando las conexiones externas.
+
+Abre el archivo:
+
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+Busca las siguientes líneas y asegúrate de que queden configuradas exactamente así (si no existen, agrégalas al final del archivo):
+
+```text
+LoginGraceTime 120
+PermitRootLogin no
+StrictModes no
+```
+
+StrictModes no: Es vital en WSL. Si está en yes, SSH rechazará las conexiones si nota alguna discrepancia menor en los permisos de las carpetas de los usuarios en Linux.
+
+Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X).
+
+Ahora, hay que verificar los archivos de control de acceso. Linux tiene dos archivos "cadeneros" que deciden quién entra y quién no por red. Vamos a garantizar que estén vacíos o que permitan el acceso.
+
+Ejecuta estos dos comandos para asegurarte de que no haya IPs bloqueadas:
+
+```bash
+sudo truncate -s 0 /etc/hosts.allow
+sudo truncate -s 0 /etc/hosts.deny
+```
+
+Para terminar todo esto hay que reiniciar el servicio. Se hace así:
+
+
+```bash
+sudo service ssh restart
+```
+
+## 4. Compartir la MISMA instancia de WSL entre usuarios de Windows
+
+Si por razones operativas el equipo de colaboradores trabaja físicamente en la misma computadora, inicia sesión con sus cuentas de Windows y abre WSL desde ahí, lo que se necesita es exportar la máquina Linux virtual actual y hacer que las cuentas de Windows de los colegas de ese equipo apunten todos a esa misma instancia.
+
+Estos son los pasos para unificar la instancia de WSL en el mismo equipo:
+
+### Paso A: Exportar tu WSL actual (Desde tu usuario de Windows)
+
+Cierra WSL y abre PowerShell como Administrador. Hay que apaga WSL por completo:
+
+```bash
+wsl --shutdown
+```
+Ahora, exporta el entorno a un archivo de respaldo (puedes guardarlo en la Unidad D: para tener espacio):
+
+```powerhell
+wsl --export Ubuntu D:\wsl_compartido_iie.tar
+```
+
+### Paso B: Importar la instancia en la cuenta de Windows de tu colega
+
++ Cierra tu sesión de Windows e inicia sesión con la cuenta de Windows de tu colaborador.
++ Abre PowerShell como Administrador en su cuenta.
++ Crea una carpeta en una ruta común (por ejemplo, en el disco D:\WSL_IIE).
++ Importa la máquina virtual compartida en su perfil de WSL:
+
+```powershell
+wsl --import Ubuntu_IIE D:\WSL_IIE D:\wsl_compartido_iie.tar
+wsl -d Ubuntu_IIE --set-default-user nombre_del_colega_local
+```
+
+Para asegurarse de que al abrir la terminal entre directamente con su usuario de Linux y no como root, ejecuta este comando en su PowerShell:
+
+```powershell
+wsl -d Ubuntu_IIE --set-default-user nombre_colaborador
+```
+
+A partir de ese momento, cuando la otra persona escriba ```wsl -d Ubuntu_IIE``` en su cuenta, entrará exactamente al mismo sistema de archivos, con las mismas carpetas, Git, configuraciones y entornos de micromamba que tú preparaste.
+
+
+
