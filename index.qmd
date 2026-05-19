@@ -1,0 +1,16 @@
+---
+title: "Inicio"
+format: html
+---
+
+# Exploración de variables
+
+[datos-R](recursos_externos/iie-training-profile-R.html)  
+ 
+[datos-Py](recursos_externos/iie-training-profile-py.html)
+
+
+
+# Estado del Workflow
+
+[reporte](recursos_externos/reporte-iie.html)

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Requerimientos para la configuración del entorno virtual – Workflow IIE-3T</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-a0f9fd0d421825b736dc1bbcbcba2219.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Workflow IIE-3T</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Buscar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Navegación de palanca" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.qmd"> 
+<span class="menu-text">Sobre mí</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#propósito" id="toc-propósito" class="nav-link active" data-scroll-target="#propósito"><span class="header-section-number">1</span> Propósito</a></li>
+  <li><a href="#objetivo-del-entorno-virtual" id="toc-objetivo-del-entorno-virtual" class="nav-link" data-scroll-target="#objetivo-del-entorno-virtual"><span class="header-section-number">2</span> Objetivo del entorno virtual</a></li>
+  <li><a href="#requerimientos-funcionales-del-entorno" id="toc-requerimientos-funcionales-del-entorno" class="nav-link" data-scroll-target="#requerimientos-funcionales-del-entorno"><span class="header-section-number">3</span> Requerimientos funcionales del entorno</a></li>
+  <li><a href="#requerimientos-técnicos-mínimos" id="toc-requerimientos-técnicos-mínimos" class="nav-link" data-scroll-target="#requerimientos-técnicos-mínimos"><span class="header-section-number">4</span> Requerimientos técnicos mínimos</a>
+  <ul class="collapse">
+  <li><a href="#lenguaje" id="toc-lenguaje" class="nav-link" data-scroll-target="#lenguaje"><span class="header-section-number">4.1</span> Lenguaje</a></li>
+  <li><a href="#bibliotecas-python-requeridas" id="toc-bibliotecas-python-requeridas" class="nav-link" data-scroll-target="#bibliotecas-python-requeridas"><span class="header-section-number">4.2</span> Bibliotecas Python requeridas</a>
+  <ul class="collapse">
+  <li><a href="#núcleo-numérico-y-tabular" id="toc-núcleo-numérico-y-tabular" class="nav-link" data-scroll-target="#núcleo-numérico-y-tabular"><span class="header-section-number">4.2.1</span> Núcleo numérico y tabular</a></li>
+  <li><a href="#serialización-tabular" id="toc-serialización-tabular" class="nav-link" data-scroll-target="#serialización-tabular"><span class="header-section-number">4.2.2</span> Serialización tabular</a></li>
+  <li><a href="#geoespacial-vectorial" id="toc-geoespacial-vectorial" class="nav-link" data-scroll-target="#geoespacial-vectorial"><span class="header-section-number">4.2.3</span> Geoespacial vectorial</a></li>
+  <li><a href="#geoespacial-raster" id="toc-geoespacial-raster" class="nav-link" data-scroll-target="#geoespacial-raster"><span class="header-section-number">4.2.4</span> Geoespacial raster</a></li>
+  <li><a href="#modelado-y-análisis-auxiliar" id="toc-modelado-y-análisis-auxiliar" class="nav-link" data-scroll-target="#modelado-y-análisis-auxiliar"><span class="header-section-number">4.2.5</span> Modelado y análisis auxiliar</a></li>
+  <li><a href="#modelado-probabilístico-según-etapa" id="toc-modelado-probabilístico-según-etapa" class="nav-link" data-scroll-target="#modelado-probabilístico-según-etapa"><span class="header-section-number">4.2.6</span> Modelado probabilístico <em>(según etapa)</em></a></li>
+  <li><a href="#visualización-auxiliar" id="toc-visualización-auxiliar" class="nav-link" data-scroll-target="#visualización-auxiliar"><span class="header-section-number">4.2.7</span> Visualización auxiliar</a></li>
+  <li><a href="#workflow" id="toc-workflow" class="nav-link" data-scroll-target="#workflow"><span class="header-section-number">4.2.8</span> Workflow</a></li>
+  <li><a href="#pruebas" id="toc-pruebas" class="nav-link" data-scroll-target="#pruebas"><span class="header-section-number">4.2.9</span> Pruebas</a></li>
+  </ul></li>
+  <li><a href="#dependencias-nativas-requeridas" id="toc-dependencias-nativas-requeridas" class="nav-link" data-scroll-target="#dependencias-nativas-requeridas"><span class="header-section-number">4.3</span> Dependencias nativas requeridas</a></li>
+  </ul></li>
+  <li><a href="#requerimientos-de-instalación" id="toc-requerimientos-de-instalación" class="nav-link" data-scroll-target="#requerimientos-de-instalación"><span class="header-section-number">5</span> Requerimientos de instalación</a>
+  <ul class="collapse">
+  <li><a href="#recomendación-general" id="toc-recomendación-general" class="nav-link" data-scroll-target="#recomendación-general"><span class="header-section-number">5.1</span> Recomendación general</a></li>
+  <li><a href="#requerimiento-de-aislamiento" id="toc-requerimiento-de-aislamiento" class="nav-link" data-scroll-target="#requerimiento-de-aislamiento"><span class="header-section-number">5.2</span> Requerimiento de aislamiento</a></li>
+  <li><a href="#requerimiento-de-exportación" id="toc-requerimiento-de-exportación" class="nav-link" data-scroll-target="#requerimiento-de-exportación"><span class="header-section-number">5.3</span> Requerimiento de exportación</a></li>
+  </ul></li>
+  <li><a href="#requerimientos-para-el-uso-de-parquet" id="toc-requerimientos-para-el-uso-de-parquet" class="nav-link" data-scroll-target="#requerimientos-para-el-uso-de-parquet"><span class="header-section-number">6</span> Requerimientos para el uso de Parquet</a></li>
+  <li><a href="#requerimientos-para-snakemake" id="toc-requerimientos-para-snakemake" class="nav-link" data-scroll-target="#requerimientos-para-snakemake"><span class="header-section-number">7</span> Requerimientos para Snakemake</a></li>
+  <li><a href="#requerimientos-para-pytest" id="toc-requerimientos-para-pytest" class="nav-link" data-scroll-target="#requerimientos-para-pytest"><span class="header-section-number">8</span> Requerimientos para pytest</a></li>
+  <li><a href="#requerimientos-de-validación-del-entorno" id="toc-requerimientos-de-validación-del-entorno" class="nav-link" data-scroll-target="#requerimientos-de-validación-del-entorno"><span class="header-section-number">9</span> Requerimientos de validación del entorno</a></li>
+  <li><a href="#requerimientos-de-estructura-del-proyecto" id="toc-requerimientos-de-estructura-del-proyecto" class="nav-link" data-scroll-target="#requerimientos-de-estructura-del-proyecto"><span class="header-section-number">10</span> Requerimientos de estructura del proyecto</a></li>
+  <li><a href="#requerimientos-de-mantenimiento" id="toc-requerimientos-de-mantenimiento" class="nav-link" data-scroll-target="#requerimientos-de-mantenimiento"><span class="header-section-number">11</span> Requerimientos de mantenimiento</a></li>
+  <li><a href="#requerimientos-de-portabilidad" id="toc-requerimientos-de-portabilidad" class="nav-link" data-scroll-target="#requerimientos-de-portabilidad"><span class="header-section-number">12</span> Requerimientos de portabilidad</a></li>
+  <li><a href="#criterios-de-aceptación-del-entorno-virtual" id="toc-criterios-de-aceptación-del-entorno-virtual" class="nav-link" data-scroll-target="#criterios-de-aceptación-del-entorno-virtual"><span class="header-section-number">13</span> Criterios de aceptación del entorno virtual</a></li>
+  <li><a href="#recomendación-operativa" id="toc-recomendación-operativa" class="nav-link" data-scroll-target="#recomendación-operativa"><span class="header-section-number">14</span> Recomendación operativa</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Otros formatos</h2><ul><li><a href="Requerimientos.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li><li><a href="Requerimientos.docx"><i class="bi bi-file-word"></i>MS Word</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Requerimientos para la configuración del entorno virtual</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="propósito" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Propósito</h1>
+<p>Este documento define los requerimientos técnicos mínimos para configurar un entorno virtual reproducible y operativo para el workflow de producción del Índice de Integridad Ecosistémica.</p>
+<p>Su propósito es servir como guía para:</p>
+<ul>
+<li>preparar estaciones de trabajo;</li>
+<li>definir entornos reproducibles;</li>
+<li>reducir conflictos entre dependencias;</li>
+<li>asegurar que el pipeline pueda ejecutarse de manera consistente.</li>
+</ul>
+</section>
+<section id="objetivo-del-entorno-virtual" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Objetivo del entorno virtual</h1>
+<p>El entorno virtual debe proporcionar una base controlada para ejecutar un flujo que incluye:</p>
+<ul>
+<li>geoprocesamiento vectorial y raster;</li>
+<li>integración tabular;</li>
+<li>serialización de datos intermedios;</li>
+<li>ejecución orquestada por Snakemake;</li>
+<li>validación automatizada con pytest;</li>
+<li>modelado probabilístico, cuando corresponda;</li>
+<li>generación de productos raster finales.</li>
+</ul>
+</section>
+<section id="requerimientos-funcionales-del-entorno" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Requerimientos funcionales del entorno</h1>
+<p>El entorno virtual debe permitir:</p>
+<ol type="1">
+<li>ejecutar scripts Python desde línea de comandos;</li>
+<li>importar correctamente bibliotecas numéricas, tabulares y geoespaciales;</li>
+<li>leer y escribir archivos vectoriales;</li>
+<li>leer, reproyectar, rasterizar y escribir archivos raster;</li>
+<li>leer y escribir tablas en Parquet;</li>
+<li>ejecutar Snakemake;</li>
+<li>correr pruebas con pytest;</li>
+<li>soportar, cuando sea necesario, bibliotecas de modelado probabilístico;</li>
+<li>registrar y reproducir la configuración usada.</li>
+</ol>
+</section>
+<section id="requerimientos-técnicos-mínimos" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Requerimientos técnicos mínimos</h1>
+<section id="lenguaje" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="lenguaje"><span class="header-section-number">4.1</span> Lenguaje</h2>
+<ul>
+<li>Python 3.x en una versión estable y soportada por las bibliotecas geoespaciales seleccionadas.</li>
+</ul>
+</section>
+<section id="bibliotecas-python-requeridas" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="bibliotecas-python-requeridas"><span class="header-section-number">4.2</span> Bibliotecas Python requeridas</h2>
+<section id="núcleo-numérico-y-tabular" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="núcleo-numérico-y-tabular"><span class="header-section-number">4.2.1</span> Núcleo numérico y tabular</h3>
+<ul>
+<li><code>numpy</code></li>
+<li><code>pandas</code></li>
+</ul>
+</section>
+<section id="serialización-tabular" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="serialización-tabular"><span class="header-section-number">4.2.2</span> Serialización tabular</h3>
+<ul>
+<li><code>pyarrow</code></li>
+</ul>
+</section>
+<section id="geoespacial-vectorial" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="geoespacial-vectorial"><span class="header-section-number">4.2.3</span> Geoespacial vectorial</h3>
+<ul>
+<li><code>geopandas</code></li>
+<li><code>shapely</code></li>
+<li><code>pyproj</code></li>
+<li><code>fiona</code> o <code>pyogrio</code></li>
+</ul>
+</section>
+<section id="geoespacial-raster" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="geoespacial-raster"><span class="header-section-number">4.2.4</span> Geoespacial raster</h3>
+<ul>
+<li><code>rasterio</code></li>
+<li><code>affine</code></li>
+</ul>
+</section>
+<section id="modelado-y-análisis-auxiliar" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="modelado-y-análisis-auxiliar"><span class="header-section-number">4.2.5</span> Modelado y análisis auxiliar</h3>
+<ul>
+<li><code>scipy</code></li>
+<li><code>scikit-learn</code></li>
+</ul>
+</section>
+<section id="modelado-probabilístico-según-etapa" class="level3" data-number="4.2.6">
+<h3 data-number="4.2.6" class="anchored" data-anchor-id="modelado-probabilístico-según-etapa"><span class="header-section-number">4.2.6</span> Modelado probabilístico <em>(según etapa)</em></h3>
+<ul>
+<li><code>pgmpy</code></li>
+</ul>
+</section>
+<section id="visualización-auxiliar" class="level3" data-number="4.2.7">
+<h3 data-number="4.2.7" class="anchored" data-anchor-id="visualización-auxiliar"><span class="header-section-number">4.2.7</span> Visualización auxiliar</h3>
+<ul>
+<li><code>matplotlib</code></li>
+</ul>
+</section>
+<section id="workflow" class="level3" data-number="4.2.8">
+<h3 data-number="4.2.8" class="anchored" data-anchor-id="workflow"><span class="header-section-number">4.2.8</span> Workflow</h3>
+<ul>
+<li><code>snakemake</code></li>
+</ul>
+</section>
+<section id="pruebas" class="level3" data-number="4.2.9">
+<h3 data-number="4.2.9" class="anchored" data-anchor-id="pruebas"><span class="header-section-number">4.2.9</span> Pruebas</h3>
+<ul>
+<li><code>pytest</code></li>
+</ul>
+</section>
+</section>
+<section id="dependencias-nativas-requeridas" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="dependencias-nativas-requeridas"><span class="header-section-number">4.3</span> Dependencias nativas requeridas</h2>
+<p>El entorno debe asegurar compatibilidad con bibliotecas del sistema requeridas por el stack geoespacial:</p>
+<ul>
+<li>GDAL</li>
+<li>PROJ</li>
+<li>GEOS</li>
+</ul>
+<p>Estas dependencias deben ser consistentes con las versiones de <code>rasterio</code>, <code>geopandas</code>, <code>shapely</code> y <code>pyproj</code>.</p>
+</section>
+</section>
+<section id="requerimientos-de-instalación" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Requerimientos de instalación</h1>
+<section id="recomendación-general" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="recomendación-general"><span class="header-section-number">5.1</span> Recomendación general</h2>
+<p>Se recomienda usar un mecanismo de gestión de entorno que permita controlar bien dependencias geoespaciales. El proyecto puede operar con:</p>
+<ul>
+<li><code>venv</code> + instalación cuidadosa de wheels compatibles, o</li>
+<li><code>conda</code> / <code>mamba</code> si se busca más robustez geoespacial.</li>
+</ul>
+<p>La decisión depende del contexto operativo del proyecto. Para flujos con muchas dependencias geoespaciales, suele ser conveniente priorizar una estrategia que reduzca conflictos binarios.</p>
+</section>
+<section id="requerimiento-de-aislamiento" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="requerimiento-de-aislamiento"><span class="header-section-number">5.2</span> Requerimiento de aislamiento</h2>
+<p>El entorno del proyecto debe estar aislado de:</p>
+<ul>
+<li>la instalación global de Python;</li>
+<li>otros proyectos con dependencias incompatibles;</li>
+<li>bibliotecas geoespaciales de sistema no controladas por el proyecto, cuando eso pueda generar conflictos.</li>
+</ul>
+</section>
+<section id="requerimiento-de-exportación" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="requerimiento-de-exportación"><span class="header-section-number">5.3</span> Requerimiento de exportación</h2>
+<p>La configuración del entorno debe poder exportarse en un archivo reproducible, por ejemplo:</p>
+<ul>
+<li><code>requirements.txt</code></li>
+<li><code>pyproject.toml</code></li>
+<li><code>environment.yml</code></li>
+</ul>
+</section>
+</section>
+<section id="requerimientos-para-el-uso-de-parquet" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Requerimientos para el uso de Parquet</h1>
+<p>Dado que se propone adoptar <strong>Parquet</strong> como tecnología base de serialización tabular, el entorno debe garantizar:</p>
+<ol type="1">
+<li>disponibilidad de <code>pyarrow</code>;</li>
+<li>lectura y escritura confiable desde <code>pandas</code>;</li>
+<li>capacidad de trabajar con tablas particionadas por región o variable si el workflow evoluciona hacia esa estrategia.</li>
+</ol>
+</section>
+<section id="requerimientos-para-snakemake" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Requerimientos para Snakemake</h1>
+<p>El entorno debe permitir:</p>
+<ul>
+<li>ejecutar reglas locales;</li>
+<li>resolver dependencias entre scripts;</li>
+<li>parametrizar rutas;</li>
+<li>reiniciar pasos fallidos;</li>
+<li>paralelizar ramas cuando sea posible.</li>
+</ul>
+<p>Además, la configuración del workflow debe poder convivir con el entorno geoespacial sin romper compatibilidades.</p>
+</section>
+<section id="requerimientos-para-pytest" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Requerimientos para pytest</h1>
+<p>El entorno debe incluir soporte para correr:</p>
+<ul>
+<li>pruebas unitarias;</li>
+<li>pruebas de integración;</li>
+<li>pruebas smoke del workflow.</li>
+</ul>
+<p>Las pruebas deben poder ejecutarse desde línea de comandos sin configuración manual adicional del intérprete.</p>
+</section>
+<section id="requerimientos-de-validación-del-entorno" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Requerimientos de validación del entorno</h1>
+<p>Antes de considerar operativo el entorno virtual, debe validarse que puede:</p>
+<ol type="1">
+<li>importar correctamente <code>numpy</code>, <code>pandas</code>, <code>rasterio</code>, <code>geopandas</code>, <code>pyarrow</code>, <code>snakemake</code> y <code>pytest</code>;</li>
+<li>leer al menos un insumo vectorial;</li>
+<li>leer al menos un raster;</li>
+<li>escribir un archivo Parquet;</li>
+<li>ejecutar una prueba simple con <code>pytest</code>;</li>
+<li>correr al menos una regla mínima de Snakemake.</li>
+</ol>
+</section>
+<section id="requerimientos-de-estructura-del-proyecto" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Requerimientos de estructura del proyecto</h1>
+<p>El entorno debe ser compatible con una estructura de proyecto donde existan al menos:</p>
+<ul>
+<li>scripts Python del workflow;</li>
+<li>reglas Snakemake;</li>
+<li>archivos de configuración;</li>
+<li>carpeta de pruebas;</li>
+<li>carpetas de salida para rasters, tablas y productos finales.</li>
+</ul>
+</section>
+<section id="requerimientos-de-mantenimiento" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Requerimientos de mantenimiento</h1>
+<p>El proyecto debe definir una práctica de mantenimiento del entorno que incluya:</p>
+<ul>
+<li>actualización controlada de dependencias;</li>
+<li>registro de cambios relevantes de versión;</li>
+<li>revalidación del workflow después de cambios mayores;</li>
+<li>conservación de una configuración estable para corridas formales.</li>
+</ul>
+</section>
+<section id="requerimientos-de-portabilidad" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Requerimientos de portabilidad</h1>
+<p>El entorno debe ser portable al menos entre máquinas del equipo con configuración comparable, siempre que:</p>
+<ul>
+<li>exista acceso a las mismas rutas de datos o a una configuración equivalente;</li>
+<li>las dependencias nativas geoespaciales estén correctamente instaladas;</li>
+<li>el archivo de definición del entorno esté disponible.</li>
+</ul>
+</section>
+<section id="criterios-de-aceptación-del-entorno-virtual" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Criterios de aceptación del entorno virtual</h1>
+<p>El entorno virtual se considerará correctamente configurado si cumple lo siguiente:</p>
+<ol type="1">
+<li>instala todas las bibliotecas requeridas sin conflictos críticos;</li>
+<li>permite ejecutar scripts geoespaciales del proyecto;</li>
+<li>permite leer y escribir Parquet;</li>
+<li>permite correr Snakemake;</li>
+<li>permite correr pytest;</li>
+<li>permite generar un producto raster y un producto tabular mínimo del workflow.</li>
+</ol>
+</section>
+<section id="recomendación-operativa" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> Recomendación operativa</h1>
+<p>Se recomienda mantener este documento alineado con:</p>
+<ul>
+<li>el archivo real de definición del entorno;</li>
+<li>la documentación del workflow;</li>
+<li>la batería de pruebas;</li>
+<li>la evolución de las dependencias geoespaciales y del motor de inferencia.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

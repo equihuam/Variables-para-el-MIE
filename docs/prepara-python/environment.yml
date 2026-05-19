@@ -1,0 +1,27 @@
+name: workflow-iie
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - pyarrow
+  - rasterio
+  - geopandas
+  - shapely
+  - pyproj
+  - pyogrio
+  - fiona
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - snakemake
+  - pytest
+  - jupyterlab
+  - ipykernel
+  - pyyaml
+  - click
+  - tqdm
+  - pip
+  - pip:
+      - pgmpy

@@ -1,0 +1,24 @@
+project:
+  type: website
+  resources:
+    - "recursos_externos/"
+
+website:
+  title: "Workflow IIE-3T"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Inicio
+  sidebar:
+    - title: "Secciones"
+      contents:
+        - introduccion.qmd
+        - tutoriales/
+  page-navigation: true
+
+format:
+  html:
+    theme: cosmo
+#    css: styles.css
+    toc: true
+    lang: es

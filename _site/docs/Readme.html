@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Definición de requerimientos y caso de uso – Workflow IIE-3T</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-a0f9fd0d421825b736dc1bbcbcba2219.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Workflow IIE-3T</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Buscar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Navegación de palanca" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.qmd"> 
+<span class="menu-text">Sobre mí</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#propósito" id="toc-propósito" class="nav-link active" data-scroll-target="#propósito"><span class="header-section-number">1</span> Propósito</a></li>
+  <li><a href="#caso-de-uso" id="toc-caso-de-uso" class="nav-link" data-scroll-target="#caso-de-uso"><span class="header-section-number">2</span> Caso de uso</a>
+  <ul class="collapse">
+  <li><a href="#nombre-del-caso-de-uso" id="toc-nombre-del-caso-de-uso" class="nav-link" data-scroll-target="#nombre-del-caso-de-uso"><span class="header-section-number">2.1</span> Nombre del caso de uso</a></li>
+  <li><a href="#descripción-general" id="toc-descripción-general" class="nav-link" data-scroll-target="#descripción-general"><span class="header-section-number">2.2</span> Descripción general</a></li>
+  <li><a href="#actores" id="toc-actores" class="nav-link" data-scroll-target="#actores"><span class="header-section-number">2.3</span> Actores</a>
+  <ul class="collapse">
+  <li><a href="#actor-principal" id="toc-actor-principal" class="nav-link" data-scroll-target="#actor-principal"><span class="header-section-number">2.3.1</span> Actor principal</a></li>
+  <li><a href="#actores-secundarios" id="toc-actores-secundarios" class="nav-link" data-scroll-target="#actores-secundarios"><span class="header-section-number">2.3.2</span> Actores secundarios</a></li>
+  </ul></li>
+  <li><a href="#disparador" id="toc-disparador" class="nav-link" data-scroll-target="#disparador"><span class="header-section-number">2.4</span> Disparador</a></li>
+  <li><a href="#resultado-esperado" id="toc-resultado-esperado" class="nav-link" data-scroll-target="#resultado-esperado"><span class="header-section-number">2.5</span> Resultado esperado</a></li>
+  </ul></li>
+  <li><a href="#alcance" id="toc-alcance" class="nav-link" data-scroll-target="#alcance"><span class="header-section-number">3</span> Alcance</a>
+  <ul class="collapse">
+  <li><a href="#incluye" id="toc-incluye" class="nav-link" data-scroll-target="#incluye"><span class="header-section-number">3.1</span> Incluye</a></li>
+  <li><a href="#no-incluye" id="toc-no-incluye" class="nav-link" data-scroll-target="#no-incluye"><span class="header-section-number">3.2</span> No incluye</a></li>
+  </ul></li>
+  <li><a href="#objetivo-general" id="toc-objetivo-general" class="nav-link" data-scroll-target="#objetivo-general"><span class="header-section-number">4</span> Objetivo general</a></li>
+  <li><a href="#objetivos-específicos" id="toc-objetivos-específicos" class="nav-link" data-scroll-target="#objetivos-específicos"><span class="header-section-number">5</span> Objetivos específicos</a></li>
+  <li><a href="#supuestos-del-proceso" id="toc-supuestos-del-proceso" class="nav-link" data-scroll-target="#supuestos-del-proceso"><span class="header-section-number">6</span> Supuestos del proceso</a></li>
+  <li><a href="#requerimientos-funcionales" id="toc-requerimientos-funcionales" class="nav-link" data-scroll-target="#requerimientos-funcionales"><span class="header-section-number">7</span> Requerimientos funcionales</a>
+  <ul class="collapse">
+  <li><a href="#rf-01.-preparación-de-polígonos-o-regiones-de-referencia" id="toc-rf-01.-preparación-de-polígonos-o-regiones-de-referencia" class="nav-link" data-scroll-target="#rf-01.-preparación-de-polígonos-o-regiones-de-referencia"><span class="header-section-number">7.1</span> RF-01. Preparación de polígonos o regiones de referencia</a></li>
+  <li><a href="#rf-02.-generación-de-rasters-de-referencia-por-región" id="toc-rf-02.-generación-de-rasters-de-referencia-por-región" class="nav-link" data-scroll-target="#rf-02.-generación-de-rasters-de-referencia-por-región"><span class="header-section-number">7.2</span> RF-02. Generación de rasters de referencia por región</a></li>
+  <li><a href="#rf-03.-producción-de-coberturas-raster-congruentes" id="toc-rf-03.-producción-de-coberturas-raster-congruentes" class="nav-link" data-scroll-target="#rf-03.-producción-de-coberturas-raster-congruentes"><span class="header-section-number">7.3</span> RF-03. Producción de coberturas raster congruentes</a></li>
+  <li><a href="#rf-04.-conversión-de-coberturas-a-series-numéricas-congruentes" id="toc-rf-04.-conversión-de-coberturas-a-series-numéricas-congruentes" class="nav-link" data-scroll-target="#rf-04.-conversión-de-coberturas-a-series-numéricas-congruentes"><span class="header-section-number">7.4</span> RF-04. Conversión de coberturas a series numéricas congruentes</a></li>
+  <li><a href="#rf-05.-almacenamiento-serializado-intermedio" id="toc-rf-05.-almacenamiento-serializado-intermedio" class="nav-link" data-scroll-target="#rf-05.-almacenamiento-serializado-intermedio"><span class="header-section-number">7.5</span> RF-05. Almacenamiento serializado intermedio</a></li>
+  <li><a href="#rf-06.-integración-de-features-en-una-tabla-maestra" id="toc-rf-06.-integración-de-features-en-una-tabla-maestra" class="nav-link" data-scroll-target="#rf-06.-integración-de-features-en-una-tabla-maestra"><span class="header-section-number">7.6</span> RF-06. Integración de features en una tabla maestra</a></li>
+  <li><a href="#rf-07.-preparación-de-datos-para-inferencia-bayesiana" id="toc-rf-07.-preparación-de-datos-para-inferencia-bayesiana" class="nav-link" data-scroll-target="#rf-07.-preparación-de-datos-para-inferencia-bayesiana"><span class="header-section-number">7.7</span> RF-07. Preparación de datos para inferencia bayesiana</a></li>
+  <li><a href="#rf-08.-integración-de-predicciones-del-modelo" id="toc-rf-08.-integración-de-predicciones-del-modelo" class="nav-link" data-scroll-target="#rf-08.-integración-de-predicciones-del-modelo"><span class="header-section-number">7.8</span> RF-08. Integración de predicciones del modelo</a></li>
+  <li><a href="#rf-09.-reconstrucción-raster-del-índice-final" id="toc-rf-09.-reconstrucción-raster-del-índice-final" class="nav-link" data-scroll-target="#rf-09.-reconstrucción-raster-del-índice-final"><span class="header-section-number">7.9</span> RF-09. Reconstrucción raster del índice final</a></li>
+  <li><a href="#rf-10.-exportación-de-productos-cartográficos-finales" id="toc-rf-10.-exportación-de-productos-cartográficos-finales" class="nav-link" data-scroll-target="#rf-10.-exportación-de-productos-cartográficos-finales"><span class="header-section-number">7.10</span> RF-10. Exportación de productos cartográficos finales</a></li>
+  <li><a href="#rf-11.-trazabilidad-del-flujo" id="toc-rf-11.-trazabilidad-del-flujo" class="nav-link" data-scroll-target="#rf-11.-trazabilidad-del-flujo"><span class="header-section-number">7.11</span> RF-11. Trazabilidad del flujo</a></li>
+  <li><a href="#rf-12.-ejecución-automatizada-por-reglas" id="toc-rf-12.-ejecución-automatizada-por-reglas" class="nav-link" data-scroll-target="#rf-12.-ejecución-automatizada-por-reglas"><span class="header-section-number">7.12</span> RF-12. Ejecución automatizada por reglas</a></li>
+  </ul></li>
+  <li><a href="#requerimientos-no-funcionales" id="toc-requerimientos-no-funcionales" class="nav-link" data-scroll-target="#requerimientos-no-funcionales"><span class="header-section-number">8</span> Requerimientos no funcionales</a>
+  <ul class="collapse">
+  <li><a href="#rnf-01.-reproducibilidad" id="toc-rnf-01.-reproducibilidad" class="nav-link" data-scroll-target="#rnf-01.-reproducibilidad"><span class="header-section-number">8.1</span> RNF-01. Reproducibilidad</a></li>
+  <li><a href="#rnf-02.-modularidad" id="toc-rnf-02.-modularidad" class="nav-link" data-scroll-target="#rnf-02.-modularidad"><span class="header-section-number">8.2</span> RNF-02. Modularidad</a></li>
+  <li><a href="#rnf-03.-escalabilidad" id="toc-rnf-03.-escalabilidad" class="nav-link" data-scroll-target="#rnf-03.-escalabilidad"><span class="header-section-number">8.3</span> RNF-03. Escalabilidad</a></li>
+  <li><a href="#rnf-04.-paralelización" id="toc-rnf-04.-paralelización" class="nav-link" data-scroll-target="#rnf-04.-paralelización"><span class="header-section-number">8.4</span> RNF-04. Paralelización</a></li>
+  <li><a href="#rnf-05.-trazabilidad-de-errores" id="toc-rnf-05.-trazabilidad-de-errores" class="nav-link" data-scroll-target="#rnf-05.-trazabilidad-de-errores"><span class="header-section-number">8.5</span> RNF-05. Trazabilidad de errores</a></li>
+  <li><a href="#rnf-06.-validación-automatizada" id="toc-rnf-06.-validación-automatizada" class="nav-link" data-scroll-target="#rnf-06.-validación-automatizada"><span class="header-section-number">8.6</span> RNF-06. Validación automatizada</a></li>
+  <li><a href="#rnf-07.-portabilidad-razonable" id="toc-rnf-07.-portabilidad-razonable" class="nav-link" data-scroll-target="#rnf-07.-portabilidad-razonable"><span class="header-section-number">8.7</span> RNF-07. Portabilidad razonable</a></li>
+  <li><a href="#rnf-08.-headless-first" id="toc-rnf-08.-headless-first" class="nav-link" data-scroll-target="#rnf-08.-headless-first"><span class="header-section-number">8.8</span> RNF-08. Headless-first</a></li>
+  </ul></li>
+  <li><a href="#arquitectura-lógica-del-proceso" id="toc-arquitectura-lógica-del-proceso" class="nav-link" data-scroll-target="#arquitectura-lógica-del-proceso"><span class="header-section-number">9</span> Arquitectura lógica del proceso</a>
+  <ul class="collapse">
+  <li><a href="#etapa-1.-geometría-de-referencia" id="toc-etapa-1.-geometría-de-referencia" class="nav-link" data-scroll-target="#etapa-1.-geometría-de-referencia"><span class="header-section-number">9.1</span> Etapa 1. Geometría de referencia</a></li>
+  <li><a href="#etapa-2.-generación-de-variables-espaciales" id="toc-etapa-2.-generación-de-variables-espaciales" class="nav-link" data-scroll-target="#etapa-2.-generación-de-variables-espaciales"><span class="header-section-number">9.2</span> Etapa 2. Generación de variables espaciales</a></li>
+  <li><a href="#etapa-3.-conversión-a-series-congruentes" id="toc-etapa-3.-conversión-a-series-congruentes" class="nav-link" data-scroll-target="#etapa-3.-conversión-a-series-congruentes"><span class="header-section-number">9.3</span> Etapa 3. Conversión a series congruentes</a></li>
+  <li><a href="#etapa-4.-integración-tabular" id="toc-etapa-4.-integración-tabular" class="nav-link" data-scroll-target="#etapa-4.-integración-tabular"><span class="header-section-number">9.4</span> Etapa 4. Integración tabular</a></li>
+  <li><a href="#etapa-5.-preparación-para-modelado-e-inferencia" id="toc-etapa-5.-preparación-para-modelado-e-inferencia" class="nav-link" data-scroll-target="#etapa-5.-preparación-para-modelado-e-inferencia"><span class="header-section-number">9.5</span> Etapa 5. Preparación para modelado e inferencia</a></li>
+  <li><a href="#etapa-6.-inferencia-externa-y-reconstrucción-cartográfica" id="toc-etapa-6.-inferencia-externa-y-reconstrucción-cartográfica" class="nav-link" data-scroll-target="#etapa-6.-inferencia-externa-y-reconstrucción-cartográfica"><span class="header-section-number">9.6</span> Etapa 6. Inferencia externa y reconstrucción cartográfica</a></li>
+  </ul></li>
+  <li><a href="#contrato-mínimo-de-datos-intermedios" id="toc-contrato-mínimo-de-datos-intermedios" class="nav-link" data-scroll-target="#contrato-mínimo-de-datos-intermedios"><span class="header-section-number">10</span> Contrato mínimo de datos intermedios</a>
+  <ul class="collapse">
+  <li><a href="#contrato-para-tablas-de-features" id="toc-contrato-para-tablas-de-features" class="nav-link" data-scroll-target="#contrato-para-tablas-de-features"><span class="header-section-number">10.1</span> Contrato para tablas de features</a></li>
+  <li><a href="#contrato-para-tablas-base-canónicas" id="toc-contrato-para-tablas-base-canónicas" class="nav-link" data-scroll-target="#contrato-para-tablas-base-canónicas"><span class="header-section-number">10.2</span> Contrato para tablas base canónicas</a></li>
+  <li><a href="#contrato-para-rasters-congruentes" id="toc-contrato-para-rasters-congruentes" class="nav-link" data-scroll-target="#contrato-para-rasters-congruentes"><span class="header-section-number">10.3</span> Contrato para rasters congruentes</a></li>
+  </ul></li>
+  <li><a href="#reglas-de-integridad-del-flujo" id="toc-reglas-de-integridad-del-flujo" class="nav-link" data-scroll-target="#reglas-de-integridad-del-flujo"><span class="header-section-number">11</span> Reglas de integridad del flujo</a></li>
+  <li><a href="#estrategia-de-implementación-recomendada" id="toc-estrategia-de-implementación-recomendada" class="nav-link" data-scroll-target="#estrategia-de-implementación-recomendada"><span class="header-section-number">12</span> Estrategia de implementación recomendada</a>
+  <ul class="collapse">
+  <li><a href="#orquestación" id="toc-orquestación" class="nav-link" data-scroll-target="#orquestación"><span class="header-section-number">12.1</span> Orquestación</a></li>
+  <li><a href="#desarrollo-de-scripts" id="toc-desarrollo-de-scripts" class="nav-link" data-scroll-target="#desarrollo-de-scripts"><span class="header-section-number">12.2</span> Desarrollo de scripts</a></li>
+  <li><a href="#pruebas-automatizadas" id="toc-pruebas-automatizadas" class="nav-link" data-scroll-target="#pruebas-automatizadas"><span class="header-section-number">12.3</span> Pruebas automatizadas</a>
+  <ul class="collapse">
+  <li><a href="#unitarias" id="toc-unitarias" class="nav-link" data-scroll-target="#unitarias"><span class="header-section-number">12.3.1</span> Unitarias</a></li>
+  <li><a href="#integración-por-script" id="toc-integración-por-script" class="nav-link" data-scroll-target="#integración-por-script"><span class="header-section-number">12.3.2</span> Integración por script</a></li>
+  <li><a href="#integración-de-workflow" id="toc-integración-de-workflow" class="nav-link" data-scroll-target="#integración-de-workflow"><span class="header-section-number">12.3.3</span> Integración de workflow</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#riesgos-y-puntos-críticos" id="toc-riesgos-y-puntos-críticos" class="nav-link" data-scroll-target="#riesgos-y-puntos-críticos"><span class="header-section-number">13</span> Riesgos y puntos críticos</a>
+  <ul class="collapse">
+  <li><a href="#riesgo-1.-desalineación-espacial" id="toc-riesgo-1.-desalineación-espacial" class="nav-link" data-scroll-target="#riesgo-1.-desalineación-espacial"><span class="header-section-number">13.1</span> Riesgo 1. Desalineación espacial</a></li>
+  <li><a href="#riesgo-2.-dependencia-implícita-del-orden-de-filas" id="toc-riesgo-2.-dependencia-implícita-del-orden-de-filas" class="nav-link" data-scroll-target="#riesgo-2.-dependencia-implícita-del-orden-de-filas"><span class="header-section-number">13.2</span> Riesgo 2. Dependencia implícita del orden de filas</a></li>
+  <li><a href="#riesgo-3.-inconsistencia-de-nombres-y-columnas" id="toc-riesgo-3.-inconsistencia-de-nombres-y-columnas" class="nav-link" data-scroll-target="#riesgo-3.-inconsistencia-de-nombres-y-columnas"><span class="header-section-number">13.3</span> Riesgo 3. Inconsistencia de nombres y columnas</a></li>
+  <li><a href="#riesgo-4.-divergencias-entre-implementaciones-r-y-python" id="toc-riesgo-4.-divergencias-entre-implementaciones-r-y-python" class="nav-link" data-scroll-target="#riesgo-4.-divergencias-entre-implementaciones-r-y-python"><span class="header-section-number">13.4</span> Riesgo 4. Divergencias entre implementaciones R y Python</a></li>
+  <li><a href="#riesgo-5.-reproyección-que-altera-la-malla-útil" id="toc-riesgo-5.-reproyección-que-altera-la-malla-útil" class="nav-link" data-scroll-target="#riesgo-5.-reproyección-que-altera-la-malla-útil"><span class="header-section-number">13.5</span> Riesgo 5. Reproyección que altera la malla útil</a></li>
+  <li><a href="#riesgo-6.-sincronización-entre-máquinas-y-placeholders-de-nube" id="toc-riesgo-6.-sincronización-entre-máquinas-y-placeholders-de-nube" class="nav-link" data-scroll-target="#riesgo-6.-sincronización-entre-máquinas-y-placeholders-de-nube"><span class="header-section-number">13.6</span> Riesgo 6. Sincronización entre máquinas y placeholders de nube</a></li>
+  <li><a href="#riesgo-7.-metadatos-locales-de-snakemake" id="toc-riesgo-7.-metadatos-locales-de-snakemake" class="nav-link" data-scroll-target="#riesgo-7.-metadatos-locales-de-snakemake"><span class="header-section-number">13.7</span> Riesgo 7. Metadatos locales de Snakemake</a></li>
+  </ul></li>
+  <li><a href="#criterios-de-aceptación" id="toc-criterios-de-aceptación" class="nav-link" data-scroll-target="#criterios-de-aceptación"><span class="header-section-number">14</span> Criterios de aceptación</a></li>
+  <li><a href="#estado-validado-actual-del-workflow" id="toc-estado-validado-actual-del-workflow" class="nav-link" data-scroll-target="#estado-validado-actual-del-workflow"><span class="header-section-number">15</span> Estado validado actual del workflow</a></li>
+  <li><a href="#hallazgos-operativos-de-la-fase-de-ensayos-y-consolidación" id="toc-hallazgos-operativos-de-la-fase-de-ensayos-y-consolidación" class="nav-link" data-scroll-target="#hallazgos-operativos-de-la-fase-de-ensayos-y-consolidación"><span class="header-section-number">16</span> Hallazgos operativos de la fase de ensayos y consolidación</a>
+  <ul class="collapse">
+  <li><a href="#hallazgo-1.-la-congruencia-por-píxel-debe-construirse-solo-sobre-celdas-válidas" id="toc-hallazgo-1.-la-congruencia-por-píxel-debe-construirse-solo-sobre-celdas-válidas" class="nav-link" data-scroll-target="#hallazgo-1.-la-congruencia-por-píxel-debe-construirse-solo-sobre-celdas-válidas"><span class="header-section-number">16.1</span> Hallazgo 1. La congruencia por píxel debe construirse solo sobre celdas válidas</a>
+  <ul class="collapse">
+  <li><a href="#decisión-adoptada" id="toc-decisión-adoptada" class="nav-link" data-scroll-target="#decisión-adoptada"><span class="header-section-number">16.1.1</span> Decisión adoptada</a></li>
+  <li><a href="#implicación" id="toc-implicación" class="nav-link" data-scroll-target="#implicación"><span class="header-section-number">16.1.2</span> Implicación</a></li>
+  </ul></li>
+  <li><a href="#hallazgo-2.-no-debe-materializarse-la-grilla-completa-antes-del-filtrado" id="toc-hallazgo-2.-no-debe-materializarse-la-grilla-completa-antes-del-filtrado" class="nav-link" data-scroll-target="#hallazgo-2.-no-debe-materializarse-la-grilla-completa-antes-del-filtrado"><span class="header-section-number">16.2</span> Hallazgo 2. No debe materializarse la grilla completa antes del filtrado</a>
+  <ul class="collapse">
+  <li><a href="#decisión-adoptada-1" id="toc-decisión-adoptada-1" class="nav-link" data-scroll-target="#decisión-adoptada-1"><span class="header-section-number">16.2.1</span> Decisión adoptada</a></li>
+  </ul></li>
+  <li><a href="#hallazgo-3.-la-organización-de-raw-como-carpeta-plana-no-escala-bien" id="toc-hallazgo-3.-la-organización-de-raw-como-carpeta-plana-no-escala-bien" class="nav-link" data-scroll-target="#hallazgo-3.-la-organización-de-raw-como-carpeta-plana-no-escala-bien"><span class="header-section-number">16.3</span> Hallazgo 3. La organización de <code>raw/</code> como carpeta plana no escala bien</a>
+  <ul class="collapse">
+  <li><a href="#decisión-adoptada-2" id="toc-decisión-adoptada-2" class="nav-link" data-scroll-target="#decisión-adoptada-2"><span class="header-section-number">16.3.1</span> Decisión adoptada</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Otros formatos</h2><ul><li><a href="Readme.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li><li><a href="Readme.docx"><i class="bi bi-file-word"></i>MS Word</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Definición de requerimientos y caso de uso</h1>
+<p class="subtitle lead">Producción de un estimador del Índice de Integridad Ecosistémica a partir de datos geográficos vectoriales y raster</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="propósito" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Propósito</h1>
+<p>Este documento define el caso de uso, los requerimientos funcionales y no funcionales, y la arquitectura lógica de un flujo de trabajo para producir un <strong>estimador espacial del Índice de Integridad Ecosistémica (IIE)</strong> a partir de datos geográficos vectoriales y raster. El flujo está concebido como una tubería reproducible, escalable y preferentemente <strong>headless-first</strong>, con capacidad de integración en un sistema de orquestación como <strong>Snakemake</strong>.</p>
+<p>El objetivo final del proceso es generar, por región de análisis, un conjunto de productos congruentes entre sí y trazables, culminando en la producción de <strong>mapas raster del índice de integridad ecosistémica</strong> y sus insumos tabulares intermedios.</p>
+<p>En el estado actual del proyecto, el tramo <strong>validado y considerado canónico</strong> llega hasta la producción de la tabla de entrada a Netica (<code>bn_input.csv</code>). La reincorporación automática de predicciones externas de Netica al flujo geoespacial se considera aún <strong>provisional</strong>, pues hoy no existe garantía suficiente de congruencia fila a fila entre la tabla exportada por Python y la tabla de predicciones devuelta por Netica.</p>
+</section>
+<section id="caso-de-uso" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Caso de uso</h1>
+<section id="nombre-del-caso-de-uso" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="nombre-del-caso-de-uso"><span class="header-section-number">2.1</span> Nombre del caso de uso</h2>
+<p><strong>Producción de un estimador espacial del Índice de Integridad Ecosistémica</strong></p>
+</section>
+<section id="descripción-general" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="descripción-general"><span class="header-section-number">2.2</span> Descripción general</h2>
+<p>A partir de una colección heterogénea de insumos geográficos —capas vectoriales, coberturas raster, tablas derivadas y salidas de un modelo probabilístico o red bayesiana— se requiere construir una representación espacialmente congruente del Índice de Integridad Ecosistémica para un conjunto de regiones costeras.</p>
+<p>El proceso debe:</p>
+<ol type="1">
+<li>definir una geometría de referencia común por región;</li>
+<li>producir coberturas raster congruentes para múltiples variables ambientales y antrópicas;</li>
+<li>convertir dichas coberturas a series tabulares congruentes por píxel;</li>
+<li>ensamblar una tabla maestra de entrenamiento o inferencia;</li>
+<li>usar un motor de modelado probabilístico para producir valores estimados del índice;</li>
+<li>reconstruir los mapas raster finales del índice a partir de dichas predicciones.</li>
+</ol>
+</section>
+<section id="actores" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="actores"><span class="header-section-number">2.3</span> Actores</h2>
+<section id="actor-principal" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="actor-principal"><span class="header-section-number">2.3.1</span> Actor principal</h3>
+<ul>
+<li><strong>Equipo técnico del proyecto</strong>: desarrolla, ejecuta, valida y ajusta el flujo de trabajo.</li>
+</ul>
+</section>
+<section id="actores-secundarios" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="actores-secundarios"><span class="header-section-number">2.3.2</span> Actores secundarios</h3>
+<ul>
+<li><strong>Motor de inferencia bayesiana</strong>: Netica u otro sistema equivalente que procese la tabla preparada y devuelva predicciones por observación/píxel.</li>
+<li><strong>Sistema de orquestación</strong>: Snakemake u otro administrador de flujos que ejecute reglas, dependencias y paralelización.</li>
+<li><strong>Entorno SIG de validación</strong>: QGIS u otra herramienta para inspección cartográfica de resultados.</li>
+</ul>
+</section>
+</section>
+<section id="disparador" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="disparador"><span class="header-section-number">2.4</span> Disparador</h2>
+<p>El proceso se ejecuta cuando se dispone de:</p>
+<ul>
+<li>insumos geográficos base;</li>
+<li>definición de regiones de análisis;</li>
+<li>reglas para generar variables derivadas;</li>
+<li>una especificación del modelo probabilístico o una salida de inferencia ya producida.</li>
+</ul>
+</section>
+<section id="resultado-esperado" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="resultado-esperado"><span class="header-section-number">2.5</span> Resultado esperado</h2>
+<p>El flujo produce:</p>
+<ul>
+<li>una colección de <strong>rasters de referencia</strong> por región;</li>
+<li>una colección de <strong>features tabulares congruentes</strong> por región o globales;</li>
+<li>una <strong>tabla final integrada</strong> de variables por píxel;</li>
+<li>una <strong>tabla de entrada a inferencia bayesiana</strong>;</li>
+<li>opcionalmente, una <strong>salida de inferencia</strong> del índice y su reconstrucción espacial;</li>
+<li>un conjunto potencial de <strong>GeoTIFF finales del Índice de Integridad Ecosistémica</strong>.</li>
+</ul>
+</section>
+</section>
+<section id="alcance" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Alcance</h1>
+<section id="incluye" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="incluye"><span class="header-section-number">3.1</span> Incluye</h2>
+<ul>
+<li>preparación de geometrías de referencia;</li>
+<li>generación de variables espaciales a partir de insumos vectoriales y raster;</li>
+<li>integración tabular de variables congruentes;</li>
+<li>preparación de tablas para modelado;</li>
+<li>validación estructural y pruebas operativas del flujo;</li>
+<li>preparación de insumos para el motor bayesiano externo.</li>
+</ul>
+</section>
+<section id="no-incluye" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="no-incluye"><span class="header-section-number">3.2</span> No incluye</h2>
+<ul>
+<li>diseño conceptual del índice ecológico en sí;</li>
+<li>definición científica de cada variable o de sus umbrales;</li>
+<li>captura primaria de datos de campo;</li>
+<li>desarrollo de interfaces gráficas como requisito principal;</li>
+<li>operación manual interactiva como mecanismo central del flujo;</li>
+<li>cierre definitivo de la retrointegración automática de predicciones externas cuando no exista congruencia verificable entre tabla base y salida del motor probabilístico.</li>
+</ul>
+</section>
+</section>
+<section id="objetivo-general" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Objetivo general</h1>
+<p>Implementar un flujo reproducible y escalable que permita estimar y mapear el Índice de Integridad Ecosistémica a partir de múltiples fuentes geoespaciales, preservando la congruencia espacial entre todas las variables y asegurando trazabilidad desde los insumos hasta el raster final.</p>
+</section>
+<section id="objetivos-específicos" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Objetivos específicos</h1>
+<ol type="1">
+<li>Definir una <strong>malla o plantilla raster de referencia</strong> por región de análisis.</li>
+<li>Generar variables espaciales derivadas a partir de insumos geográficos heterogéneos.</li>
+<li>Convertir las variables espaciales en <strong>series tabulares congruentes por píxel</strong>.</li>
+<li>Construir una tabla final apta para entrenamiento, inferencia o exportación a motores externos.</li>
+<li>Preparar una tabla canónica de entrada para inferencia bayesiana.</li>
+<li>Integrar la salida del modelo probabilístico con la geometría espacial de referencia cuando exista congruencia verificable.</li>
+<li>Garantizar reproducibilidad, escalabilidad y validación automatizada.</li>
+</ol>
+</section>
+<section id="supuestos-del-proceso" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Supuestos del proceso</h1>
+<ul>
+<li>Existe una partición territorial en regiones de análisis.</li>
+<li>Cada región cuenta o puede contar con un raster de referencia que fija CRS, resolución, extensión y alineación.</li>
+<li>Las variables derivadas pueden expresarse finalmente de forma raster o tabular por píxel.</li>
+<li>La congruencia espacial entre variables es un requisito central.</li>
+<li>Los productos intermedios se almacenan preferentemente en <strong>Parquet</strong> para tablas y en <strong>GeoTIFF</strong> para rasters.</li>
+<li>La salida del modelo probabilístico solo puede reincorporarse automáticamente si preserva una correspondencia inequívoca con la tabla base.</li>
+<li>El orden de filas y la longitud total de las tablas son parte del contrato operativo cuando interviene un motor externo sin llaves espaciales explícitas.</li>
+</ul>
+</section>
+<section id="requerimientos-funcionales" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Requerimientos funcionales</h1>
+<section id="rf-01.-preparación-de-polígonos-o-regiones-de-referencia" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="rf-01.-preparación-de-polígonos-o-regiones-de-referencia"><span class="header-section-number">7.1</span> RF-01. Preparación de polígonos o regiones de referencia</h2>
+<p>El sistema debe permitir preparar una colección de regiones o polígonos de análisis a partir de insumos vectoriales, incluyendo operaciones como reproyección, corrección de CRS y buffering cuando el flujo lo requiera.</p>
+</section>
+<section id="rf-02.-generación-de-rasters-de-referencia-por-región" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="rf-02.-generación-de-rasters-de-referencia-por-región"><span class="header-section-number">7.2</span> RF-02. Generación de rasters de referencia por región</h2>
+<p>El sistema debe generar, para cada región, un raster de referencia que defina la malla espacial canónica del análisis, incluyendo:</p>
+<ul>
+<li>resolución;</li>
+<li>extensión;</li>
+<li>alineación;</li>
+<li>sistema de coordenadas;</li>
+<li>nodata.</li>
+</ul>
+</section>
+<section id="rf-03.-producción-de-coberturas-raster-congruentes" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="rf-03.-producción-de-coberturas-raster-congruentes"><span class="header-section-number">7.3</span> RF-03. Producción de coberturas raster congruentes</h2>
+<p>El sistema debe permitir generar coberturas raster congruentes por región a partir de distintos tipos de datos de entrada, incluyendo:</p>
+<ul>
+<li>datos vectoriales rasterizados;</li>
+<li>datos raster reproyectados y recortados;</li>
+<li>interpolaciones o transformaciones espaciales;</li>
+<li>muestreos o distancias evaluadas sobre una base tabular canónica cuando esto resulte más estable que rederivar la malla desde un raster reproyectado.</li>
+</ul>
+</section>
+<section id="rf-04.-conversión-de-coberturas-a-series-numéricas-congruentes" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="rf-04.-conversión-de-coberturas-a-series-numéricas-congruentes"><span class="header-section-number">7.4</span> RF-04. Conversión de coberturas a series numéricas congruentes</h2>
+<p>El sistema debe convertir las coberturas congruentes a tablas o series numéricas por píxel, preservando al menos:</p>
+<ul>
+<li>identificador regional;</li>
+<li>identificador de píxel;</li>
+<li>coordenadas <code>x</code>, <code>y</code>;</li>
+<li>una o más variables temáticas.</li>
+</ul>
+</section>
+<section id="rf-05.-almacenamiento-serializado-intermedio" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="rf-05.-almacenamiento-serializado-intermedio"><span class="header-section-number">7.5</span> RF-05. Almacenamiento serializado intermedio</h2>
+<p>Para las tablas intermedias y finales, se adopta <strong>Parquet</strong> como formato base de almacenamiento tabular, por las siguientes razones:</p>
+<ul>
+<li>mayor eficiencia de lectura y escritura;</li>
+<li>mejor compresión;</li>
+<li>mejor soporte para tablas grandes;</li>
+<li>compatibilidad con particionamiento por región o variable;</li>
+<li>mejor integración con workflows escalables.</li>
+</ul>
+</section>
+<section id="rf-06.-integración-de-features-en-una-tabla-maestra" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="rf-06.-integración-de-features-en-una-tabla-maestra"><span class="header-section-number">7.6</span> RF-06. Integración de features en una tabla maestra</h2>
+<p>El sistema debe ensamblar una tabla maestra a partir de múltiples productos serializados congruentes, preservando la correspondencia espacial entre observaciones.</p>
+</section>
+<section id="rf-07.-preparación-de-datos-para-inferencia-bayesiana" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="rf-07.-preparación-de-datos-para-inferencia-bayesiana"><span class="header-section-number">7.7</span> RF-07. Preparación de datos para inferencia bayesiana</h2>
+<p>El sistema debe producir una tabla de entrada apta para ser consumida por un motor de inferencia bayesiana o un proceso equivalente, incluyendo discretización y codificación cuando sea necesario.</p>
+</section>
+<section id="rf-08.-integración-de-predicciones-del-modelo" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="rf-08.-integración-de-predicciones-del-modelo"><span class="header-section-number">7.8</span> RF-08. Integración de predicciones del modelo</h2>
+<p>El sistema debe poder leer una salida de inferencia generada por Netica o por otro motor compatible y asociarla correctamente con los píxeles de la tabla base <strong>solo si</strong> se cumple una congruencia verificable en orden y número de filas.</p>
+</section>
+<section id="rf-09.-reconstrucción-raster-del-índice-final" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="rf-09.-reconstrucción-raster-del-índice-final"><span class="header-section-number">7.9</span> RF-09. Reconstrucción raster del índice final</h2>
+<p>El sistema debe reconstruir, por región, el raster final del Índice de Integridad Ecosistémica usando:</p>
+<ul>
+<li>la tabla base espacialmente congruente;</li>
+<li>las predicciones del modelo;</li>
+<li>el raster de referencia regional.</li>
+</ul>
+</section>
+<section id="rf-10.-exportación-de-productos-cartográficos-finales" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="rf-10.-exportación-de-productos-cartográficos-finales"><span class="header-section-number">7.10</span> RF-10. Exportación de productos cartográficos finales</h2>
+<p>El sistema debe generar productos finales al menos en formato:</p>
+<ul>
+<li><code>GeoTIFF</code> por región;</li>
+</ul>
+<p>y opcionalmente:</p>
+<ul>
+<li>histogramas PNG;</li>
+<li>tablas CSV auxiliares;</li>
+<li>proyectos QGIS para inspección.</li>
+</ul>
+</section>
+<section id="rf-11.-trazabilidad-del-flujo" class="level2" data-number="7.11">
+<h2 data-number="7.11" class="anchored" data-anchor-id="rf-11.-trazabilidad-del-flujo"><span class="header-section-number">7.11</span> RF-11. Trazabilidad del flujo</h2>
+<p>El sistema debe permitir rastrear qué insumos y qué pasos generaron cada producto final o intermedio.</p>
+</section>
+<section id="rf-12.-ejecución-automatizada-por-reglas" class="level2" data-number="7.12">
+<h2 data-number="7.12" class="anchored" data-anchor-id="rf-12.-ejecución-automatizada-por-reglas"><span class="header-section-number">7.12</span> RF-12. Ejecución automatizada por reglas</h2>
+<p>El sistema debe permitir la ejecución automatizada de los pasos mediante reglas y dependencias explícitas, preferentemente con Snakemake.</p>
+</section>
+</section>
+<section id="requerimientos-no-funcionales" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Requerimientos no funcionales</h1>
+<section id="rnf-01.-reproducibilidad" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="rnf-01.-reproducibilidad"><span class="header-section-number">8.1</span> RNF-01. Reproducibilidad</h2>
+<p>El flujo debe producir resultados reproducibles a partir de la misma configuración, insumos y versión de scripts.</p>
+</section>
+<section id="rnf-02.-modularidad" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="rnf-02.-modularidad"><span class="header-section-number">8.2</span> RNF-02. Modularidad</h2>
+<p>Cada componente debe corresponder a una etapa funcional clara, con entradas y salidas explícitas.</p>
+</section>
+<section id="rnf-03.-escalabilidad" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="rnf-03.-escalabilidad"><span class="header-section-number">8.3</span> RNF-03. Escalabilidad</h2>
+<p>El flujo debe permitir crecer en número de variables y regiones sin rediseño estructural.</p>
+</section>
+<section id="rnf-04.-paralelización" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="rnf-04.-paralelización"><span class="header-section-number">8.4</span> RNF-04. Paralelización</h2>
+<p>Siempre que sea viable, las ramas por variable o por región deben poder ejecutarse en paralelo.</p>
+</section>
+<section id="rnf-05.-trazabilidad-de-errores" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="rnf-05.-trazabilidad-de-errores"><span class="header-section-number">8.5</span> RNF-05. Trazabilidad de errores</h2>
+<p>Las fallas deben poder localizarse a nivel de regla, script, región o variable.</p>
+</section>
+<section id="rnf-06.-validación-automatizada" class="level2" data-number="8.6">
+<h2 data-number="8.6" class="anchored" data-anchor-id="rnf-06.-validación-automatizada"><span class="header-section-number">8.6</span> RNF-06. Validación automatizada</h2>
+<p>El proyecto debe contar con pruebas automatizadas que validen componentes críticos del flujo y contratos de datos.</p>
+</section>
+<section id="rnf-07.-portabilidad-razonable" class="level2" data-number="8.7">
+<h2 data-number="8.7" class="anchored" data-anchor-id="rnf-07.-portabilidad-razonable"><span class="header-section-number">8.7</span> RNF-07. Portabilidad razonable</h2>
+<p>El flujo debe ejecutarse en entornos Python reproducibles, idealmente mediante entornos controlados y dependencias explícitas.</p>
+</section>
+<section id="rnf-08.-headless-first" class="level2" data-number="8.8">
+<h2 data-number="8.8" class="anchored" data-anchor-id="rnf-08.-headless-first"><span class="header-section-number">8.8</span> RNF-08. Headless-first</h2>
+<p>El flujo debe funcionar sin depender de interfaces gráficas, salvo para validación o inspección posterior.</p>
+</section>
+</section>
+<section id="arquitectura-lógica-del-proceso" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Arquitectura lógica del proceso</h1>
+<section id="etapa-1.-geometría-de-referencia" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="etapa-1.-geometría-de-referencia"><span class="header-section-number">9.1</span> Etapa 1. Geometría de referencia</h2>
+<p>Se construyen las regiones y sus plantillas raster de referencia. Esta etapa fija la congruencia espacial del resto del proceso.</p>
+<p><strong>Producto principal:</strong> <code>ref_grid.tif</code> por región.</p>
+</section>
+<section id="etapa-2.-generación-de-variables-espaciales" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="etapa-2.-generación-de-variables-espaciales"><span class="header-section-number">9.2</span> Etapa 2. Generación de variables espaciales</h2>
+<p>Se generan capas raster o equivalentes para variables derivadas a partir de datos vectoriales o raster.</p>
+<p><strong>Producto principal:</strong> features regionales tabulares congruentes o insumos preparados para su conversión tabular.</p>
+</section>
+<section id="etapa-3.-conversión-a-series-congruentes" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="etapa-3.-conversión-a-series-congruentes"><span class="header-section-number">9.3</span> Etapa 3. Conversión a series congruentes</h2>
+<p>Cada variable se transforma a una tabla de observaciones por píxel con las mismas llaves espaciales.</p>
+<p><strong>Producto principal:</strong> archivos serializados por variable, con columnas como <code>regionid</code>, <code>pixid</code>, <code>x</code>, <code>y</code> y la variable temática.</p>
+</section>
+<section id="etapa-4.-integración-tabular" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="etapa-4.-integración-tabular"><span class="header-section-number">9.4</span> Etapa 4. Integración tabular</h2>
+<p>Se ensamblan todas las variables en una sola tabla maestra.</p>
+<p><strong>Producto principal:</strong> <code>master_features.parquet</code>.</p>
+</section>
+<section id="etapa-5.-preparación-para-modelado-e-inferencia" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="etapa-5.-preparación-para-modelado-e-inferencia"><span class="header-section-number">9.5</span> Etapa 5. Preparación para modelado e inferencia</h2>
+<p>Se prepara la tabla final para el motor bayesiano externo.</p>
+<p><strong>Producto principal:</strong> <code>bn_input.parquet</code> y <code>bn_input.csv</code>.</p>
+</section>
+<section id="etapa-6.-inferencia-externa-y-reconstrucción-cartográfica" class="level2" data-number="9.6">
+<h2 data-number="9.6" class="anchored" data-anchor-id="etapa-6.-inferencia-externa-y-reconstrucción-cartográfica"><span class="header-section-number">9.6</span> Etapa 6. Inferencia externa y reconstrucción cartográfica</h2>
+<p>Se leen predicciones del motor externo y, si existe congruencia verificable, se reconstruyen mapas raster finales por región.</p>
+<p><strong>Producto principal esperado:</strong> <code>master_features_with_ie.parquet</code> y <code>GeoTIFF</code> regionales del índice.</p>
+<p><strong>Estado actual:</strong> esta etapa se considera <strong>no cerrada</strong> mientras no se garantice correspondencia inequívoca entre <code>bn_input.csv</code> e <code>ie_predictions.csv</code>.</p>
+</section>
+</section>
+<section id="contrato-mínimo-de-datos-intermedios" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Contrato mínimo de datos intermedios</h1>
+<section id="contrato-para-tablas-de-features" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="contrato-para-tablas-de-features"><span class="header-section-number">10.1</span> Contrato para tablas de features</h2>
+<p>Toda tabla serializada de features debe incluir como mínimo:</p>
+<ul>
+<li><code>regionid</code></li>
+<li><code>pixid</code></li>
+<li><code>x</code></li>
+<li><code>y</code></li>
+</ul>
+<p>más una o varias columnas temáticas.</p>
+</section>
+<section id="contrato-para-tablas-base-canónicas" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="contrato-para-tablas-base-canónicas"><span class="header-section-number">10.2</span> Contrato para tablas base canónicas</h2>
+<p>Cuando una feature se construya usando una <strong>tabla base regional</strong> para preservar alineación, esa tabla base debe cumplir el mismo contrato mínimo:</p>
+<ul>
+<li><code>regionid</code></li>
+<li><code>pixid</code></li>
+<li><code>x</code></li>
+<li><code>y</code></li>
+</ul>
+<p>y debe representar la malla canónica que ya fue validada por el flujo.</p>
+</section>
+<section id="contrato-para-rasters-congruentes" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="contrato-para-rasters-congruentes"><span class="header-section-number">10.3</span> Contrato para rasters congruentes</h2>
+<p>Todo raster congruente debe ser compatible con el raster de referencia regional en:</p>
+<ul>
+<li>CRS;</li>
+<li>resolución;</li>
+<li><code>transform</code>;</li>
+<li><code>shape</code>;</li>
+<li>nodata;</li>
+<li>extensión o máscara válida.</li>
+</ul>
+</section>
+</section>
+<section id="reglas-de-integridad-del-flujo" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Reglas de integridad del flujo</h1>
+<ol type="1">
+<li>Ninguna variable debe perder su correspondencia espacial con la plantilla regional.</li>
+<li>La unión entre variables debe preservar una llave espacial consistente o una alineación posicional previamente validada.</li>
+<li>La reconstrucción raster final debe usar la misma plantilla de referencia que originó la congruencia del resto del análisis.</li>
+<li>Los productos intermedios deben ser suficientemente explícitos para permitir depuración y recomputación parcial.</li>
+<li>Las salidas del modelo probabilístico deben poder vincularse sin ambigüedad con la tabla base.</li>
+<li>Debe distinguirse explícitamente entre:
+<ul>
+<li><strong>clave estructural de feature</strong>: nombre de carpeta o regla en <code>results/features/</code>;</li>
+<li><strong>nombre temático de columna</strong>: nombre final exportado dentro de la tabla.</li>
+</ul></li>
+<li>No debe asumirse que el nombre de la carpeta de una feature y el nombre de su columna temática son idénticos.</li>
+</ol>
+</section>
+<section id="estrategia-de-implementación-recomendada" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Estrategia de implementación recomendada</h1>
+<section id="orquestación" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="orquestación"><span class="header-section-number">12.1</span> Orquestación</h2>
+<p>Se recomienda implementar el flujo mediante <strong>Snakemake</strong>, organizando reglas por capas:</p>
+<ul>
+<li><code>reference</code></li>
+<li><code>feature_tables</code></li>
+<li><code>training_table</code></li>
+<li><code>bayes_io</code></li>
+<li><code>final_maps</code></li>
+</ul>
+</section>
+<section id="desarrollo-de-scripts" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="desarrollo-de-scripts"><span class="header-section-number">12.2</span> Desarrollo de scripts</h2>
+<p>Se recomienda que cada script:</p>
+<ul>
+<li>reciba rutas parametrizadas;</li>
+<li>pueda ejecutarse por región cuando sea razonable;</li>
+<li>tenga entradas y salidas explícitas;</li>
+<li>no dependa de rutas hardcodeadas como única opción operativa;</li>
+<li>documente si usa como base un <code>ref_grid.tif</code> o una tabla base regional ya alineada.</li>
+</ul>
+</section>
+<section id="pruebas-automatizadas" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="pruebas-automatizadas"><span class="header-section-number">12.3</span> Pruebas automatizadas</h2>
+<p>Se recomienda una batería de pruebas en <strong>pytest</strong> en tres niveles:</p>
+<section id="unitarias" class="level3" data-number="12.3.1">
+<h3 data-number="12.3.1" class="anchored" data-anchor-id="unitarias"><span class="header-section-number">12.3.1</span> Unitarias</h3>
+<p>Para funciones puras:</p>
+<ul>
+<li>normalización;</li>
+<li>discretización;</li>
+<li>construcción de llaves;</li>
+<li>ordenamiento de regiones;</li>
+<li>validación de contratos;</li>
+<li>normalización de nombres de columnas o categorías.</li>
+</ul>
+</section>
+<section id="integración-por-script" class="level3" data-number="12.3.2">
+<h3 data-number="12.3.2" class="anchored" data-anchor-id="integración-por-script"><span class="header-section-number">12.3.2</span> Integración por script</h3>
+<p>Para mini-casos sintéticos:</p>
+<ul>
+<li>creación de <code>ref_grid</code>;</li>
+<li>rasterización simple;</li>
+<li>generación de <code>.parquet</code>;</li>
+<li>ensamblado tabular;</li>
+<li>alineación ligera entre features.</li>
+</ul>
+</section>
+<section id="integración-de-workflow" class="level3" data-number="12.3.3">
+<h3 data-number="12.3.3" class="anchored" data-anchor-id="integración-de-workflow"><span class="header-section-number">12.3.3</span> Integración de workflow</h3>
+<p>Para un DAG mínimo:</p>
+<ul>
+<li>una región;</li>
+<li>un subconjunto pequeño de variables;</li>
+<li>ensamblado final;</li>
+<li>preparación de <code>bn_input.csv</code>.</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="riesgos-y-puntos-críticos" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Riesgos y puntos críticos</h1>
+<section id="riesgo-1.-desalineación-espacial" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="riesgo-1.-desalineación-espacial"><span class="header-section-number">13.1</span> Riesgo 1. Desalineación espacial</h2>
+<p>Si una variable no respeta la malla canónica regional, toda la integración posterior puede quedar sesgada.</p>
+</section>
+<section id="riesgo-2.-dependencia-implícita-del-orden-de-filas" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="riesgo-2.-dependencia-implícita-del-orden-de-filas"><span class="header-section-number">13.2</span> Riesgo 2. Dependencia implícita del orden de filas</h2>
+<p>El flujo requiere especial cuidado cuando un motor externo devuelve predicciones por fila. Debe preservarse una correspondencia inequívoca entre observación y píxel. El problema sigue vigente en la interfaz con Netica y hoy constituye el principal límite funcional del tramo final. El README previo ya señalaba este riesgo y ahora se considera confirmado operativamente.</p>
+</section>
+<section id="riesgo-3.-inconsistencia-de-nombres-y-columnas" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="riesgo-3.-inconsistencia-de-nombres-y-columnas"><span class="header-section-number">13.3</span> Riesgo 3. Inconsistencia de nombres y columnas</h2>
+<p>El ensamblado final puede fallar si no existe una convención estable de nombres para archivos y columnas.</p>
+</section>
+<section id="riesgo-4.-divergencias-entre-implementaciones-r-y-python" class="level2" data-number="13.4">
+<h2 data-number="13.4" class="anchored" data-anchor-id="riesgo-4.-divergencias-entre-implementaciones-r-y-python"><span class="header-section-number">13.4</span> Riesgo 4. Divergencias entre implementaciones R y Python</h2>
+<p>Algunas operaciones pueden no tener equivalencia exacta entre bibliotecas. Eso debe documentarse explícitamente y validarse empíricamente cuando haya datos disponibles.</p>
+</section>
+<section id="riesgo-5.-reproyección-que-altera-la-malla-útil" class="level2" data-number="13.5">
+<h2 data-number="13.5" class="anchored" data-anchor-id="riesgo-5.-reproyección-que-altera-la-malla-útil"><span class="header-section-number">13.5</span> Riesgo 5. Reproyección que altera la malla útil</h2>
+<p>En algunas variables, derivar la tabla de salida a partir de un <code>ref_grid</code> reproyectado puede cambiar el número de filas válidas. Cuando eso ocurra, conviene usar una tabla base regional ya alineada como malla canónica.</p>
+</section>
+<section id="riesgo-6.-sincronización-entre-máquinas-y-placeholders-de-nube" class="level2" data-number="13.6">
+<h2 data-number="13.6" class="anchored" data-anchor-id="riesgo-6.-sincronización-entre-máquinas-y-placeholders-de-nube"><span class="header-section-number">13.6</span> Riesgo 6. Sincronización entre máquinas y placeholders de nube</h2>
+<p>Cuando el repositorio de datos se sincroniza mediante Dropbox u otro servicio de nube, un archivo puede “existir” pero no estar materializado localmente. Esto puede romper lecturas con <code>pyarrow</code> o <code>pandas</code>, especialmente en Parquet, aunque Snakemake vea el archivo. El problema se observó en una segunda máquina Windows y se resolvió materializando localmente los archivos relevantes antes de ejecutar reglas finales.</p>
+</section>
+<section id="riesgo-7.-metadatos-locales-de-snakemake" class="level2" data-number="13.7">
+<h2 data-number="13.7" class="anchored" data-anchor-id="riesgo-7.-metadatos-locales-de-snakemake"><span class="header-section-number">13.7</span> Riesgo 7. Metadatos locales de Snakemake</h2>
+<p>Los metadatos de Snakemake viven en el proyecto local, no en el repositorio de datos. Al trabajar entre varias máquinas, es normal que existan outputs válidos pero sin metadata local asociada. Esto afecta la riqueza de <code>snakemake --report</code>, pero no invalida los archivos.</p>
+</section>
+</section>
+<section id="criterios-de-aceptación" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> Criterios de aceptación</h1>
+<p>El flujo se considerará funcionalmente aceptable en su estado actual cuando cumpla al menos lo siguiente:</p>
+<ol type="1">
+<li>genera un raster de referencia válido por región;</li>
+<li>genera variables intermedias congruentes y serializadas;</li>
+<li>construye una tabla final con una fila por píxel y una columna por variable;</li>
+<li>produce correctamente <code>master_features.parquet</code>;</li>
+<li>produce correctamente <code>bn_input.parquet</code> y <code>bn_input.csv</code>;</li>
+<li>permite reejecutar parcialmente etapas del flujo;</li>
+<li>cuenta con validaciones mínimas para identificar desalineación, duplicados e inconsistencias de esquema.</li>
+</ol>
+<p>La reincorporación de inferencia externa y la reconstrucción de mapas finales se considera aún <strong>provisional</strong> y no forma parte del criterio de aceptación cerrado mientras no exista correspondencia verificable con la salida de Netica.</p>
+</section>
+<section id="estado-validado-actual-del-workflow" class="level1" data-number="15">
+<h1 data-number="15"><span class="header-section-number">15</span> Estado validado actual del workflow</h1>
+<p>En su estado actual, el workflow ya integra de forma congruente al menos las siguientes familias de variables:</p>
+<ul>
+<li><code>tasa_erosion</code></li>
+<li><code>corales</code></li>
+<li><code>tipo_costa</code></li>
+<li><code>zvh</code></li>
+<li><code>velocidad_del_viento</code></li>
+<li><code>estructuras_costeras</code></li>
+<li><code>spp_invasoras</code></li>
+<li><code>pasto_marino</code></li>
+<li><code>batimetria</code></li>
+<li><code>madmex_uso_suelo</code></li>
+<li><code>manglares</code></li>
+<li><code>movimiento_dunas</code></li>
+</ul>
+<p>En una corrida validada con dos regiones de prueba, el ensamblado produjo <code>master_features.parquet</code> con <strong>546223 filas</strong> y <strong>20 columnas</strong>, confirmando que las nuevas variables se integran sin romper la alineación regional cuando respetan la malla canónica del workflow. :contentReference<span data-index="2">oaicite:2</span></p>
+</section>
+<section id="hallazgos-operativos-de-la-fase-de-ensayos-y-consolidación" class="level1" data-number="16">
+<h1 data-number="16"><span class="header-section-number">16</span> Hallazgos operativos de la fase de ensayos y consolidación</h1>
+<p>La fase de ensayos sobre laptop Windows y la posterior validación en una segunda máquina permitieron validar la arquitectura general del workflow, detectar defectos lógicos importantes en la traducción inicial de scripts R a Python y ajustar decisiones operativas relevantes para su ejecución estable.</p>
+<section id="hallazgo-1.-la-congruencia-por-píxel-debe-construirse-solo-sobre-celdas-válidas" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="hallazgo-1.-la-congruencia-por-píxel-debe-construirse-solo-sobre-celdas-válidas"><span class="header-section-number">16.1</span> Hallazgo 1. La congruencia por píxel debe construirse solo sobre celdas válidas</h2>
+<p>El principal defecto lógico detectado en la traducción inicial de algunos scripts Python fue que, después de reproyectar el <code>ref_grid</code> regional, se estaban convirtiendo <strong>todas las celdas</strong> de la grilla reproyectada a observaciones tabulares, incluyendo celdas sin datos o fuera de la máscara útil.</p>
+<p>Eso provocó una inflación artificial severa en las tablas de features.</p>
+<section id="decisión-adoptada" class="level3" data-number="16.1.1">
+<h3 data-number="16.1.1" class="anchored" data-anchor-id="decisión-adoptada"><span class="header-section-number">16.1.1</span> Decisión adoptada</h3>
+<p>Los scripts de features deben:</p>
+<ol type="1">
+<li>reproyectar el raster de referencia cuando aplique;</li>
+<li>identificar primero las celdas válidas;</li>
+<li>calcular coordenadas <code>x</code>, <code>y</code> solo para esas celdas válidas;</li>
+<li>exportar únicamente esas observaciones.</li>
+</ol>
+</section>
+<section id="implicación" class="level3" data-number="16.1.2">
+<h3 data-number="16.1.2" class="anchored" data-anchor-id="implicación"><span class="header-section-number">16.1.2</span> Implicación</h3>
+<p>La tabla tabular congruente por píxel no debe entenderse como “todas las celdas del raster reproyectado”, sino como “todas las celdas válidas de la malla útil regional”.</p>
+</section>
+</section>
+<section id="hallazgo-2.-no-debe-materializarse-la-grilla-completa-antes-del-filtrado" class="level2" data-number="16.2">
+<h2 data-number="16.2" class="anchored" data-anchor-id="hallazgo-2.-no-debe-materializarse-la-grilla-completa-antes-del-filtrado"><span class="header-section-number">16.2</span> Hallazgo 2. No debe materializarse la grilla completa antes del filtrado</h2>
+<p>En regiones grandes, incluso el paso intermedio de construir coordenadas para toda la grilla reproyectada resultó inviable por memoria.</p>
+<section id="decisión-adoptada-1" class="level3" data-number="16.2.1">
+<h3 data-number="16.2.1" class="anchored" data-anchor-id="decisión-adoptada-1"><span class="header-section-number">16.2.1</span> Decisión adoptada</h3>
+<p>Los scripts de features deben evitar:</p>
+<ul>
+<li>creación de <code>meshgrid</code> completo;</li>
+<li>transformación a coordenadas para toda la matriz;</li>
+<li>filtrado posterior.</li>
+</ul>
+<p>En su lugar, deben trabajar así:</p>
+<ol type="1">
+<li>detectar índices de celdas válidas;</li>
+<li>generar coordenadas solo para esas posiciones;</li>
+<li>construir la tabla final directamente a partir de ese subconjunto.</li>
+</ol>
+</section>
+</section>
+<section id="hallazgo-3.-la-organización-de-raw-como-carpeta-plana-no-escala-bien" class="level2" data-number="16.3">
+<h2 data-number="16.3" class="anchored" data-anchor-id="hallazgo-3.-la-organización-de-raw-como-carpeta-plana-no-escala-bien"><span class="header-section-number">16.3</span> Hallazgo 3. La organización de <code>raw/</code> como carpeta plana no escala bien</h2>
+<p>Durante los ensayos operativos se comprobó que una carpeta <code>raw/</code> plana se vuelve rápidamente confusa y poco manejable.</p>
+<section id="decisión-adoptada-2" class="level3" data-number="16.3.1">
+<h3 data-number="16.3.1" class="anchored" data-anchor-id="decisión-adoptada-2"><span class="header-section-number">16.3.1</span> Decisión adoptada</h3>
+<p>La organización canónica de insumos se movió a una estructura temática bajo <code>varsIni/</code>, sustituyendo el uso previo de <code>raw/</code> como convención principal. La estructura actual recomendada es del tipo:</p>
+<p>```text varsIni/ batimetria/ coastal_regions/ corals/ dunes_cost_2014/ dunes_inegi/ erosion/ estructuras/ madmex/ manglares/ pastos_marinos/ plantas_snib/ velocidad_del_viento/ results/ reference/ features/ training/ final_maps/ external/ netica/</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

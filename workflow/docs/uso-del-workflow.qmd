@@ -1,0 +1,183 @@
+---
+title: "Snakemake · Cheat Sheet"
+subtitle: "Usos comunes para el workflow Workflow-IIE"
+format:
+  html:
+    toc: true
+    number-sections: false
+  pdf:
+    toc: true
+    number-sections: false
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## Contexto de uso
+
+Suposiciones previas:
+
+```powershell
+conda activate qgis_env
+cd "C:\Users\equih\0 Versiones\Workflow-iie\propuesta-workflow-iie\workflow"
+````
+
+
+## Tabla rápida: uso y comando
+
+| Uso                                                     | Comando                                                                               |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Ver qué se ejecutaría, sin correr nada                  | `snakemake -n`                                                                        |
+| Ver qué se ejecutaría para un archivo objetivo          | `snakemake -n C:/wf-ie-data/results/training/bn_input.csv`                            |
+| Correr todo el workflow definido en `rule all`          | `snakemake -j1`                                                                       |
+| Correr un objetivo específico                           | `snakemake -j1 C:/wf-ie-data/results/training/bn_input.csv`                           |
+| Correr una regla forzándola                             | `snakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv`       |
+| Forzar una regla y ver comandos en pantalla             | `snakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv`    |
+| Mostrar también el motivo de ejecución                  | `snakemake -j1 -p --reason C:/wf-ie-data/results/training/bn_input.csv`               |
+| Ejecutar con varios núcleos                             | `snakemake -j8`                                                                       |
+| Seguir aunque una regla falle                           | `snakemake -j4 --keep-going`                                                          |
+| Mostrar menos ruido en pantalla                         | `snakemake -j1 --quiet progress rules`                                                |
+| Mostrar resumen de archivos y estado                    | `snakemake --summary`                                                                 |
+| Mostrar resumen detallado                               | `snakemake --detailed-summary`                                                        |
+| Listar reglas disponibles                               | `snakemake --list-rules`                                                              |
+| Listar sólo las reglas objetivo                         | `snakemake --list-target-rules`                                                       |
+| Forzar recreación de un archivo ya existente            | `snakemake -j1 -f C:/wf-ie-data/results/training/bn_input.csv`                        |
+| Forzar toda una regla, aunque los archivos existan      | `snakemake -j1 -R feature_zvh C:/wf-ie-data/results/training/master_features.parquet` |
+| Borrar outputs temporales innecesarios                  | `snakemake --delete-temp-output`                                                      |
+| Limpiar metadatos de un archivo                         | `snakemake --cleanup-metadata C:/wf-ie-data/results/training/bn_input.csv`            |
+| Ignorar provenance y usar sólo fechas de modificación   | `snakemake -j1 --rerun-triggers mtime`                                                |
+| Desbloquear el workflow si quedó “locked”               | `snakemake --unlock`                                                                  |
+| Ver el DAG en texto                                     | `snakemake --dag`                                                                     |
+| Exportar el DAG para Graphviz                           | `snakemake --dag \| dot -Tpdf > dag.pdf`                                              |
+| Ver por qué se quiere ejecutar algo (dry-run + razones) | `snakemake -n -r C:/wf-ie-data/results/training/bn_input.csv`                         |
+| Ejecutar hasta una regla, sin pasar de ahí              | `snakemake -j1 --until prepare_bn_table`                                              |
+| Ver comandos de shell ejecutados                        | `snakemake -j1 -p`                                                                    |
+| Ver logs más completos para diagnóstico                 | `snakemake -j1 --printshellcmds --reason --verbose`                                   |
+
+
+
+## Comandos especialmente útiles en este workflow
+
+### 1. Regenerar la tabla maestra de features
+
+| Uso                                        | Comando                                                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Dry-run de la tabla maestra                | `snakemake -n C:/wf-ie-data/results/training/master_features.parquet`                             |
+| Construir la tabla maestra                 | `snakemake -j1 C:/wf-ie-data/results/training/master_features.parquet`                            |
+| Forzar reconstrucción de `master_features` | `snakemake -j1 -R assemble_training_table C:/wf-ie-data/results/training/master_features.parquet` |
+
+### 2. Regenerar `bn_input.csv`
+
+| Uso                                  | Comando                                                                         |
+| ------------------------------------ | ------------------------------------------------------------------------------- |
+| Dry-run de `bn_input.csv`            | `snakemake -n C:/wf-ie-data/results/training/bn_input.csv`                      |
+| Construir `bn_input.csv`             | `snakemake -j1 C:/wf-ie-data/results/training/bn_input.csv`                     |
+| Forzar sólo la regla correspondiente | `snakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv` |
+
+### 3. Regenerar un feature regional
+
+| Uso                          | Comando                                                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Forzar erosión en `region_1` | `snakemake -j1 -R feature_tasa_erosion C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet`       |
+| Forzar viento en `region_1`  | `snakemake -j1 -R feature_wind_speed C:/wf-ie-data/results/features/velocidad_del_viento/region_1.parquet` |
+| Forzar ZVH en `region_1`     | `snakemake -j1 -R feature_zvh C:/wf-ie-data/results/features/zvh/region_1.parquet`                         |
+
+### 4. Regenerar mapas de IE
+
+| Uso                            | Comando                                 |
+| ------------------------------ | --------------------------------------- |
+| Construir mapas IE             | `snakemake -j1 -R create_ie_rasters`    |
+| Forzar mapas IE y ver comandos | `snakemake -j1 -p -R create_ie_rasters` |
+
+### 5. Validar mapas IE contra `ei_qnint`
+
+| Uso                                               | Comando                                                                                                        |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Ejecutar validación base vs referencia            | `snakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv`                                  |
+| Forzar validación base vs referencia              | `snakemake -j1 -R validate_ie_base_vs_reference C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv` |
+| Ejecutar validación base vs alterna vs referencia | `snakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_alterna_vs_ei_qnint_summary.csv`                          |
+
+---
+
+## Combinaciones muy prácticas
+
+| Uso                                   | Comando                                |
+| ------------------------------------- | -------------------------------------- |
+| Dry-run con razones y comandos        | `snakemake -n -r -p`                   |
+| Ejecutar mostrando comandos y razones | `snakemake -j1 -p --reason`            |
+| Ejecutar compacto pero informativo    | `snakemake -j1 --quiet progress rules` |
+| Rehacer algo usando sólo `mtime`      | `snakemake -j1 --rerun-triggers mtime` |
+| Si algo quedó “atascado”              | `snakemake --unlock`                   |
+
+---
+
+## Mis comandos favoritos para uso diario
+
+### Revisar qué haría
+
+```powershell
+snakemake -n -r -p C:/wf-ie-data/results/training/bn_input.csv
+```
+
+### Ejecutar un producto puntual
+
+```powershell
+snakemake -j1 -p C:/wf-ie-data/results/training/bn_input.csv
+```
+
+### Forzar una regla concreta
+
+```powershell
+snakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv
+```
+
+### Salida más compacta
+
+```powershell
+snakemake -j1 --quiet progress rules
+```
+
+### Desbloquear el workflow
+
+```powershell
+snakemake --unlock
+```
+
+---
+
+## Regla práctica de interpretación
+
+* **`-n`** = no ejecuta, sólo simula
+* **`-jN`** = número de cores
+* **`-R regla`** = fuerza una regla
+* **`-p`** = imprime comandos shell
+* **`--reason`** = explica por qué corre algo
+* **`--quiet progress rules`** = menos ruido
+* **`--unlock`** = quita locks
+* **`--summary`** = estado general del workflow
+
+---
+
+## Nota final
+
+En este proyecto, los usos más frecuentes son:
+
+1. **probar en dry-run**
+2. **forzar una regla específica**
+3. **pedir un objetivo concreto**
+4. **usar salida compacta**
+5. **desbloquear cuando un proceso anterior se interrumpió**
+
+Una combinación muy útil como valor por defecto es:
+
+```powershell
+snakemake -j1 -p --reason
+```
+
+y, para revisión previa:
+
+```powershell
+snakemake -n -r -p
+```
+

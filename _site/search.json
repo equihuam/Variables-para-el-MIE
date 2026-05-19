@@ -1,0 +1,989 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Inicio",
+    "section": "",
+    "text": "Exploración de variables\ndatos-R\ndatos-Py\n\n\nEstado del Workflow\nreporte"
+  },
+  {
+    "objectID": "workflow/scripts/origen/headless_qgis/readme-headless.html",
+    "href": "workflow/scripts/origen/headless_qgis/readme-headless.html",
+    "title": "Workflow IIE-3T",
+    "section": "",
+    "text": "Fecha: 2026-04-11 Código sugerido: DOC / WORKFLOW / ENTORNO Tema: Adaptación de scripts geoespaciales a qgis_env para ejecución headless\n\nObjetivo\nEstablecer un criterio común para adaptar scripts geoespaciales originalmente escritos con componentes interactivos de PyQGIS a una modalidad de ejecución sin interfaz gráfica, apta para integrarse a un workflow no supervisado dentro de qgis_env.\n\n\nCambio realizado\nSe revisó y refactorizó un conjunto de scripts que dependían, en diverso grado, de elementos asociados al uso interactivo de QGIS Desktop, tales como carga de capas al proyecto, uso de QgsProject, QgsRasterLayer, QgsVectorLayer y llamadas a processing.run(...).\nLa adaptación consistió en sustituir esas dependencias por herramientas disponibles dentro del mismo entorno virtual, priorizando implementaciones más directas y robustas con:\n\ngdal\nogr\nosr\nxarray, rioxarray, geopandas y dask se consideran disponibles, como criterio general para scripts futuros,cuando el tipo de insumo o la escala del procesamiento lo justifiquen.\n\n\n\nCriterio técnico adoptado\nEl principio general definido fue trabajar con un enfoque headless-first:\n\nevitar dependencias de GUI o de una sesión abierta de QGIS Desktop;\nconservar el uso del entorno qgis_env como base unificada de ejecución;\naprovechar las bibliotecas geoespaciales ya instaladas en el entorno;\nmantener la lógica metodológica original de cada script, modificando sólo la capa de implementación.\n\nEn términos operativos, se consolidó el siguiente patrón:\n\nusar reg_unidas como raster plantilla para obtener:\n\nCRS,\nresolución,\nextensión,\ndimensiones de la malla;\n\nreproyectar, recortar o alinear insumos directamente sobre esa plantilla;\nusar el método de remuestreo según el tipo de variable:\n\nnear para datos categóricos,\nbilinear para variables continuas;\n\ndefinir explícitamente valores NoData;\nestructurar los scripts para ejecución batch mediante:\n\nvalidación de entradas,\nescritura controlada de salidas,\nlimpieza opcional de temporales,\nfunción main(),\nmanejo explícito de errores.\n\n\n\n\nJustificación\nLa refactorización responde a la necesidad de contar con scripts más robustos, reproducibles y fáciles de integrar a un workflow automatizado. En varios casos, las dependencias de PyQGIS interactivo no aportaban ventajas reales al procesamiento, pero sí introducían fragilidad o complejidad innecesaria para ejecución por lote.\nEl cambio también ayuda a separar con mayor claridad dos niveles de trabajo:\n\nprocesamiento analítico, que puede ejecutarse de forma headless;\nvisualización y ensamblaje cartográfico, que puede reservarse para scripts específicamente orientados a QGIS Desktop o al cierre cartográfico.\n\n\n\nAlcance\nEste criterio quedó aplicado a una primera tanda de scripts correspondientes a:\n\nalineación y enmascaramiento de raster categórico;\nprocesamiento de variables de viento derivadas de NetCDF;\nrasterización de shapefiles temáticos sobre la malla de reg_unidas;\nrecorte y alineación de batimetría usando máscara vectorial.\n\n\n\nImplicaciones para el workflow\nEste ajuste sienta una base metodológica para la migración progresiva de scripts heredados hacia un esquema más automatizable. También facilita una futura integración con herramientas de orquestación del flujo, por ejemplo Snakemake u otros sistemas equivalentes.\nComo criterio de desarrollo futuro, se recomienda que los nuevos scripts se escriban desde el inicio en modalidad headless, usando PyQGIS sólo cuando exista una ventaja específica que no pueda resolverse de forma más simple con las bibliotecas ya disponibles en qgis_env.\n\n\nResultado\nSe definió un patrón reusable para adaptar scripts geoespaciales a un entorno de ejecución no supervisado, preservando consistencia metodológica y mejorando la robustez del workflow.\nSi quieres, el siguiente paso puede ser que te la deje en formato todavía más compacto, como entrada breve de bitácora de 1 párrafo largo más viñetas mínimas."
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html",
+    "href": "workflow/docs/snakemake-cheatsheet.html",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "",
+    "text": "Contexto típico\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html#comandos-esenciales",
+    "href": "workflow/docs/snakemake-cheatsheet.html#comandos-esenciales",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "1. Comandos esenciales",
+    "text": "1. Comandos esenciales\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nSimular sin ejecutar\nsnakemake -n\n\n\nSimular un objetivo\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar todo lo definido en rule all\nsnakemake -j1\n\n\nEjecutar un objetivo concreto\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nMostrar comandos shell\nsnakemake -j1 -p\n\n\nMostrar razones de ejecución\nsnakemake -j1 --reason\n\n\nEjecutar con salida compacta\nsnakemake -j1 --quiet progress rules\n\n\nEjecutar con varios núcleos\nsnakemake -j8\n\n\nContinuar aunque falle algo\nsnakemake -j4 --keep-going\n\n\nDesbloquear workflow\nsnakemake --unlock"
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html#forzar-ejecución",
+    "href": "workflow/docs/snakemake-cheatsheet.html#forzar-ejecución",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "2. Forzar ejecución",
+    "text": "2. Forzar ejecución\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nForzar una regla específica\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar regla y ver comando shell\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar un archivo objetivo\nsnakemake -j1 -f C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar feature_zvh hacia tabla master\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/training/master_features.parquet\n\n\nUsar sólo fecha de modificación\nsnakemake -j1 --rerun-triggers mtime\n\n\nLimpiar metadata de un archivo\nsnakemake --cleanup-metadata C:/wf-ie-data/results/training/bn_input.csv"
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html#productos-centrales-del-workflow",
+    "href": "workflow/docs/snakemake-cheatsheet.html#productos-centrales-del-workflow",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "3. Productos centrales del workflow",
+    "text": "3. Productos centrales del workflow\n\n\n\n\n\n\n\nProducto\nComando\n\n\n\n\nTabla master de features\nsnakemake -j1 C:/wf-ie-data/results/training/master_features.parquet\n\n\nForzar tabla master\nsnakemake -j1 -R assemble_training_table C:/wf-ie-data/results/training/master_features.parquet\n\n\nTabla BN para Netica\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar preparación BN\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nMapas IE\nsnakemake -j1 -R create_ie_rasters\n\n\nValidación IE vs ei_qnint\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nForzar validación IE vs ei_qnint\nsnakemake -j1 -R validate_ie_base_vs_reference C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv"
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html#features-regionales-frecuentes",
+    "href": "workflow/docs/snakemake-cheatsheet.html#features-regionales-frecuentes",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "4. Features regionales frecuentes",
+    "text": "4. Features regionales frecuentes\n\n\n\n\n\n\n\nFeature\nComando ejemplo\n\n\n\n\nErosión, region_1\nsnakemake -j1 -R feature_tasa_erosion C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet\n\n\nViento, region_1\nsnakemake -j1 -R feature_wind_speed C:/wf-ie-data/results/features/velocidad_del_viento/region_1.parquet\n\n\nZVH, region_1\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/features/zvh/region_1.parquet\n\n\nTipo de costa, region_1\nsnakemake -j1 -R feature_tipo_costa C:/wf-ie-data/results/features/tipo_costa/region_1.parquet\n\n\nCondición de dunas, region_1\nsnakemake -j1 -R feature_condicion_dunas C:/wf-ie-data/results/features/condicion_dunas/region_1.parquet"
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html#exportaciones-geotiff-de-features",
+    "href": "workflow/docs/snakemake-cheatsheet.html#exportaciones-geotiff-de-features",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "5. Exportaciones GeoTIFF de features",
+    "text": "5. Exportaciones GeoTIFF de features\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nExportar una variable\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/zvh\n\n\nForzar una exportación\nsnakemake -j1 -R export_feature_geotiff C:/wf-ie-data/results/feature_geotiffs/zvh\n\n\nExportar condición de dunas\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/condicion_dunas\n\n\nExportar tipo de costa\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/tipo_costa"
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html#inspección-del-workflow",
+    "href": "workflow/docs/snakemake-cheatsheet.html#inspección-del-workflow",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "6. Inspección del workflow",
+    "text": "6. Inspección del workflow\n\n\n\nUso\nComando\n\n\n\n\nListar reglas\nsnakemake --list-rules\n\n\nListar reglas objetivo\nsnakemake --list-target-rules\n\n\nResumen de estado\nsnakemake --summary\n\n\nResumen detallado\nsnakemake --detailed-summary\n\n\nVer DAG en texto\nsnakemake --dag\n\n\nExportar DAG a PDF\nsnakemake --dag | dot -Tpdf &gt; dag.pdf\n\n\nVer comandos y razones en dry-run\nsnakemake -n -r -p"
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html#diagnóstico-y-recuperación",
+    "href": "workflow/docs/snakemake-cheatsheet.html#diagnóstico-y-recuperación",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "7. Diagnóstico y recuperación",
+    "text": "7. Diagnóstico y recuperación\n\n\n\n\n\n\n\nSituación\nComando\n\n\n\n\nWorkflow quedó bloqueado\nsnakemake --unlock\n\n\nVer más detalle\nsnakemake -j1 --printshellcmds --reason --verbose\n\n\nBorrar outputs temporales\nsnakemake --delete-temp-output\n\n\nEjecutar hasta una regla\nsnakemake -j1 --until prepare_bn_table\n\n\nReanudar pidiendo un objetivo final\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv"
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html#recordatorio-mental",
+    "href": "workflow/docs/snakemake-cheatsheet.html#recordatorio-mental",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "8. Recordatorio mental",
+    "text": "8. Recordatorio mental\n\n\n\nOpción\nSignificado\n\n\n\n\n-n\nDry-run: simula, no ejecuta\n\n\n-jN\nNúmero de núcleos\n\n\n-R regla\nFuerza una regla\n\n\n-f archivo\nFuerza un archivo objetivo\n\n\n-p\nImprime comandos shell\n\n\n--reason\nExplica por qué corre una regla\n\n\n--quiet progress rules\nReduce ruido\n\n\n--unlock\nLibera el lock del workflow\n\n\n--rerun-triggers mtime\nUsa sólo tiempos de modificación"
+  },
+  {
+    "objectID": "workflow/docs/snakemake-cheatsheet.html#flujo-recomendado-de-trabajo",
+    "href": "workflow/docs/snakemake-cheatsheet.html#flujo-recomendado-de-trabajo",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Flujo recomendado de trabajo",
+    "text": "Flujo recomendado de trabajo\n# 1. Revisar qué pasaría\nsnakemake -n -r -p C:/wf-ie-data/results/training/bn_input.csv\n\n# 2. Ejecutar el objetivo\nsnakemake -j1 -p C:/wf-ie-data/results/training/bn_input.csv\n\n# 3. Si cambió una regla específica, forzarla\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n# 4. Si algo quedó bloqueado\nsnakemake --unlock"
+  },
+  {
+    "objectID": "docs/Readme.html",
+    "href": "docs/Readme.html",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "",
+    "text": "Este documento define el caso de uso, los requerimientos funcionales y no funcionales, y la arquitectura lógica de un flujo de trabajo para producir un estimador espacial del Índice de Integridad Ecosistémica (IIE) a partir de datos geográficos vectoriales y raster. El flujo está concebido como una tubería reproducible, escalable y preferentemente headless-first, con capacidad de integración en un sistema de orquestación como Snakemake.\nEl objetivo final del proceso es generar, por región de análisis, un conjunto de productos congruentes entre sí y trazables, culminando en la producción de mapas raster del índice de integridad ecosistémica y sus insumos tabulares intermedios.\nEn el estado actual del proyecto, el tramo validado y considerado canónico llega hasta la producción de la tabla de entrada a Netica (bn_input.csv). La reincorporación automática de predicciones externas de Netica al flujo geoespacial se considera aún provisional, pues hoy no existe garantía suficiente de congruencia fila a fila entre la tabla exportada por Python y la tabla de predicciones devuelta por Netica."
+  },
+  {
+    "objectID": "docs/Readme.html#nombre-del-caso-de-uso",
+    "href": "docs/Readme.html#nombre-del-caso-de-uso",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "2.1 Nombre del caso de uso",
+    "text": "2.1 Nombre del caso de uso\nProducción de un estimador espacial del Índice de Integridad Ecosistémica"
+  },
+  {
+    "objectID": "docs/Readme.html#descripción-general",
+    "href": "docs/Readme.html#descripción-general",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "2.2 Descripción general",
+    "text": "2.2 Descripción general\nA partir de una colección heterogénea de insumos geográficos —capas vectoriales, coberturas raster, tablas derivadas y salidas de un modelo probabilístico o red bayesiana— se requiere construir una representación espacialmente congruente del Índice de Integridad Ecosistémica para un conjunto de regiones costeras.\nEl proceso debe:\n\ndefinir una geometría de referencia común por región;\nproducir coberturas raster congruentes para múltiples variables ambientales y antrópicas;\nconvertir dichas coberturas a series tabulares congruentes por píxel;\nensamblar una tabla maestra de entrenamiento o inferencia;\nusar un motor de modelado probabilístico para producir valores estimados del índice;\nreconstruir los mapas raster finales del índice a partir de dichas predicciones."
+  },
+  {
+    "objectID": "docs/Readme.html#actores",
+    "href": "docs/Readme.html#actores",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "2.3 Actores",
+    "text": "2.3 Actores\n\n2.3.1 Actor principal\n\nEquipo técnico del proyecto: desarrolla, ejecuta, valida y ajusta el flujo de trabajo.\n\n\n\n2.3.2 Actores secundarios\n\nMotor de inferencia bayesiana: Netica u otro sistema equivalente que procese la tabla preparada y devuelva predicciones por observación/píxel.\nSistema de orquestación: Snakemake u otro administrador de flujos que ejecute reglas, dependencias y paralelización.\nEntorno SIG de validación: QGIS u otra herramienta para inspección cartográfica de resultados."
+  },
+  {
+    "objectID": "docs/Readme.html#disparador",
+    "href": "docs/Readme.html#disparador",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "2.4 Disparador",
+    "text": "2.4 Disparador\nEl proceso se ejecuta cuando se dispone de:\n\ninsumos geográficos base;\ndefinición de regiones de análisis;\nreglas para generar variables derivadas;\nuna especificación del modelo probabilístico o una salida de inferencia ya producida."
+  },
+  {
+    "objectID": "docs/Readme.html#resultado-esperado",
+    "href": "docs/Readme.html#resultado-esperado",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "2.5 Resultado esperado",
+    "text": "2.5 Resultado esperado\nEl flujo produce:\n\nuna colección de rasters de referencia por región;\nuna colección de features tabulares congruentes por región o globales;\nuna tabla final integrada de variables por píxel;\nuna tabla de entrada a inferencia bayesiana;\nopcionalmente, una salida de inferencia del índice y su reconstrucción espacial;\nun conjunto potencial de GeoTIFF finales del Índice de Integridad Ecosistémica."
+  },
+  {
+    "objectID": "docs/Readme.html#incluye",
+    "href": "docs/Readme.html#incluye",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "3.1 Incluye",
+    "text": "3.1 Incluye\n\npreparación de geometrías de referencia;\ngeneración de variables espaciales a partir de insumos vectoriales y raster;\nintegración tabular de variables congruentes;\npreparación de tablas para modelado;\nvalidación estructural y pruebas operativas del flujo;\npreparación de insumos para el motor bayesiano externo."
+  },
+  {
+    "objectID": "docs/Readme.html#no-incluye",
+    "href": "docs/Readme.html#no-incluye",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "3.2 No incluye",
+    "text": "3.2 No incluye\n\ndiseño conceptual del índice ecológico en sí;\ndefinición científica de cada variable o de sus umbrales;\ncaptura primaria de datos de campo;\ndesarrollo de interfaces gráficas como requisito principal;\noperación manual interactiva como mecanismo central del flujo;\ncierre definitivo de la retrointegración automática de predicciones externas cuando no exista congruencia verificable entre tabla base y salida del motor probabilístico."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-01.-preparación-de-polígonos-o-regiones-de-referencia",
+    "href": "docs/Readme.html#rf-01.-preparación-de-polígonos-o-regiones-de-referencia",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.1 RF-01. Preparación de polígonos o regiones de referencia",
+    "text": "7.1 RF-01. Preparación de polígonos o regiones de referencia\nEl sistema debe permitir preparar una colección de regiones o polígonos de análisis a partir de insumos vectoriales, incluyendo operaciones como reproyección, corrección de CRS y buffering cuando el flujo lo requiera."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-02.-generación-de-rasters-de-referencia-por-región",
+    "href": "docs/Readme.html#rf-02.-generación-de-rasters-de-referencia-por-región",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.2 RF-02. Generación de rasters de referencia por región",
+    "text": "7.2 RF-02. Generación de rasters de referencia por región\nEl sistema debe generar, para cada región, un raster de referencia que defina la malla espacial canónica del análisis, incluyendo:\n\nresolución;\nextensión;\nalineación;\nsistema de coordenadas;\nnodata."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-03.-producción-de-coberturas-raster-congruentes",
+    "href": "docs/Readme.html#rf-03.-producción-de-coberturas-raster-congruentes",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.3 RF-03. Producción de coberturas raster congruentes",
+    "text": "7.3 RF-03. Producción de coberturas raster congruentes\nEl sistema debe permitir generar coberturas raster congruentes por región a partir de distintos tipos de datos de entrada, incluyendo:\n\ndatos vectoriales rasterizados;\ndatos raster reproyectados y recortados;\ninterpolaciones o transformaciones espaciales;\nmuestreos o distancias evaluadas sobre una base tabular canónica cuando esto resulte más estable que rederivar la malla desde un raster reproyectado."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-04.-conversión-de-coberturas-a-series-numéricas-congruentes",
+    "href": "docs/Readme.html#rf-04.-conversión-de-coberturas-a-series-numéricas-congruentes",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.4 RF-04. Conversión de coberturas a series numéricas congruentes",
+    "text": "7.4 RF-04. Conversión de coberturas a series numéricas congruentes\nEl sistema debe convertir las coberturas congruentes a tablas o series numéricas por píxel, preservando al menos:\n\nidentificador regional;\nidentificador de píxel;\ncoordenadas x, y;\nuna o más variables temáticas."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-05.-almacenamiento-serializado-intermedio",
+    "href": "docs/Readme.html#rf-05.-almacenamiento-serializado-intermedio",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.5 RF-05. Almacenamiento serializado intermedio",
+    "text": "7.5 RF-05. Almacenamiento serializado intermedio\nPara las tablas intermedias y finales, se adopta Parquet como formato base de almacenamiento tabular, por las siguientes razones:\n\nmayor eficiencia de lectura y escritura;\nmejor compresión;\nmejor soporte para tablas grandes;\ncompatibilidad con particionamiento por región o variable;\nmejor integración con workflows escalables."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-06.-integración-de-features-en-una-tabla-maestra",
+    "href": "docs/Readme.html#rf-06.-integración-de-features-en-una-tabla-maestra",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.6 RF-06. Integración de features en una tabla maestra",
+    "text": "7.6 RF-06. Integración de features en una tabla maestra\nEl sistema debe ensamblar una tabla maestra a partir de múltiples productos serializados congruentes, preservando la correspondencia espacial entre observaciones."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-07.-preparación-de-datos-para-inferencia-bayesiana",
+    "href": "docs/Readme.html#rf-07.-preparación-de-datos-para-inferencia-bayesiana",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.7 RF-07. Preparación de datos para inferencia bayesiana",
+    "text": "7.7 RF-07. Preparación de datos para inferencia bayesiana\nEl sistema debe producir una tabla de entrada apta para ser consumida por un motor de inferencia bayesiana o un proceso equivalente, incluyendo discretización y codificación cuando sea necesario."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-08.-integración-de-predicciones-del-modelo",
+    "href": "docs/Readme.html#rf-08.-integración-de-predicciones-del-modelo",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.8 RF-08. Integración de predicciones del modelo",
+    "text": "7.8 RF-08. Integración de predicciones del modelo\nEl sistema debe poder leer una salida de inferencia generada por Netica o por otro motor compatible y asociarla correctamente con los píxeles de la tabla base solo si se cumple una congruencia verificable en orden y número de filas."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-09.-reconstrucción-raster-del-índice-final",
+    "href": "docs/Readme.html#rf-09.-reconstrucción-raster-del-índice-final",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.9 RF-09. Reconstrucción raster del índice final",
+    "text": "7.9 RF-09. Reconstrucción raster del índice final\nEl sistema debe reconstruir, por región, el raster final del Índice de Integridad Ecosistémica usando:\n\nla tabla base espacialmente congruente;\nlas predicciones del modelo;\nel raster de referencia regional."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-10.-exportación-de-productos-cartográficos-finales",
+    "href": "docs/Readme.html#rf-10.-exportación-de-productos-cartográficos-finales",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.10 RF-10. Exportación de productos cartográficos finales",
+    "text": "7.10 RF-10. Exportación de productos cartográficos finales\nEl sistema debe generar productos finales al menos en formato:\n\nGeoTIFF por región;\n\ny opcionalmente:\n\nhistogramas PNG;\ntablas CSV auxiliares;\nproyectos QGIS para inspección."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-11.-trazabilidad-del-flujo",
+    "href": "docs/Readme.html#rf-11.-trazabilidad-del-flujo",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.11 RF-11. Trazabilidad del flujo",
+    "text": "7.11 RF-11. Trazabilidad del flujo\nEl sistema debe permitir rastrear qué insumos y qué pasos generaron cada producto final o intermedio."
+  },
+  {
+    "objectID": "docs/Readme.html#rf-12.-ejecución-automatizada-por-reglas",
+    "href": "docs/Readme.html#rf-12.-ejecución-automatizada-por-reglas",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "7.12 RF-12. Ejecución automatizada por reglas",
+    "text": "7.12 RF-12. Ejecución automatizada por reglas\nEl sistema debe permitir la ejecución automatizada de los pasos mediante reglas y dependencias explícitas, preferentemente con Snakemake."
+  },
+  {
+    "objectID": "docs/Readme.html#rnf-01.-reproducibilidad",
+    "href": "docs/Readme.html#rnf-01.-reproducibilidad",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "8.1 RNF-01. Reproducibilidad",
+    "text": "8.1 RNF-01. Reproducibilidad\nEl flujo debe producir resultados reproducibles a partir de la misma configuración, insumos y versión de scripts."
+  },
+  {
+    "objectID": "docs/Readme.html#rnf-02.-modularidad",
+    "href": "docs/Readme.html#rnf-02.-modularidad",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "8.2 RNF-02. Modularidad",
+    "text": "8.2 RNF-02. Modularidad\nCada componente debe corresponder a una etapa funcional clara, con entradas y salidas explícitas."
+  },
+  {
+    "objectID": "docs/Readme.html#rnf-03.-escalabilidad",
+    "href": "docs/Readme.html#rnf-03.-escalabilidad",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "8.3 RNF-03. Escalabilidad",
+    "text": "8.3 RNF-03. Escalabilidad\nEl flujo debe permitir crecer en número de variables y regiones sin rediseño estructural."
+  },
+  {
+    "objectID": "docs/Readme.html#rnf-04.-paralelización",
+    "href": "docs/Readme.html#rnf-04.-paralelización",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "8.4 RNF-04. Paralelización",
+    "text": "8.4 RNF-04. Paralelización\nSiempre que sea viable, las ramas por variable o por región deben poder ejecutarse en paralelo."
+  },
+  {
+    "objectID": "docs/Readme.html#rnf-05.-trazabilidad-de-errores",
+    "href": "docs/Readme.html#rnf-05.-trazabilidad-de-errores",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "8.5 RNF-05. Trazabilidad de errores",
+    "text": "8.5 RNF-05. Trazabilidad de errores\nLas fallas deben poder localizarse a nivel de regla, script, región o variable."
+  },
+  {
+    "objectID": "docs/Readme.html#rnf-06.-validación-automatizada",
+    "href": "docs/Readme.html#rnf-06.-validación-automatizada",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "8.6 RNF-06. Validación automatizada",
+    "text": "8.6 RNF-06. Validación automatizada\nEl proyecto debe contar con pruebas automatizadas que validen componentes críticos del flujo y contratos de datos."
+  },
+  {
+    "objectID": "docs/Readme.html#rnf-07.-portabilidad-razonable",
+    "href": "docs/Readme.html#rnf-07.-portabilidad-razonable",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "8.7 RNF-07. Portabilidad razonable",
+    "text": "8.7 RNF-07. Portabilidad razonable\nEl flujo debe ejecutarse en entornos Python reproducibles, idealmente mediante entornos controlados y dependencias explícitas."
+  },
+  {
+    "objectID": "docs/Readme.html#rnf-08.-headless-first",
+    "href": "docs/Readme.html#rnf-08.-headless-first",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "8.8 RNF-08. Headless-first",
+    "text": "8.8 RNF-08. Headless-first\nEl flujo debe funcionar sin depender de interfaces gráficas, salvo para validación o inspección posterior."
+  },
+  {
+    "objectID": "docs/Readme.html#etapa-1.-geometría-de-referencia",
+    "href": "docs/Readme.html#etapa-1.-geometría-de-referencia",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "9.1 Etapa 1. Geometría de referencia",
+    "text": "9.1 Etapa 1. Geometría de referencia\nSe construyen las regiones y sus plantillas raster de referencia. Esta etapa fija la congruencia espacial del resto del proceso.\nProducto principal: ref_grid.tif por región."
+  },
+  {
+    "objectID": "docs/Readme.html#etapa-2.-generación-de-variables-espaciales",
+    "href": "docs/Readme.html#etapa-2.-generación-de-variables-espaciales",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "9.2 Etapa 2. Generación de variables espaciales",
+    "text": "9.2 Etapa 2. Generación de variables espaciales\nSe generan capas raster o equivalentes para variables derivadas a partir de datos vectoriales o raster.\nProducto principal: features regionales tabulares congruentes o insumos preparados para su conversión tabular."
+  },
+  {
+    "objectID": "docs/Readme.html#etapa-3.-conversión-a-series-congruentes",
+    "href": "docs/Readme.html#etapa-3.-conversión-a-series-congruentes",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "9.3 Etapa 3. Conversión a series congruentes",
+    "text": "9.3 Etapa 3. Conversión a series congruentes\nCada variable se transforma a una tabla de observaciones por píxel con las mismas llaves espaciales.\nProducto principal: archivos serializados por variable, con columnas como regionid, pixid, x, y y la variable temática."
+  },
+  {
+    "objectID": "docs/Readme.html#etapa-4.-integración-tabular",
+    "href": "docs/Readme.html#etapa-4.-integración-tabular",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "9.4 Etapa 4. Integración tabular",
+    "text": "9.4 Etapa 4. Integración tabular\nSe ensamblan todas las variables en una sola tabla maestra.\nProducto principal: master_features.parquet."
+  },
+  {
+    "objectID": "docs/Readme.html#etapa-5.-preparación-para-modelado-e-inferencia",
+    "href": "docs/Readme.html#etapa-5.-preparación-para-modelado-e-inferencia",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "9.5 Etapa 5. Preparación para modelado e inferencia",
+    "text": "9.5 Etapa 5. Preparación para modelado e inferencia\nSe prepara la tabla final para el motor bayesiano externo.\nProducto principal: bn_input.parquet y bn_input.csv."
+  },
+  {
+    "objectID": "docs/Readme.html#etapa-6.-inferencia-externa-y-reconstrucción-cartográfica",
+    "href": "docs/Readme.html#etapa-6.-inferencia-externa-y-reconstrucción-cartográfica",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "9.6 Etapa 6. Inferencia externa y reconstrucción cartográfica",
+    "text": "9.6 Etapa 6. Inferencia externa y reconstrucción cartográfica\nSe leen predicciones del motor externo y, si existe congruencia verificable, se reconstruyen mapas raster finales por región.\nProducto principal esperado: master_features_with_ie.parquet y GeoTIFF regionales del índice.\nEstado actual: esta etapa se considera no cerrada mientras no se garantice correspondencia inequívoca entre bn_input.csv e ie_predictions.csv."
+  },
+  {
+    "objectID": "docs/Readme.html#contrato-para-tablas-de-features",
+    "href": "docs/Readme.html#contrato-para-tablas-de-features",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "10.1 Contrato para tablas de features",
+    "text": "10.1 Contrato para tablas de features\nToda tabla serializada de features debe incluir como mínimo:\n\nregionid\npixid\nx\ny\n\nmás una o varias columnas temáticas."
+  },
+  {
+    "objectID": "docs/Readme.html#contrato-para-tablas-base-canónicas",
+    "href": "docs/Readme.html#contrato-para-tablas-base-canónicas",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "10.2 Contrato para tablas base canónicas",
+    "text": "10.2 Contrato para tablas base canónicas\nCuando una feature se construya usando una tabla base regional para preservar alineación, esa tabla base debe cumplir el mismo contrato mínimo:\n\nregionid\npixid\nx\ny\n\ny debe representar la malla canónica que ya fue validada por el flujo."
+  },
+  {
+    "objectID": "docs/Readme.html#contrato-para-rasters-congruentes",
+    "href": "docs/Readme.html#contrato-para-rasters-congruentes",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "10.3 Contrato para rasters congruentes",
+    "text": "10.3 Contrato para rasters congruentes\nTodo raster congruente debe ser compatible con el raster de referencia regional en:\n\nCRS;\nresolución;\ntransform;\nshape;\nnodata;\nextensión o máscara válida."
+  },
+  {
+    "objectID": "docs/Readme.html#orquestación",
+    "href": "docs/Readme.html#orquestación",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "12.1 Orquestación",
+    "text": "12.1 Orquestación\nSe recomienda implementar el flujo mediante Snakemake, organizando reglas por capas:\n\nreference\nfeature_tables\ntraining_table\nbayes_io\nfinal_maps"
+  },
+  {
+    "objectID": "docs/Readme.html#desarrollo-de-scripts",
+    "href": "docs/Readme.html#desarrollo-de-scripts",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "12.2 Desarrollo de scripts",
+    "text": "12.2 Desarrollo de scripts\nSe recomienda que cada script:\n\nreciba rutas parametrizadas;\npueda ejecutarse por región cuando sea razonable;\ntenga entradas y salidas explícitas;\nno dependa de rutas hardcodeadas como única opción operativa;\ndocumente si usa como base un ref_grid.tif o una tabla base regional ya alineada."
+  },
+  {
+    "objectID": "docs/Readme.html#pruebas-automatizadas",
+    "href": "docs/Readme.html#pruebas-automatizadas",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "12.3 Pruebas automatizadas",
+    "text": "12.3 Pruebas automatizadas\nSe recomienda una batería de pruebas en pytest en tres niveles:\n\n12.3.1 Unitarias\nPara funciones puras:\n\nnormalización;\ndiscretización;\nconstrucción de llaves;\nordenamiento de regiones;\nvalidación de contratos;\nnormalización de nombres de columnas o categorías.\n\n\n\n12.3.2 Integración por script\nPara mini-casos sintéticos:\n\ncreación de ref_grid;\nrasterización simple;\ngeneración de .parquet;\nensamblado tabular;\nalineación ligera entre features.\n\n\n\n12.3.3 Integración de workflow\nPara un DAG mínimo:\n\nuna región;\nun subconjunto pequeño de variables;\nensamblado final;\npreparación de bn_input.csv."
+  },
+  {
+    "objectID": "docs/Readme.html#riesgo-1.-desalineación-espacial",
+    "href": "docs/Readme.html#riesgo-1.-desalineación-espacial",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "13.1 Riesgo 1. Desalineación espacial",
+    "text": "13.1 Riesgo 1. Desalineación espacial\nSi una variable no respeta la malla canónica regional, toda la integración posterior puede quedar sesgada."
+  },
+  {
+    "objectID": "docs/Readme.html#riesgo-2.-dependencia-implícita-del-orden-de-filas",
+    "href": "docs/Readme.html#riesgo-2.-dependencia-implícita-del-orden-de-filas",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "13.2 Riesgo 2. Dependencia implícita del orden de filas",
+    "text": "13.2 Riesgo 2. Dependencia implícita del orden de filas\nEl flujo requiere especial cuidado cuando un motor externo devuelve predicciones por fila. Debe preservarse una correspondencia inequívoca entre observación y píxel. El problema sigue vigente en la interfaz con Netica y hoy constituye el principal límite funcional del tramo final. El README previo ya señalaba este riesgo y ahora se considera confirmado operativamente."
+  },
+  {
+    "objectID": "docs/Readme.html#riesgo-3.-inconsistencia-de-nombres-y-columnas",
+    "href": "docs/Readme.html#riesgo-3.-inconsistencia-de-nombres-y-columnas",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "13.3 Riesgo 3. Inconsistencia de nombres y columnas",
+    "text": "13.3 Riesgo 3. Inconsistencia de nombres y columnas\nEl ensamblado final puede fallar si no existe una convención estable de nombres para archivos y columnas."
+  },
+  {
+    "objectID": "docs/Readme.html#riesgo-4.-divergencias-entre-implementaciones-r-y-python",
+    "href": "docs/Readme.html#riesgo-4.-divergencias-entre-implementaciones-r-y-python",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "13.4 Riesgo 4. Divergencias entre implementaciones R y Python",
+    "text": "13.4 Riesgo 4. Divergencias entre implementaciones R y Python\nAlgunas operaciones pueden no tener equivalencia exacta entre bibliotecas. Eso debe documentarse explícitamente y validarse empíricamente cuando haya datos disponibles."
+  },
+  {
+    "objectID": "docs/Readme.html#riesgo-5.-reproyección-que-altera-la-malla-útil",
+    "href": "docs/Readme.html#riesgo-5.-reproyección-que-altera-la-malla-útil",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "13.5 Riesgo 5. Reproyección que altera la malla útil",
+    "text": "13.5 Riesgo 5. Reproyección que altera la malla útil\nEn algunas variables, derivar la tabla de salida a partir de un ref_grid reproyectado puede cambiar el número de filas válidas. Cuando eso ocurra, conviene usar una tabla base regional ya alineada como malla canónica."
+  },
+  {
+    "objectID": "docs/Readme.html#riesgo-6.-sincronización-entre-máquinas-y-placeholders-de-nube",
+    "href": "docs/Readme.html#riesgo-6.-sincronización-entre-máquinas-y-placeholders-de-nube",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "13.6 Riesgo 6. Sincronización entre máquinas y placeholders de nube",
+    "text": "13.6 Riesgo 6. Sincronización entre máquinas y placeholders de nube\nCuando el repositorio de datos se sincroniza mediante Dropbox u otro servicio de nube, un archivo puede “existir” pero no estar materializado localmente. Esto puede romper lecturas con pyarrow o pandas, especialmente en Parquet, aunque Snakemake vea el archivo. El problema se observó en una segunda máquina Windows y se resolvió materializando localmente los archivos relevantes antes de ejecutar reglas finales."
+  },
+  {
+    "objectID": "docs/Readme.html#riesgo-7.-metadatos-locales-de-snakemake",
+    "href": "docs/Readme.html#riesgo-7.-metadatos-locales-de-snakemake",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "13.7 Riesgo 7. Metadatos locales de Snakemake",
+    "text": "13.7 Riesgo 7. Metadatos locales de Snakemake\nLos metadatos de Snakemake viven en el proyecto local, no en el repositorio de datos. Al trabajar entre varias máquinas, es normal que existan outputs válidos pero sin metadata local asociada. Esto afecta la riqueza de snakemake --report, pero no invalida los archivos."
+  },
+  {
+    "objectID": "docs/Readme.html#hallazgo-1.-la-congruencia-por-píxel-debe-construirse-solo-sobre-celdas-válidas",
+    "href": "docs/Readme.html#hallazgo-1.-la-congruencia-por-píxel-debe-construirse-solo-sobre-celdas-válidas",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "16.1 Hallazgo 1. La congruencia por píxel debe construirse solo sobre celdas válidas",
+    "text": "16.1 Hallazgo 1. La congruencia por píxel debe construirse solo sobre celdas válidas\nEl principal defecto lógico detectado en la traducción inicial de algunos scripts Python fue que, después de reproyectar el ref_grid regional, se estaban convirtiendo todas las celdas de la grilla reproyectada a observaciones tabulares, incluyendo celdas sin datos o fuera de la máscara útil.\nEso provocó una inflación artificial severa en las tablas de features.\n\n16.1.1 Decisión adoptada\nLos scripts de features deben:\n\nreproyectar el raster de referencia cuando aplique;\nidentificar primero las celdas válidas;\ncalcular coordenadas x, y solo para esas celdas válidas;\nexportar únicamente esas observaciones.\n\n\n\n16.1.2 Implicación\nLa tabla tabular congruente por píxel no debe entenderse como “todas las celdas del raster reproyectado”, sino como “todas las celdas válidas de la malla útil regional”."
+  },
+  {
+    "objectID": "docs/Readme.html#hallazgo-2.-no-debe-materializarse-la-grilla-completa-antes-del-filtrado",
+    "href": "docs/Readme.html#hallazgo-2.-no-debe-materializarse-la-grilla-completa-antes-del-filtrado",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "16.2 Hallazgo 2. No debe materializarse la grilla completa antes del filtrado",
+    "text": "16.2 Hallazgo 2. No debe materializarse la grilla completa antes del filtrado\nEn regiones grandes, incluso el paso intermedio de construir coordenadas para toda la grilla reproyectada resultó inviable por memoria.\n\n16.2.1 Decisión adoptada\nLos scripts de features deben evitar:\n\ncreación de meshgrid completo;\ntransformación a coordenadas para toda la matriz;\nfiltrado posterior.\n\nEn su lugar, deben trabajar así:\n\ndetectar índices de celdas válidas;\ngenerar coordenadas solo para esas posiciones;\nconstruir la tabla final directamente a partir de ese subconjunto."
+  },
+  {
+    "objectID": "docs/Readme.html#hallazgo-3.-la-organización-de-raw-como-carpeta-plana-no-escala-bien",
+    "href": "docs/Readme.html#hallazgo-3.-la-organización-de-raw-como-carpeta-plana-no-escala-bien",
+    "title": "Definición de requerimientos y caso de uso",
+    "section": "16.3 Hallazgo 3. La organización de raw/ como carpeta plana no escala bien",
+    "text": "16.3 Hallazgo 3. La organización de raw/ como carpeta plana no escala bien\nDurante los ensayos operativos se comprobó que una carpeta raw/ plana se vuelve rápidamente confusa y poco manejable.\n\n16.3.1 Decisión adoptada\nLa organización canónica de insumos se movió a una estructura temática bajo varsIni/, sustituyendo el uso previo de raw/ como convención principal. La estructura actual recomendada es del tipo:\n```text varsIni/ batimetria/ coastal_regions/ corals/ dunes_cost_2014/ dunes_inegi/ erosion/ estructuras/ madmex/ manglares/ pastos_marinos/ plantas_snib/ velocidad_del_viento/ results/ reference/ features/ training/ final_maps/ external/ netica/"
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "Este documento describe una forma estable y simple de preparar el entorno de trabajo del proyecto workflow-iie para desarrollo y operación del flujo geoespacial. La estrategia recomendada es:\n\ninstalar QGIS como base geoespacial del sistema;\nusar micromamba o miniconda para crear un entorno virtual reproducible;\ninstalar las dependencias del proyecto desde environment.yml;\ntrabajar con un enfoque QGIS headless-first, reservando la GUI de QGIS para inspección, validación cartográfica y productos auxiliares.\n\n\n\n\n\n\n\nSe recomienda instalar QGIS de forma estándar en la máquina, porque esto resuelve de manera robusta dependencias geoespaciales delicadas como:\n\nGDAL\nPROJ\nGEOS\nPyQGIS\n\nLa idea no es que todo el workflow dependa de PyQGIS, sino que QGIS quede disponible como base confiable para:\n\nvalidación cartográfica;\ninspección de capas;\ncreación de proyectos .qgz;\ntareas específicas que sí requieran qgis.core.\n\n\n\n\nEl entorno del proyecto debe gestionarse con micromamba o miniconda. Para personal no muy técnico, micromamba suele ser una opción muy conveniente por su simplicidad y velocidad.\nEl proyecto debe crear su entorno a partir de un archivo único:\n\nenvironment.yml\n\nEso reduce el riesgo de instalaciones manuales inconsistentes.\n\n\n\n\n\nEl entorno recomendado del proyecto se define en:\n\nenvironment.yml\n\nEste archivo incluye bibliotecas para:\n\nmanejo tabular y numérico;\nlectura y escritura raster/vectorial;\nserialización en Parquet;\nSnakemake;\npytest;\nmodelado probabilístico básico;\nutilidades de desarrollo.\n\n\n\n\n\n\n\nCrear el entorno:\nmicromamba env create -f environment.yml\nActivarlo:\nmicromamba activate workflow-iie\n\n\n\nCrear el entorno:\nconda env create -f environment.yml\nActivarlo:\nconda activate workflow-iie\n\n\n\n\n\nUna vez activado el entorno, se recomienda verificar imports clave:\npuede hacerse con el script Python que hemos preparado para el caso: python check_environment.py o manualmente:\npython -c \"import numpy, pandas, rasterio, geopandas, pyarrow, sklearn, matplotlib, snakemake\"\nY correr pruebas, cuando ya existan en el repositorio:\npytest\n\n\n\n\nEl proyecto debe seguir un enfoque headless-first.\nEsto significa que el procesamiento principal debe realizarse con bibliotecas Python como:\n\nrasterio\ngeopandas\nshapely\npyproj\nnumpy\npandas\n\nY que qgis.core debe usarse solo cuando aporte una ventaja real, por ejemplo:\n\nconstruir proyectos QGIS automáticamente;\npreparar productos cartográficos auxiliares;\ninspección o validación final;\nalguna operación específica difícil de sustituir de forma razonable.\n\n\n\n\nProcesamiento analítico: preferir Python headless.\nPublicación, inspección o empaquetado cartográfico: usar QGIS/PyQGIS si conviene.\n\nEsto hace el workflow:\n\nmás reproducible;\nmás portable;\nmás fácil de automatizar con Snakemake;\nmenos dependiente de configuraciones frágiles de GUI.\n\n\n\n\n\n\nPyCharm puede ser el IDE principal del proyecto, siempre que se configure de forma simple y consistente.\n\n\nUsar como intérprete del proyecto el Python del entorno workflow-iie creado con micromamba o conda.\n\n\n\n\ncrear y activar el entorno desde terminal;\nabrir el proyecto en PyCharm;\nseleccionar el intérprete del entorno workflow-iie;\nejecutar scripts normales del workflow con ese intérprete;\nreservar PyQGIS para scripts específicos, no para todo el pipeline.\n\n\n\n\nPara scripts que importen qgis.core, puede ser necesario un intérprete o una configuración específica vinculada a la instalación de QGIS. En ese caso se recomienda:\n\nmantener esos scripts en una carpeta diferenciada, por ejemplo scripts/headless_qgis/;\ndocumentar claramente sus variables de entorno necesarias;\nno hacer que todo el proyecto dependa de ellas.\n\n\n\n\nSi una ejecución PyQGIS lo requiere, puede ser necesario configurar variables como:\nGDAL_DATA=&lt;ruta a share/gdal&gt;\nPROJ_LIB=&lt;ruta a share/proj&gt;\nGDAL_DRIVER_PATH=&lt;ruta a gdalplugins&gt;\nY, si aplica, ajustar rutas de intérprete para que PyCharm encuentre correctamente bibliotecas Python de QGIS.\n\n\n\nPara personal no muy técnico:\n\nusar el entorno workflow-iie para casi todo el desarrollo;\nusar configuraciones PyCharm separadas para scripts PyQGIS especiales;\nno mezclar en una sola configuración scripts headless puros y scripts dependientes de qgis.core.\n\n\n\n\n\n\n\n\nEjemplos:\n\ngeneración de grids de referencia;\nrasterización y reproyección;\nconstrucción de features tabulares;\nensamblado de tablas;\npreparación de insumos para inferencia;\nreconstrucción raster final.\n\nEstos scripts deben poder correr con el entorno del proyecto sin depender de la GUI de QGIS.\n\n\n\nEjemplos:\n\ncreación automática de proyectos .qgz;\naplicación de simbología;\nempaquetado de resultados para inspección.\n\nEstos scripts pueden convivir en el proyecto, pero deben tratarse como una capa adicional, no como el núcleo del pipeline.\n\n\n\n\n\nEl entorno workflow-iie debe ser suficiente para correr el workflow principal por reglas con Snakemake.\nEjemplo de ejecución general:\nsnakemake -j 4\nO para una regla específica:\nsnakemake &lt;nombre_regla&gt; -j 2\nLa recomendación es que Snakemake orqueste el flujo principal headless y que las tareas PyQGIS queden como reglas terminales u opcionales, por ejemplo para generar proyectos de revisión.\n\n\n\n\nSe recomienda que cada instalación confirme al menos lo siguiente:\n\nel entorno activa correctamente;\nnumpy, pandas, rasterio, geopandas y pyarrow importan sin error;\nsnakemake está disponible;\npytest corre;\nsi se usarán scripts PyQGIS, existe al menos una configuración funcional separada para ellos.\n\n\n\n\n\nPara reducir fricción en un equipo no muy técnico:\n\nusar un solo archivo environment.yml como referencia oficial;\nusar micromamba como estándar sugerido;\ndocumentar una sola forma canónica de crear y activar el entorno;\nmantener el procesamiento principal en modo headless-first;\naislar los scripts PyQGIS en configuraciones específicas;\ncorrer pytest como validación básica después de instalar.\n\nEsta estrategia ofrece un equilibrio adecuado entre estabilidad geoespacial, facilidad de operación y escalabilidad del workflow."
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#objetivo",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#objetivo",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "Este documento describe una forma estable y simple de preparar el entorno de trabajo del proyecto workflow-iie para desarrollo y operación del flujo geoespacial. La estrategia recomendada es:\n\ninstalar QGIS como base geoespacial del sistema;\nusar micromamba o miniconda para crear un entorno virtual reproducible;\ninstalar las dependencias del proyecto desde environment.yml;\ntrabajar con un enfoque QGIS headless-first, reservando la GUI de QGIS para inspección, validación cartográfica y productos auxiliares."
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#estrategia-recomendada",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#estrategia-recomendada",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "Se recomienda instalar QGIS de forma estándar en la máquina, porque esto resuelve de manera robusta dependencias geoespaciales delicadas como:\n\nGDAL\nPROJ\nGEOS\nPyQGIS\n\nLa idea no es que todo el workflow dependa de PyQGIS, sino que QGIS quede disponible como base confiable para:\n\nvalidación cartográfica;\ninspección de capas;\ncreación de proyectos .qgz;\ntareas específicas que sí requieran qgis.core.\n\n\n\n\nEl entorno del proyecto debe gestionarse con micromamba o miniconda. Para personal no muy técnico, micromamba suele ser una opción muy conveniente por su simplicidad y velocidad.\nEl proyecto debe crear su entorno a partir de un archivo único:\n\nenvironment.yml\n\nEso reduce el riesgo de instalaciones manuales inconsistentes."
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#archivo-de-entorno",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#archivo-de-entorno",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "El entorno recomendado del proyecto se define en:\n\nenvironment.yml\n\nEste archivo incluye bibliotecas para:\n\nmanejo tabular y numérico;\nlectura y escritura raster/vectorial;\nserialización en Parquet;\nSnakemake;\npytest;\nmodelado probabilístico básico;\nutilidades de desarrollo."
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#instalación-del-entorno",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#instalación-del-entorno",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "Crear el entorno:\nmicromamba env create -f environment.yml\nActivarlo:\nmicromamba activate workflow-iie\n\n\n\nCrear el entorno:\nconda env create -f environment.yml\nActivarlo:\nconda activate workflow-iie"
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#verificación-rápida-del-entorno",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#verificación-rápida-del-entorno",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "Una vez activado el entorno, se recomienda verificar imports clave:\npuede hacerse con el script Python que hemos preparado para el caso: python check_environment.py o manualmente:\npython -c \"import numpy, pandas, rasterio, geopandas, pyarrow, sklearn, matplotlib, snakemake\"\nY correr pruebas, cuando ya existan en el repositorio:\npytest"
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#recomendación-de-trabajo-qgis-headless-first",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#recomendación-de-trabajo-qgis-headless-first",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "El proyecto debe seguir un enfoque headless-first.\nEsto significa que el procesamiento principal debe realizarse con bibliotecas Python como:\n\nrasterio\ngeopandas\nshapely\npyproj\nnumpy\npandas\n\nY que qgis.core debe usarse solo cuando aporte una ventaja real, por ejemplo:\n\nconstruir proyectos QGIS automáticamente;\npreparar productos cartográficos auxiliares;\ninspección o validación final;\nalguna operación específica difícil de sustituir de forma razonable.\n\n\n\n\nProcesamiento analítico: preferir Python headless.\nPublicación, inspección o empaquetado cartográfico: usar QGIS/PyQGIS si conviene.\n\nEsto hace el workflow:\n\nmás reproducible;\nmás portable;\nmás fácil de automatizar con Snakemake;\nmenos dependiente de configuraciones frágiles de GUI."
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#uso-recomendado-con-pycharm",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#uso-recomendado-con-pycharm",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "PyCharm puede ser el IDE principal del proyecto, siempre que se configure de forma simple y consistente.\n\n\nUsar como intérprete del proyecto el Python del entorno workflow-iie creado con micromamba o conda.\n\n\n\n\ncrear y activar el entorno desde terminal;\nabrir el proyecto en PyCharm;\nseleccionar el intérprete del entorno workflow-iie;\nejecutar scripts normales del workflow con ese intérprete;\nreservar PyQGIS para scripts específicos, no para todo el pipeline.\n\n\n\n\nPara scripts que importen qgis.core, puede ser necesario un intérprete o una configuración específica vinculada a la instalación de QGIS. En ese caso se recomienda:\n\nmantener esos scripts en una carpeta diferenciada, por ejemplo scripts/headless_qgis/;\ndocumentar claramente sus variables de entorno necesarias;\nno hacer que todo el proyecto dependa de ellas.\n\n\n\n\nSi una ejecución PyQGIS lo requiere, puede ser necesario configurar variables como:\nGDAL_DATA=&lt;ruta a share/gdal&gt;\nPROJ_LIB=&lt;ruta a share/proj&gt;\nGDAL_DRIVER_PATH=&lt;ruta a gdalplugins&gt;\nY, si aplica, ajustar rutas de intérprete para que PyCharm encuentre correctamente bibliotecas Python de QGIS.\n\n\n\nPara personal no muy técnico:\n\nusar el entorno workflow-iie para casi todo el desarrollo;\nusar configuraciones PyCharm separadas para scripts PyQGIS especiales;\nno mezclar en una sola configuración scripts headless puros y scripts dependientes de qgis.core."
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#organización-sugerida-del-trabajo",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#organización-sugerida-del-trabajo",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "Ejemplos:\n\ngeneración de grids de referencia;\nrasterización y reproyección;\nconstrucción de features tabulares;\nensamblado de tablas;\npreparación de insumos para inferencia;\nreconstrucción raster final.\n\nEstos scripts deben poder correr con el entorno del proyecto sin depender de la GUI de QGIS.\n\n\n\nEjemplos:\n\ncreación automática de proyectos .qgz;\naplicación de simbología;\nempaquetado de resultados para inspección.\n\nEstos scripts pueden convivir en el proyecto, pero deben tratarse como una capa adicional, no como el núcleo del pipeline."
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#integración-con-snakemake",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#integración-con-snakemake",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "El entorno workflow-iie debe ser suficiente para correr el workflow principal por reglas con Snakemake.\nEjemplo de ejecución general:\nsnakemake -j 4\nO para una regla específica:\nsnakemake &lt;nombre_regla&gt; -j 2\nLa recomendación es que Snakemake orqueste el flujo principal headless y que las tareas PyQGIS queden como reglas terminales u opcionales, por ejemplo para generar proyectos de revisión."
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#validación-mínima-del-entorno-antes-de-trabajar",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#validación-mínima-del-entorno-antes-de-trabajar",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "Se recomienda que cada instalación confirme al menos lo siguiente:\n\nel entorno activa correctamente;\nnumpy, pandas, rasterio, geopandas y pyarrow importan sin error;\nsnakemake está disponible;\npytest corre;\nsi se usarán scripts PyQGIS, existe al menos una configuración funcional separada para ellos."
+  },
+  {
+    "objectID": "docs/prepara-python/README_entorno_workflow_iie.html#recomendación-final-para-el-equipo",
+    "href": "docs/prepara-python/README_entorno_workflow_iie.html#recomendación-final-para-el-equipo",
+    "title": "Entorno de trabajo para workflow-iie",
+    "section": "",
+    "text": "Para reducir fricción en un equipo no muy técnico:\n\nusar un solo archivo environment.yml como referencia oficial;\nusar micromamba como estándar sugerido;\ndocumentar una sola forma canónica de crear y activar el entorno;\nmantener el procesamiento principal en modo headless-first;\naislar los scripts PyQGIS en configuraciones específicas;\ncorrer pytest como validación básica después de instalar.\n\nEsta estrategia ofrece un equilibrio adecuado entre estabilidad geoespacial, facilidad de operación y escalabilidad del workflow."
+  },
+  {
+    "objectID": "docs/Instalación Python y ambiente qgis_env.html",
+    "href": "docs/Instalación Python y ambiente qgis_env.html",
+    "title": "Instalación de Python y del ambiente qgis_env",
+    "section": "",
+    "text": "Esta guía está orientada a usuarios cuyo sistema operativo principal es Windows 11. En ese mismo equipo puede coexistir además un entorno Linux mediante WSL (Windows Subsystem for Linux).\nLa guía explica el procedimiento para trabajar en ambos entornos. Se cubre desde la instalación inicial de los componentes necesarios hasta la creación del ambiente qgis_env, que es el que estamos usando para el desarrollo del workflow. Como base se adopta Python 3.11, que actualmente es una opción estable para trabajar con la API de QGIS.\nLa base técnica es adecuada para nuestro objetivo: micromamba es el instalador oficial recomendado, no necesita un ambiente base con Python preinstalado, y qgis en conda-forge tiene builds actuales para win-64 y linux-64. Además, para asegurar estabilidad con paquetes de la colección conda-forge, conviene usar channel priority strict y evitar mezclar canales. (Mamba)\n\n\nAunque no es indispensable, en esta guía optamos por usar un archivo environment.yml que puede emplearse tanto en Windows como en WSL. Esto ayuda a mantener ambos entornos alineados.\nPara mayor estabilidad de QGIS, fijamos explícitamente el canal conda-forge/label/qgis_ltr, donde existen builds recientes de QGIS 3.40.11 para Python 3.11 en Windows y Linux. (Anaconda)\nCopia las líneas siguientes en un archivo y guárdalo con el nombre:\nenvironment-qgis_env.yml\nname: qgis_env\nchannels:\n  - conda-forge/label/qgis_ltr\n  - conda-forge\ndependencies:\n  - python=3.11\n  - qgis\n  - xarray\n  - geopandas\n  - dask\n  - pandas\n  - snakemake\n  - pytest\n  - numpy\n  - scipy\n  - statsmodels\n  - scikit-learn\n  - matplotlib\n\n\n\nAunque el contenido del archivo environment-qgis_env.yml puede ser el mismo en Windows y en WSL, la ubicación recomendada no es la misma en ambos casos.\n\n\nSi el ambiente qgis_env se va a crear y usar en Windows nativo, conviene guardar el archivo en una carpeta normal de Windows, por ejemplo:\nC:\\Users\\TU_USUARIO\\proyectos\\qgis-win\\\nEn ese caso, desde PowerShell se puede entrar a esa carpeta y crear el ambiente con:\ncd C:\\Users\\TU_USUARIO\\proyectos\\qgis-win\nmicromamba create -f .\\environment-qgis_env.yml\n\n\n\nSi el ambiente qgis_env se va a crear y usar en WSL, conviene guardar tanto el archivo YAML como el proyecto dentro del sistema de archivos Linux, por ejemplo:\n~/proyectos/qgis-wsl/\nEn WSL, el símbolo ~ representa la carpeta personal del usuario, normalmente:\n/home/tu_usuario\nAsí, una ubicación típica del archivo sería:\n/home/tu_usuario/proyectos/qgis-wsl/environment-qgis_env.yml\nDesde la terminal de WSL, bastaría con:\ncd ~/proyectos/qgis-wsl\nmicromamba create -f environment-qgis_env.yml\n\n\n\nWSL también puede acceder a archivos ubicados en discos de Windows. Por ejemplo, el disco C: aparece montado bajo:\n/mnt/c/\nDe este modo, una carpeta como:\nC:\\Users\\TU_USUARIO\\proyectos\\qgis-win\\\nse verá en WSL como:\n/mnt/c/Users/TU_USUARIO/proyectos/qgis-win/\nEsto permite leer o copiar archivos entre ambos sistemas. Sin embargo, para el trabajo cotidiano del workflow, especialmente si se usarán snakemake, geopandas, xarray, dask y scripts headless (sin recurrir a la interfaz gráfica de QGIS), conviene trabajar dentro del sistema de archivos Linux y no sobre /mnt/c/.... (Microsoft Learn)\n\n\n\n\nLa documentación oficial indica que en Windows PowerShell la instalación recomendada de micromamba se hace con el script oficial siguiente. (Mamba)\n\n\nAbre PowerShell normal, o mejor PowerShell 7 si lo usas habitualmente.\n\n\n\nEjecuta:\nInvoke-Expression ((Invoke-WebRequest -Uri https://micro.mamba.pm/install.ps1 -UseBasicParsing).Content)\nEso instala micromamba. Después conviene reiniciar la terminal para que tome correctamente el PATH y la inicialización del shell. La propia documentación también indica que micromamba usa MAMBA_ROOT_PREFIX para ubicar ambientes y caché. (Mamba)\n\n\n\nSi al reabrir la terminal no reconoce micromamba activate, ejecuta:\nmicromamba shell init -s powershell -r $env:USERPROFILE\\micromamba\nCuidado: esto debe hacerse una sola vez y sólo si es necesario, pues la operación modifica archivos de configuración del shell.\nLuego cierra y vuelve a abrir PowerShell. La activación en Mamba/Micromamba depende del shell y por eso esta inicialización es importante. (Mamba)\n\n\n\nPara reducir conflictos, usa prioridad estricta y deja conda-forge arriba. Eso está alineado con la recomendación de conda-forge y la documentación de conda. Observa que en este punto micromamba ya debería existir como comando válido en PowerShell. (Conda-Forge)\nmicromamba config append channels conda-forge\nmicromamba config set channel_priority strict\n\n\n\nEn la ventana de PowerShell, ubícate en la carpeta donde guardaste environment-qgis_env.yml. Por ejemplo:\ncd C:\\Users\\TU_USUARIO\\proyectos\\qgis-win\nmicromamba create -f .\\environment-qgis_env.yml\nEl sistema resolverá dependencias y creará el ambiente aislado qgis_env, que contendrá Python 3.11 y las bibliotecas indicadas en el archivo YAML. Cuando termine, lo indicará en la misma terminal.\nEl contenido de este ambiente no estará disponible de manera general en el sistema: sólo podrá usarse cuando el ambiente sea activado.\n\n\n\nmicromamba activate qgis_env\n\n\n\nEste comando lanza Python, intenta cargar las bibliotecas solicitadas y, si todo funciona correctamente, imprimirá OK.\npython --version\npython -c \"import qgis, xarray, geopandas, dask, pandas, snakemake, pytest, numpy, scipy, statsmodels, sklearn, matplotlib; print('OK')\"\n\n\n\nSi quieres comprobar que QGIS quedó correctamente instalado en este ambiente, ejecuta:\nqgis\nEsto abrirá la instalación de QGIS asociada a ese ambiente, independiente de otras instalaciones de QGIS que pudiera haber en el equipo.\nTambién puedes probar sólo el módulo Python:\npython -c \"from qgis.core import QgsApplication; print('QGIS Python OK')\"\n\n\n\nAunque el paquete qgis esté instalado en el ambiente Conda, el Python del ambiente puede no encontrar qgis.core si no se agregan las rutas internas de QGIS al PYTHONPATH.\nSe resolvió agregando, al activar qgis_env, las rutas:\n%CONDA_PREFIX%\\Library\\python %CONDA_PREFIX%\\Library\\python\\site-packages\nCon esto, la prueba:\nconda activate qgis_env\npython -c \"import qgis.core; print('qgis.core OK')\"\n\n## 3) Instalación en WSL\n\nMicrosoft indica que en Windows 11 puedes instalar WSL con `wsl --install`, que las instalaciones nuevas quedan en **WSL 2** por defecto, y que **WSLg** permite ejecutar aplicaciones GUI Linux integradas en Windows. Eso significa que, si quieres, también puedes lanzar `qgis` con interfaz desde WSL en Windows 11. ([Microsoft Learn][5])\n\n### 3.1. Instalar WSL en Windows 11\n\nDesde **PowerShell como administrador**:\n\n```powershell\nwsl --install\nReinicia si te lo pide. Luego confirma que estás en WSL 2:\nwsl -l -v\nSi hiciera falta forzar una distribución a WSL 2, por ejemplo Ubuntu, usa:\nwsl --set-version Ubuntu 2\nTodo esto está documentado en la guía oficial de Microsoft. (Microsoft Learn)\n\n\n\nAbre tu terminal WSL/Ubuntu.\n\n\n\nLa forma recomendada en Linux es el script oficial, aunque seguramente ya estará ahora un ícono en inicio con el pingüino de Linux: (Mamba)\n\"${SHELL}\" &lt;(curl -L micro.mamba.pm/install.sh)\nDespués cierra y vuelve a abrir la terminal WSL.\n\n\n\nSi micromamba no queda activado automáticamente, ejecuta lo siguiente una sola vez:\nmicromamba shell init -s bash -r ~/micromamba\nLuego:\nsource ~/.bashrc\nLa documentación de Mamba/Micromamba deja claro que la activación depende del shell y que micromamba puede usarse con sus subcomandos de shell para ello. (Mamba)\n\n\n\nmicromamba config append channels conda-forge\nmicromamba config set channel_priority strict\nEso sigue la recomendación de conda-forge y conda para evitar mezclas problemáticas de canales. (Conda-Forge)\n\n\n\nSe asume que el archivo environment-qgis_env.yml fue guardado dentro del sistema de archivos Linux, por ejemplo en ~/proyectos/qgis-wsl/.\ncd ~/proyectos/qgis-wsl\nmicromamba create -f environment-qgis_env.yml\n\n\n\nmicromamba activate qgis_env\n\n\n\npython --version\npython -c \"import qgis, xarray, geopandas, dask, pandas, snakemake, pytest, numpy, scipy, statsmodels, sklearn, matplotlib; print('OK')\"\n\n\n\nSi tu Windows 11 tiene WSLg funcionando, puedes intentar:\nqgis\nMicrosoft documenta que WSL 2 en Windows 11 soporta aplicaciones GUI Linux con integración de escritorio. (Microsoft Learn)\n\n\n\n\nSi prefieres crear el ambiente con un solo comando, tanto en Windows como en WSL puedes usar esto:\nmicromamba create -n qgis_env -c conda-forge/label/qgis_ltr -c conda-forge \\\n  python=3.11 qgis xarray geopandas dask pandas snakemake pytest numpy scipy \\\n  statsmodels scikit-learn matplotlib\nLuego:\nmicromamba activate qgis_env\nLa creación y activación de ambientes con comandos de este tipo forma parte del flujo normal documentado para Mamba/Micromamba. (Mamba)\n\n\n\nPara nuestro flujo de trabajo sugerimos lo siguiente:\n\nWindows 11: usar qgis_env como entorno principal para pruebas con QGIS de escritorio y scripts Python/QGIS.\nWSL: usar otro qgis_env paralelo para trabajo headless, Snakemake, geopandas, xarray y procesamiento reproducible.\nMantener ambos con el mismo environment-qgis_env.yml para reducir divergencias.\nEvitar mezclar defaults con conda-forge, porque conda-forge recomienda priorizar su propio canal y usar ambientes separados del entorno base. (Conda-Forge)\n\n\n\n\nPrimera: si quieres la rama más estable de QGIS, el uso de conda-forge/label/qgis_ltr tiene sentido aquí porque hay builds publicados de la línea LTR para py311 tanto en win-64 como en linux-64. (Anaconda)\nSegunda: qgis en conda-forge está soportado en Windows 64-bit y Linux 64-bit, así que nuestro objetivo es plenamente razonable tanto en Windows nativo como en WSL. (Anaconda)\n\n\n\nLa conveniencia de usar WSL sobre Windows aparece sobre todo cuando se quiere desarrollar un workflow headless-first, reproducible y cercano a un entorno Linux real. No lo proponemos como sustituto total de Windows para el uso interactivo de QGIS Desktop, sino como el entorno principal para procesamiento, automatización y ejecución de scripts.\nEn este esquema, Windows se aprovecha principalmente para prototipado, inspección visual y afinación cartográfica interactiva.\nEn una frase:\n\nWSL para producción; Windows para experimentar, inspeccionar y afinar.\n\n\n\n\nAspecto\nWindows nativo\nWSL\n\n\n\n\nQGIS Desktop (GUI)\nMejor opción para uso interactivo intensivo: abrir proyectos, revisar simbología, editar capas y afinar composición cartográfica.\nFunciona con WSLg en Windows 11, pero Microsoft aclara que no ofrece una experiencia de escritorio Linux completa; sirve bien, pero no suele ser la primera elección para uso GUI pesado. (Microsoft Learn)\n\n\nPyQGIS standalone\nMuy viable, especialmente si quieres integrar scripts con el QGIS de escritorio de Windows y trabajar cerca de tus proyectos .qgz.\nMuy atractivo si quieres scripts reproducibles y un entorno Linux limpio. Encaja mejor con automatización y shell scripting. WSL permite correr herramientas Linux sin VM tradicional. (Microsoft Learn)\n\n\nqgis_process / procesamiento headless\nFunciona, pero el entorno Windows suele introducir más fricción en rutas, shell y automatización.\nVentaja clara de WSL. QGIS documenta qgis_process explícitamente e incluso indica cómo usarlo en sistemas sin window manager con QT_QPA_PLATFORM=offscreen, lo que encaja muy bien con trabajo headless. (QGIS)\n\n\nSnakemake / bash / utilidades Linux\nSe puede, pero con más fricción si tu flujo usa muchas herramientas POSIX.\nMejor opción. WSL está pensado para correr la mayor parte de herramientas, utilidades y aplicaciones GNU/Linux directamente en Windows. (Microsoft Learn)\n\n\nRendimiento de archivos\nMejor cuando trabajas en el filesystem de Windows.\nMejor cuando trabajas en el filesystem Linux, por ejemplo en ~/proyecto; Microsoft recomienda evitar trabajar “cruzando” sistemas si no hace falta. (Microsoft Learn)\n\n\nAcceso cruzado a archivos y comandos\nMuy cómodo para integrarte con apps Windows.\nTambién muy fuerte: WSL permite mezclar comandos Windows y Linux, abrir Explorer desde Linux y ejecutar Linux desde PowerShell con wsl &lt;command&gt;. (Microsoft Learn)\n\n\nIntegración con flujos reproducibles\nBuena, pero más propensa a detalles específicos de Windows.\nMejor opción si quieres un pipeline más portable a servidores Linux o a otros entornos científicos. Esto se desprende del propio modelo de WSL como entorno GNU/Linux dentro de Windows. (Microsoft Learn)\n\n\nMicromamba\nMuy usable.\nMuy usable también; micromamba es un ejecutable pequeño, sin base obligatorio, y resulta especialmente cómodo en CI, Docker y shells Linux. (Mamba)\n\n\nCurva de complejidad operativa\nMás simple si tu prioridad es “instalar y usar QGIS Desktop”.\nMás potente, pero requiere más disciplina: filesystem Linux, shell, rutas y separación clara entre GUI y procesamiento. (Microsoft Learn)\n\n\nPara tu flujo concreto\nMejor para inspección visual, simbología, composición y revisión final.\nMejor para producir: scripts, validación, Snakemake, PyQGIS headless, qgis_process, xarray, geopandas, dask. (QGIS)\n\n\n\n\n\n\n\n\nPara ejecutar scripts con qgis.core desde PyCharm usando el entorno C:\\QGis_env, fue necesario complementar la configuración del intérprete con variables de entorno y una ruta adicional de módulos.\n\n\nDefinir las siguientes variables:\nGDAL_DATA=C:\\QGis_env\\Library\\share\\gdal\nGDAL_DRIVER_PATH=C:\\QGis_env\\Library\\lib\\gdalplugins\nPROJ_LIB=C:\\QGis_env\\Library\\share\\proj\nEstas variables permiten que GDAL y PROJ localicen correctamente sus datos auxiliares y controladores.\n\n\n\nAgregar esta ruta:\nC:\\QGis_env\\Library\\python\nEsto permite que el intérprete encuentre el paquete qgis y resuelva correctamente importaciones como:\nfrom qgis.core import QgsApplication"
+  },
+  {
+    "objectID": "docs/Instalación Python y ambiente qgis_env.html#archivo-de-entorno-recomendado",
+    "href": "docs/Instalación Python y ambiente qgis_env.html#archivo-de-entorno-recomendado",
+    "title": "Instalación de Python y del ambiente qgis_env",
+    "section": "",
+    "text": "Aunque no es indispensable, en esta guía optamos por usar un archivo environment.yml que puede emplearse tanto en Windows como en WSL. Esto ayuda a mantener ambos entornos alineados.\nPara mayor estabilidad de QGIS, fijamos explícitamente el canal conda-forge/label/qgis_ltr, donde existen builds recientes de QGIS 3.40.11 para Python 3.11 en Windows y Linux. (Anaconda)\nCopia las líneas siguientes en un archivo y guárdalo con el nombre:\nenvironment-qgis_env.yml\nname: qgis_env\nchannels:\n  - conda-forge/label/qgis_ltr\n  - conda-forge\ndependencies:\n  - python=3.11\n  - qgis\n  - xarray\n  - geopandas\n  - dask\n  - pandas\n  - snakemake\n  - pytest\n  - numpy\n  - scipy\n  - statsmodels\n  - scikit-learn\n  - matplotlib"
+  },
+  {
+    "objectID": "docs/Instalación Python y ambiente qgis_env.html#ubicación-recomendada-del-archivo-environment-qgis_env.yml",
+    "href": "docs/Instalación Python y ambiente qgis_env.html#ubicación-recomendada-del-archivo-environment-qgis_env.yml",
+    "title": "Instalación de Python y del ambiente qgis_env",
+    "section": "",
+    "text": "Aunque el contenido del archivo environment-qgis_env.yml puede ser el mismo en Windows y en WSL, la ubicación recomendada no es la misma en ambos casos.\n\n\nSi el ambiente qgis_env se va a crear y usar en Windows nativo, conviene guardar el archivo en una carpeta normal de Windows, por ejemplo:\nC:\\Users\\TU_USUARIO\\proyectos\\qgis-win\\\nEn ese caso, desde PowerShell se puede entrar a esa carpeta y crear el ambiente con:\ncd C:\\Users\\TU_USUARIO\\proyectos\\qgis-win\nmicromamba create -f .\\environment-qgis_env.yml\n\n\n\nSi el ambiente qgis_env se va a crear y usar en WSL, conviene guardar tanto el archivo YAML como el proyecto dentro del sistema de archivos Linux, por ejemplo:\n~/proyectos/qgis-wsl/\nEn WSL, el símbolo ~ representa la carpeta personal del usuario, normalmente:\n/home/tu_usuario\nAsí, una ubicación típica del archivo sería:\n/home/tu_usuario/proyectos/qgis-wsl/environment-qgis_env.yml\nDesde la terminal de WSL, bastaría con:\ncd ~/proyectos/qgis-wsl\nmicromamba create -f environment-qgis_env.yml\n\n\n\nWSL también puede acceder a archivos ubicados en discos de Windows. Por ejemplo, el disco C: aparece montado bajo:\n/mnt/c/\nDe este modo, una carpeta como:\nC:\\Users\\TU_USUARIO\\proyectos\\qgis-win\\\nse verá en WSL como:\n/mnt/c/Users/TU_USUARIO/proyectos/qgis-win/\nEsto permite leer o copiar archivos entre ambos sistemas. Sin embargo, para el trabajo cotidiano del workflow, especialmente si se usarán snakemake, geopandas, xarray, dask y scripts headless (sin recurrir a la interfaz gráfica de QGIS), conviene trabajar dentro del sistema de archivos Linux y no sobre /mnt/c/.... (Microsoft Learn)"
+  },
+  {
+    "objectID": "docs/Instalación Python y ambiente qgis_env.html#instalación-en-windows-11",
+    "href": "docs/Instalación Python y ambiente qgis_env.html#instalación-en-windows-11",
+    "title": "Instalación de Python y del ambiente qgis_env",
+    "section": "",
+    "text": "La documentación oficial indica que en Windows PowerShell la instalación recomendada de micromamba se hace con el script oficial siguiente. (Mamba)\n\n\nAbre PowerShell normal, o mejor PowerShell 7 si lo usas habitualmente.\n\n\n\nEjecuta:\nInvoke-Expression ((Invoke-WebRequest -Uri https://micro.mamba.pm/install.ps1 -UseBasicParsing).Content)\nEso instala micromamba. Después conviene reiniciar la terminal para que tome correctamente el PATH y la inicialización del shell. La propia documentación también indica que micromamba usa MAMBA_ROOT_PREFIX para ubicar ambientes y caché. (Mamba)\n\n\n\nSi al reabrir la terminal no reconoce micromamba activate, ejecuta:\nmicromamba shell init -s powershell -r $env:USERPROFILE\\micromamba\nCuidado: esto debe hacerse una sola vez y sólo si es necesario, pues la operación modifica archivos de configuración del shell.\nLuego cierra y vuelve a abrir PowerShell. La activación en Mamba/Micromamba depende del shell y por eso esta inicialización es importante. (Mamba)\n\n\n\nPara reducir conflictos, usa prioridad estricta y deja conda-forge arriba. Eso está alineado con la recomendación de conda-forge y la documentación de conda. Observa que en este punto micromamba ya debería existir como comando válido en PowerShell. (Conda-Forge)\nmicromamba config append channels conda-forge\nmicromamba config set channel_priority strict\n\n\n\nEn la ventana de PowerShell, ubícate en la carpeta donde guardaste environment-qgis_env.yml. Por ejemplo:\ncd C:\\Users\\TU_USUARIO\\proyectos\\qgis-win\nmicromamba create -f .\\environment-qgis_env.yml\nEl sistema resolverá dependencias y creará el ambiente aislado qgis_env, que contendrá Python 3.11 y las bibliotecas indicadas en el archivo YAML. Cuando termine, lo indicará en la misma terminal.\nEl contenido de este ambiente no estará disponible de manera general en el sistema: sólo podrá usarse cuando el ambiente sea activado.\n\n\n\nmicromamba activate qgis_env\n\n\n\nEste comando lanza Python, intenta cargar las bibliotecas solicitadas y, si todo funciona correctamente, imprimirá OK.\npython --version\npython -c \"import qgis, xarray, geopandas, dask, pandas, snakemake, pytest, numpy, scipy, statsmodels, sklearn, matplotlib; print('OK')\"\n\n\n\nSi quieres comprobar que QGIS quedó correctamente instalado en este ambiente, ejecuta:\nqgis\nEsto abrirá la instalación de QGIS asociada a ese ambiente, independiente de otras instalaciones de QGIS que pudiera haber en el equipo.\nTambién puedes probar sólo el módulo Python:\npython -c \"from qgis.core import QgsApplication; print('QGIS Python OK')\"\n\n\n\nAunque el paquete qgis esté instalado en el ambiente Conda, el Python del ambiente puede no encontrar qgis.core si no se agregan las rutas internas de QGIS al PYTHONPATH.\nSe resolvió agregando, al activar qgis_env, las rutas:\n%CONDA_PREFIX%\\Library\\python %CONDA_PREFIX%\\Library\\python\\site-packages\nCon esto, la prueba:\nconda activate qgis_env\npython -c \"import qgis.core; print('qgis.core OK')\"\n\n## 3) Instalación en WSL\n\nMicrosoft indica que en Windows 11 puedes instalar WSL con `wsl --install`, que las instalaciones nuevas quedan en **WSL 2** por defecto, y que **WSLg** permite ejecutar aplicaciones GUI Linux integradas en Windows. Eso significa que, si quieres, también puedes lanzar `qgis` con interfaz desde WSL en Windows 11. ([Microsoft Learn][5])\n\n### 3.1. Instalar WSL en Windows 11\n\nDesde **PowerShell como administrador**:\n\n```powershell\nwsl --install\nReinicia si te lo pide. Luego confirma que estás en WSL 2:\nwsl -l -v\nSi hiciera falta forzar una distribución a WSL 2, por ejemplo Ubuntu, usa:\nwsl --set-version Ubuntu 2\nTodo esto está documentado en la guía oficial de Microsoft. (Microsoft Learn)\n\n\n\nAbre tu terminal WSL/Ubuntu.\n\n\n\nLa forma recomendada en Linux es el script oficial, aunque seguramente ya estará ahora un ícono en inicio con el pingüino de Linux: (Mamba)\n\"${SHELL}\" &lt;(curl -L micro.mamba.pm/install.sh)\nDespués cierra y vuelve a abrir la terminal WSL.\n\n\n\nSi micromamba no queda activado automáticamente, ejecuta lo siguiente una sola vez:\nmicromamba shell init -s bash -r ~/micromamba\nLuego:\nsource ~/.bashrc\nLa documentación de Mamba/Micromamba deja claro que la activación depende del shell y que micromamba puede usarse con sus subcomandos de shell para ello. (Mamba)\n\n\n\nmicromamba config append channels conda-forge\nmicromamba config set channel_priority strict\nEso sigue la recomendación de conda-forge y conda para evitar mezclas problemáticas de canales. (Conda-Forge)\n\n\n\nSe asume que el archivo environment-qgis_env.yml fue guardado dentro del sistema de archivos Linux, por ejemplo en ~/proyectos/qgis-wsl/.\ncd ~/proyectos/qgis-wsl\nmicromamba create -f environment-qgis_env.yml\n\n\n\nmicromamba activate qgis_env\n\n\n\npython --version\npython -c \"import qgis, xarray, geopandas, dask, pandas, snakemake, pytest, numpy, scipy, statsmodels, sklearn, matplotlib; print('OK')\"\n\n\n\nSi tu Windows 11 tiene WSLg funcionando, puedes intentar:\nqgis\nMicrosoft documenta que WSL 2 en Windows 11 soporta aplicaciones GUI Linux con integración de escritorio. (Microsoft Learn)"
+  },
+  {
+    "objectID": "docs/Instalación Python y ambiente qgis_env.html#variante-sin-archivo-yaml",
+    "href": "docs/Instalación Python y ambiente qgis_env.html#variante-sin-archivo-yaml",
+    "title": "Instalación de Python y del ambiente qgis_env",
+    "section": "",
+    "text": "Si prefieres crear el ambiente con un solo comando, tanto en Windows como en WSL puedes usar esto:\nmicromamba create -n qgis_env -c conda-forge/label/qgis_ltr -c conda-forge \\\n  python=3.11 qgis xarray geopandas dask pandas snakemake pytest numpy scipy \\\n  statsmodels scikit-learn matplotlib\nLuego:\nmicromamba activate qgis_env\nLa creación y activación de ambientes con comandos de este tipo forma parte del flujo normal documentado para Mamba/Micromamba. (Mamba)"
+  },
+  {
+    "objectID": "docs/Instalación Python y ambiente qgis_env.html#recomendaciones-concretas-para-nuestro-caso",
+    "href": "docs/Instalación Python y ambiente qgis_env.html#recomendaciones-concretas-para-nuestro-caso",
+    "title": "Instalación de Python y del ambiente qgis_env",
+    "section": "",
+    "text": "Para nuestro flujo de trabajo sugerimos lo siguiente:\n\nWindows 11: usar qgis_env como entorno principal para pruebas con QGIS de escritorio y scripts Python/QGIS.\nWSL: usar otro qgis_env paralelo para trabajo headless, Snakemake, geopandas, xarray y procesamiento reproducible.\nMantener ambos con el mismo environment-qgis_env.yml para reducir divergencias.\nEvitar mezclar defaults con conda-forge, porque conda-forge recomienda priorizar su propio canal y usar ambientes separados del entorno base. (Conda-Forge)"
+  },
+  {
+    "objectID": "docs/Instalación Python y ambiente qgis_env.html#dos-notas-útiles",
+    "href": "docs/Instalación Python y ambiente qgis_env.html#dos-notas-útiles",
+    "title": "Instalación de Python y del ambiente qgis_env",
+    "section": "",
+    "text": "Primera: si quieres la rama más estable de QGIS, el uso de conda-forge/label/qgis_ltr tiene sentido aquí porque hay builds publicados de la línea LTR para py311 tanto en win-64 como en linux-64. (Anaconda)\nSegunda: qgis en conda-forge está soportado en Windows 64-bit y Linux 64-bit, así que nuestro objetivo es plenamente razonable tanto en Windows nativo como en WSL. (Anaconda)"
+  },
+  {
+    "objectID": "docs/Instalación Python y ambiente qgis_env.html#conveniencia-de-usar-wsl",
+    "href": "docs/Instalación Python y ambiente qgis_env.html#conveniencia-de-usar-wsl",
+    "title": "Instalación de Python y del ambiente qgis_env",
+    "section": "",
+    "text": "La conveniencia de usar WSL sobre Windows aparece sobre todo cuando se quiere desarrollar un workflow headless-first, reproducible y cercano a un entorno Linux real. No lo proponemos como sustituto total de Windows para el uso interactivo de QGIS Desktop, sino como el entorno principal para procesamiento, automatización y ejecución de scripts.\nEn este esquema, Windows se aprovecha principalmente para prototipado, inspección visual y afinación cartográfica interactiva.\nEn una frase:\n\nWSL para producción; Windows para experimentar, inspeccionar y afinar.\n\n\n\n\nAspecto\nWindows nativo\nWSL\n\n\n\n\nQGIS Desktop (GUI)\nMejor opción para uso interactivo intensivo: abrir proyectos, revisar simbología, editar capas y afinar composición cartográfica.\nFunciona con WSLg en Windows 11, pero Microsoft aclara que no ofrece una experiencia de escritorio Linux completa; sirve bien, pero no suele ser la primera elección para uso GUI pesado. (Microsoft Learn)\n\n\nPyQGIS standalone\nMuy viable, especialmente si quieres integrar scripts con el QGIS de escritorio de Windows y trabajar cerca de tus proyectos .qgz.\nMuy atractivo si quieres scripts reproducibles y un entorno Linux limpio. Encaja mejor con automatización y shell scripting. WSL permite correr herramientas Linux sin VM tradicional. (Microsoft Learn)\n\n\nqgis_process / procesamiento headless\nFunciona, pero el entorno Windows suele introducir más fricción en rutas, shell y automatización.\nVentaja clara de WSL. QGIS documenta qgis_process explícitamente e incluso indica cómo usarlo en sistemas sin window manager con QT_QPA_PLATFORM=offscreen, lo que encaja muy bien con trabajo headless. (QGIS)\n\n\nSnakemake / bash / utilidades Linux\nSe puede, pero con más fricción si tu flujo usa muchas herramientas POSIX.\nMejor opción. WSL está pensado para correr la mayor parte de herramientas, utilidades y aplicaciones GNU/Linux directamente en Windows. (Microsoft Learn)\n\n\nRendimiento de archivos\nMejor cuando trabajas en el filesystem de Windows.\nMejor cuando trabajas en el filesystem Linux, por ejemplo en ~/proyecto; Microsoft recomienda evitar trabajar “cruzando” sistemas si no hace falta. (Microsoft Learn)\n\n\nAcceso cruzado a archivos y comandos\nMuy cómodo para integrarte con apps Windows.\nTambién muy fuerte: WSL permite mezclar comandos Windows y Linux, abrir Explorer desde Linux y ejecutar Linux desde PowerShell con wsl &lt;command&gt;. (Microsoft Learn)\n\n\nIntegración con flujos reproducibles\nBuena, pero más propensa a detalles específicos de Windows.\nMejor opción si quieres un pipeline más portable a servidores Linux o a otros entornos científicos. Esto se desprende del propio modelo de WSL como entorno GNU/Linux dentro de Windows. (Microsoft Learn)\n\n\nMicromamba\nMuy usable.\nMuy usable también; micromamba es un ejecutable pequeño, sin base obligatorio, y resulta especialmente cómodo en CI, Docker y shells Linux. (Mamba)\n\n\nCurva de complejidad operativa\nMás simple si tu prioridad es “instalar y usar QGIS Desktop”.\nMás potente, pero requiere más disciplina: filesystem Linux, shell, rutas y separación clara entre GUI y procesamiento. (Microsoft Learn)\n\n\nPara tu flujo concreto\nMejor para inspección visual, simbología, composición y revisión final.\nMejor para producir: scripts, validación, Snakemake, PyQGIS headless, qgis_process, xarray, geopandas, dask. (QGIS)"
+  },
+  {
+    "objectID": "docs/Instalación Python y ambiente qgis_env.html#pycharm-windows",
+    "href": "docs/Instalación Python y ambiente qgis_env.html#pycharm-windows",
+    "title": "Instalación de Python y del ambiente qgis_env",
+    "section": "",
+    "text": "Para ejecutar scripts con qgis.core desde PyCharm usando el entorno C:\\QGis_env, fue necesario complementar la configuración del intérprete con variables de entorno y una ruta adicional de módulos.\n\n\nDefinir las siguientes variables:\nGDAL_DATA=C:\\QGis_env\\Library\\share\\gdal\nGDAL_DRIVER_PATH=C:\\QGis_env\\Library\\lib\\gdalplugins\nPROJ_LIB=C:\\QGis_env\\Library\\share\\proj\nEstas variables permiten que GDAL y PROJ localicen correctamente sus datos auxiliares y controladores.\n\n\n\nAgregar esta ruta:\nC:\\QGis_env\\Library\\python\nEsto permite que el intérprete encuentre el paquete qgis y resuelva correctamente importaciones como:\nfrom qgis.core import QgsApplication"
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "",
+    "text": "Se consolidaron las rutas reconocibles extraídas de los scripts R compartidos para apoyar la revisión de consistencia, la identificación de familias operativas y la futura definición de una estructura canónica de datos y resultados. La tabla adjunta reúne rutas concretas, plantillas dinámicas y orígenes de colección detectados por el manifest analítico."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#llamado-breve",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#llamado-breve",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "",
+    "text": "Se consolidaron las rutas reconocibles extraídas de los scripts R compartidos para apoyar la revisión de consistencia, la identificación de familias operativas y la futura definición de una estructura canónica de datos y resultados. La tabla adjunta reúne rutas concretas, plantillas dinámicas y orígenes de colección detectados por el manifest analítico."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#resumen",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#resumen",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "Resumen",
+    "text": "Resumen\n\nTotal de registros: 57\nRutas concretas: 48\nPlantillas dinámicas: 6\nOrígenes de colección: 3"
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#archivo-csv",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#archivo-csv",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "Archivo CSV",
+    "text": "Archivo CSV\n\nDescargar CSV"
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#tabla-de-rutas",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#tabla-de-rutas",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "Tabla de rutas",
+    "text": "Tabla de rutas\n\n  El navegador no pudo incrustar el CSV. Usa el enlace de descarga."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#nota",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#nota",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "Nota",
+    "text": "Nota\nLa categoría ruta_concreta corresponde a archivos o directorios reconocibles tal como aparecen o pueden ensamblarse de forma estable. plantilla_dinamica corresponde a salidas o entradas parametrizadas. origen_coleccion identifica directorios desde los cuales el script llama una colección seleccionada de archivos."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html",
+    "title": "Árbol canónico tentativo",
+    "section": "",
+    "text": "proyecto/\n├── data_raw/\n│   ├── vectores_base/\n│   ├── rasters_base/\n│   ├── tablas_base/\n│   └── externos_modelado/\n├── data_intermediate/\n│   ├── grids/\n│   │   └── ref_grid_50m_regional/\n│   ├── features/\n│   │   ├── por_script/\n│   │   └── consolidadas/\n│   ├── training_tables/\n│   └── model_inputs/\n├── outputs/\n│   ├── maps/\n│   │   ├── ei/\n│   │   └── otras_salidas_raster/\n│   ├── tables/\n│   └── reports/\n├── scripts/\n│   ├── prep/\n│   ├── features/\n│   ├── training/\n│   ├── inference/\n│   └── utils/\n└── metadata/\n    ├── manifests/\n    ├── dictionaries/\n    └── workflow/\n\n\n\ndata/06_DunasCost250116_malla_ref_50m → familia troncal de grillas/regiones.\ndata/7_ref_grid_50m y data/8_ref_grid_50m → probable misma familia operativa con inconsistencia de nombre.\ndata_features → features derivadas consumidas por etapas posteriores.\ndata_training_tables → tablas de entrenamiento/modelado.\nBN_maps/.../R → salidas raster/mapas."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html#alias-actuales-que-conviene-validar",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html#alias-actuales-que-conviene-validar",
+    "title": "Árbol canónico tentativo",
+    "section": "",
+    "text": "data/06_DunasCost250116_malla_ref_50m → familia troncal de grillas/regiones.\ndata/7_ref_grid_50m y data/8_ref_grid_50m → probable misma familia operativa con inconsistencia de nombre.\ndata_features → features derivadas consumidas por etapas posteriores.\ndata_training_tables → tablas de entrenamiento/modelado.\nBN_maps/.../R → salidas raster/mapas."
+  },
+  {
+    "objectID": "antecedentes/README-headless.html",
+    "href": "antecedentes/README-headless.html",
+    "title": "README-headless",
+    "section": "",
+    "text": "Breve explicación del subproyecto y del objetivo de migrar scripts geoespaciales a ejecución headless.\n\n\n\nQué procesos cubre: - raster alineado a plantilla - reproyección - rasterización - procesamiento NetCDF - recorte con máscara - exportación tabular/vectorial\n\n\n\n\nheadless-first\nreproducibilidad\nseparación entre análisis y visualización\nalineación estricta a raster plantilla\nvalidación formal con pytest\n\n\n\n\n\nnombre del entorno: qgis_env\nbibliotecas disponibles\nversión recomendada de Python\nobservaciones de compatibilidad\n\n\n\n\n\nGDAL/OGR/OSR: raster, reproyección, rasterización\nxarray/rioxarray/netCDF4: NetCDF y cubos climáticos\ndask: procesamiento escalable\ngeopandas: vectores cuando simplifique\nqgis.core: solo si aporta valor real, sin GUI\n\n\n\n\n\nraster plantilla: reg_unidas\nresample categórico: near\nresample continuo: bilinear\ndefinición explícita de NoData\nuso de main() y manejo de errores\nlimpieza opcional de temporales\n\n\n\n\nResumen del árbol de directorios.\n\n\n\n\nejecución directa de scripts\nejecución con Snakemake\ndry-run\nlogs\nrerun de pasos\n\n\n\n\n\npruebas unitarias\npruebas de integración\ncriterios mínimos de aceptación\n\n\n\n\n\ndatos muy grandes\nsupuestos de CRS\ncampos esperados en vectores\nmejoras futuras"
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#propósito",
+    "href": "antecedentes/README-headless.html#propósito",
+    "title": "README-headless",
+    "section": "",
+    "text": "Breve explicación del subproyecto y del objetivo de migrar scripts geoespaciales a ejecución headless."
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#alcance",
+    "href": "antecedentes/README-headless.html#alcance",
+    "title": "README-headless",
+    "section": "",
+    "text": "Qué procesos cubre: - raster alineado a plantilla - reproyección - rasterización - procesamiento NetCDF - recorte con máscara - exportación tabular/vectorial"
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#principios-de-diseño",
+    "href": "antecedentes/README-headless.html#principios-de-diseño",
+    "title": "README-headless",
+    "section": "",
+    "text": "headless-first\nreproducibilidad\nseparación entre análisis y visualización\nalineación estricta a raster plantilla\nvalidación formal con pytest"
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#entorno-computacional",
+    "href": "antecedentes/README-headless.html#entorno-computacional",
+    "title": "README-headless",
+    "section": "",
+    "text": "nombre del entorno: qgis_env\nbibliotecas disponibles\nversión recomendada de Python\nobservaciones de compatibilidad"
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#bibliotecas-y-criterio-de-uso",
+    "href": "antecedentes/README-headless.html#bibliotecas-y-criterio-de-uso",
+    "title": "README-headless",
+    "section": "",
+    "text": "GDAL/OGR/OSR: raster, reproyección, rasterización\nxarray/rioxarray/netCDF4: NetCDF y cubos climáticos\ndask: procesamiento escalable\ngeopandas: vectores cuando simplifique\nqgis.core: solo si aporta valor real, sin GUI"
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#convenciones-metodológicas",
+    "href": "antecedentes/README-headless.html#convenciones-metodológicas",
+    "title": "README-headless",
+    "section": "",
+    "text": "raster plantilla: reg_unidas\nresample categórico: near\nresample continuo: bilinear\ndefinición explícita de NoData\nuso de main() y manejo de errores\nlimpieza opcional de temporales"
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#estructura-del-proyecto",
+    "href": "antecedentes/README-headless.html#estructura-del-proyecto",
+    "title": "README-headless",
+    "section": "",
+    "text": "Resumen del árbol de directorios."
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#ejecución",
+    "href": "antecedentes/README-headless.html#ejecución",
+    "title": "README-headless",
+    "section": "",
+    "text": "ejecución directa de scripts\nejecución con Snakemake\ndry-run\nlogs\nrerun de pasos"
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#validación",
+    "href": "antecedentes/README-headless.html#validación",
+    "title": "README-headless",
+    "section": "",
+    "text": "pruebas unitarias\npruebas de integración\ncriterios mínimos de aceptación"
+  },
+  {
+    "objectID": "antecedentes/README-headless.html#limitaciones-y-pendientes",
+    "href": "antecedentes/README-headless.html#limitaciones-y-pendientes",
+    "title": "README-headless",
+    "section": "",
+    "text": "datos muy grandes\nsupuestos de CRS\ncampos esperados en vectores\nmejoras futuras"
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html",
+    "title": "Hallazgos y propuesta canónica tentativa",
+    "section": "",
+    "text": "Hallazgo principal: el análisis de scripts permitió pasar de una lista de rutas a una vista de familias operativas de archivos. Con eso ya se distinguen etapas claras del flujo: base espacial/regional, cálculo de features, tablas de entrenamiento y generación de mapas.\nSe detectó una familia claramente troncal: data/06_DunasCost250116_malla_ref_50m, que alimenta muchos scripts. También emergen como etapas posteriores data_features y data_training_tables. Además apareció una posible inconsistencia de nomenclatura entre data/7_ref_grid_50m y data/8_ref_grid_50m, que probablemente representan la misma familia operativa y conviene validar directamente.\nPropuesta canónica tentativa: reorganizar por etapas del workflow y no por herencia histórica de carpetas. En términos generales: data_raw/ para insumos fuente, data_intermediate/grids/ para moldes o grillas base regionales, data_intermediate/features/ para capas derivadas, data_intermediate/training_tables/ para tablas de modelado y outputs/maps/ para resultados cartográficos."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#grafo",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#grafo",
+    "title": "Hallazgos y propuesta canónica tentativa",
+    "section": "Grafo simplificado",
+    "text": "Grafo simplificado\n\n\n\n\n\n\nflowchart LR\n    F001(\"data/5_deltavp250m\")\n    F002(\"data/6_inegiSVII_dunes\")\n    F003(\"data_crude/02_cm-conabio\")\n    F004(\"data/7_dunes250116\")\n    F005(\"data/3_misc_cesia\")\n    F006(\"data_features\")\n    F007(\"data/06_DunasCost250116_malla_ref_50m\\\\n[\\\\.tif$]\")\n    F008(\"data_crude/12_Tipo_de_costa\")\n    F009(\"data/06_DunasCost250116_malla_ref_50m\")\n    F010(\"data_crude/11_dataset-sis-biodiversity-era5-global\")\n    F011(\"data_crude/05_InventarioEstructuras\")\n    F012(\"data_crude/07_zvh_mx3gw\")\n    F013(\"data_features\\\\n[\\\\.rds$]\")\n    F014(\"data_training_tables\")\n    F015(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m\\\\n[\\\\.tif$]\")\n    F016(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R\")\n    F017(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales\")\n    F018(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m\")\n    F019(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data\")\n    F020(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data\")\n    F021(\"data/7_ref_grid_50m\")\n    F022(\"data/8_ref_grid_50m\")\n    F023(\"data_crude/04_Erosion_acresion\")\n    F024(\"data_crude/15_plantas_snib\")\n    F025(\"data_crude/08_coral-global\")\n    F026(\"data_crude/03_seagrasses-pol-simar\")\n    F027(\"data_crude/13_Batimetría\")\n    F028(\"data_crude/16_madmex\")\n    S10[\"10_movimiento_dunas.R\"]\n    S11[\"11_tipo_costa.R\"]\n    S12[\"12_wind_speed.R\"]\n    S13[\"13_z_v_holdridge.R\"]\n    S14[\"14_create_data_table.R\"]\n    S15[\"15_one_class_ei.R\"]\n    S16[\"16_final_training_data_v1.R\"]\n    S17[\"17_naive_bayes_ei.R\"]\n    S18[\"18_create_ei_rasters.R\"]\n    S101[\"1_create_reference_grid.R\"]\n    S102[\"1_create_reference_grid2.R\"]\n    S1e[\"1_features_tasa_erosion.R\"]\n    S2e[\"2_features_estructuras.R\"]\n    S3e[\"3_sp_invasoras.R\"]\n    S4e[\"4_corales_global.R\"]\n    S5e[\"5_pasto_marino.R\"]\n    S6e[\"6_batimetria_caracteristica.R\"]\n    S7i[\"7_inegi_uso_suelo.R\"]\n    S7m[\"7_madmex_uso_suelo.R\"]\n    S7m2[\"7_madmex_uso_suelo_2.R\"]\n    S7m3[\"7_madmex_uso_suelo_3.R\"]\n    S8m[\"8_manglares.R\"]\n    S9c[\"9_condicion_dunas.R\"]\n    F001 --&gt; S10\n    F002 --&gt; S10\n    F003 --&gt; S10\n    F004 --&gt; S10\n    F005 --&gt; S10\n    S10 --&gt; F006\n    F007 --&gt; S11\n    F008 --&gt; S11\n    F009 --&gt; S11\n    S11 --&gt; F006\n    F007 --&gt; S12\n    F009 --&gt; S12\n    F010 --&gt; S12\n    F011 --&gt; S12\n    S12 --&gt; F006\n    F003 --&gt; S13\n    F007 --&gt; S13\n    F009 --&gt; S13\n    F012 --&gt; S13\n    S13 --&gt; F006\n    F006 --&gt; S14\n    F013 --&gt; S14\n    S14 --&gt; F014\n    F014 --&gt; S15\n    S15 --&gt; F014\n    F014 --&gt; S16\n    F014 --&gt; S17\n    S17 --&gt; F014\n    F015 --&gt; S18\n    F017 --&gt; S18\n    F018 --&gt; S18\n    F019 --&gt; S18\n    F020 --&gt; S18\n    S18 --&gt; F016\n    F002 --&gt; S101\n    F005 --&gt; S101\n    S101 --&gt; F021\n    F001 --&gt; S102\n    F002 --&gt; S102\n    F004 --&gt; S102\n    F005 --&gt; S102\n    S102 --&gt; F022\n    F007 --&gt; S1e\n    F009 --&gt; S1e\n    F023 --&gt; S1e\n    S1e --&gt; F006\n    F007 --&gt; S2e\n    F009 --&gt; S2e\n    F011 --&gt; S2e\n    S2e --&gt; F006\n    F007 --&gt; S3e\n    F009 --&gt; S3e\n    F024 --&gt; S3e\n    S3e --&gt; F006\n    F007 --&gt; S4e\n    F009 --&gt; S4e\n    F025 --&gt; S4e\n    S4e --&gt; F006\n    F007 --&gt; S5e\n    F009 --&gt; S5e\n    F026 --&gt; S5e\n    S5e --&gt; F006\n    F007 --&gt; S6e\n    F009 --&gt; S6e\n    F027 --&gt; S6e\n    S6e --&gt; F006\n    F007 --&gt; S7i\n    F009 --&gt; S7i\n    F028 --&gt; S7i\n    F003 --&gt; S7i\n    S7i --&gt; F006\n    F007 --&gt; S7m\n    F009 --&gt; S7m\n    F028 --&gt; S7m\n    S7m --&gt; F006\n    F007 --&gt; S7m2\n    F009 --&gt; S7m2\n    F028 --&gt; S7m2\n    S7m2 --&gt; F006\n    F007 --&gt; S7m3\n    F009 --&gt; S7m3\n    F028 --&gt; S7m3\n    S7m3 --&gt; F006\n    F007 --&gt; S8m\n    F009 --&gt; S8m\n    F003 --&gt; S8m\n    S8m --&gt; F006\n    F001 --&gt; S9c\n    F002 --&gt; S9c\n    F003 --&gt; S9c\n    F004 --&gt; S9c\n    F005 --&gt; S9c\n    S9c --&gt; F006\n\n\n\n\n\n\n\n\nDescargas: Mermaid fuente, grafo JSON."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#arbol",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#arbol",
+    "title": "Hallazgos y propuesta canónica tentativa",
+    "section": "Árbol canónico tentativo",
+    "text": "Árbol canónico tentativo\n\nproyecto/\n├── data_raw/\n│   ├── vectores_base/\n│   ├── rasters_base/\n│   ├── tablas_base/\n│   └── externos_modelado/\n├── data_intermediate/\n│   ├── grids/\n│   │   └── ref_grid_50m_regional/\n│   ├── features/\n│   │   ├── por_script/\n│   │   └── consolidadas/\n│   ├── training_tables/\n│   └── model_inputs/\n├── outputs/\n│   ├── maps/\n│   │   └── ei/\n│   ├── tables/\n│   └── reports/\n├── scripts/\n│   ├── prep/\n│   ├── features/\n│   ├── training/\n│   ├── inference/\n│   └── utils/\n└── metadata/\n    ├── manifests/\n    ├── dictionaries/\n    └── workflow/\n\n\nDescargas: árbol Markdown, familias globales, manifest v0.6."
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html",
+    "href": "docs/operacion-snakemake.html",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "entorno qgis_env activo\nestructura de directorios creada\narchivo config/config.yaml revisado\n\n\n\n\n\nverificar rutas de entrada\nverificar que existe reg_unidas\nverificar permisos de escritura\n\n\n\n\nsnakemake -n snakemake –cores 1\n\n\n\nsnakemake –cores 4\n\n\n\nsnakemake –forcerun batimetria –cores 1\n\n\n\nexplicar qué se limpia manualmente y qué no\n\n\n\nubicación de logs por regla\n\n\n\npytest -q pytest tests/test_erosion_integration.py -q\n\n\n\n\nrutas Windows/WSL\nCRS faltante\nshapefile sin campo esperado\nbloqueo de archivos"
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html#requisitos",
+    "href": "docs/operacion-snakemake.html#requisitos",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "entorno qgis_env activo\nestructura de directorios creada\narchivo config/config.yaml revisado"
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html#validación-previa",
+    "href": "docs/operacion-snakemake.html#validación-previa",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "verificar rutas de entrada\nverificar que existe reg_unidas\nverificar permisos de escritura"
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html#ejecución-básica",
+    "href": "docs/operacion-snakemake.html#ejecución-básica",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "snakemake -n snakemake –cores 1"
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html#ejecución-con-número-de-núcleos",
+    "href": "docs/operacion-snakemake.html#ejecución-con-número-de-núcleos",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "snakemake –cores 4"
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html#forzar-reejecución",
+    "href": "docs/operacion-snakemake.html#forzar-reejecución",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "snakemake –forcerun batimetria –cores 1"
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html#limpiar-productos",
+    "href": "docs/operacion-snakemake.html#limpiar-productos",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "explicar qué se limpia manualmente y qué no"
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html#logs",
+    "href": "docs/operacion-snakemake.html#logs",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "ubicación de logs por regla"
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html#integración-con-pytest",
+    "href": "docs/operacion-snakemake.html#integración-con-pytest",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "pytest -q pytest tests/test_erosion_integration.py -q"
+  },
+  {
+    "objectID": "docs/operacion-snakemake.html#problemas-frecuentes",
+    "href": "docs/operacion-snakemake.html#problemas-frecuentes",
+    "title": "Operación de Snakemake",
+    "section": "",
+    "text": "rutas Windows/WSL\nCRS faltante\nshapefile sin campo esperado\nbloqueo de archivos"
+  },
+  {
+    "objectID": "docs/README-headless.html",
+    "href": "docs/README-headless.html",
+    "title": "README-headless",
+    "section": "",
+    "text": "Breve explicación del subproyecto y del objetivo de migrar scripts geoespaciales a ejecución headless.\n\n\n\nQué procesos cubre: - raster alineado a plantilla - reproyección - rasterización - procesamiento NetCDF - recorte con máscara - exportación tabular/vectorial\n\n\n\n\nheadless-first\nreproducibilidad\nseparación entre análisis y visualización\nalineación estricta a raster plantilla\nvalidación formal con pytest\n\n\n\n\n\nnombre del entorno: qgis_env\nbibliotecas disponibles\nversión recomendada de Python\nobservaciones de compatibilidad\n\n\n\n\n\nGDAL/OGR/OSR: raster, reproyección, rasterización\nxarray/rioxarray/netCDF4: NetCDF y cubos climáticos\ndask: procesamiento escalable\ngeopandas: vectores cuando simplifique\nqgis.core: solo si aporta valor real, sin GUI\n\n\n\n\n\nraster plantilla: reg_unidas\nresample categórico: near\nresample continuo: bilinear\ndefinición explícita de NoData\nuso de main() y manejo de errores\nlimpieza opcional de temporales\n\n\n\n\nResumen del árbol de directorios.\n\n\n\n\nejecución directa de scripts\nejecución con Snakemake\ndry-run\nlogs\nrerun de pasos\n\n\n\n\n\npruebas unitarias\npruebas de integración\ncriterios mínimos de aceptación\n\n\n\n\n\ndatos muy grandes\nsupuestos de CRS\ncampos esperados en vectores\nmejoras futuras"
+  },
+  {
+    "objectID": "docs/README-headless.html#propósito",
+    "href": "docs/README-headless.html#propósito",
+    "title": "README-headless",
+    "section": "",
+    "text": "Breve explicación del subproyecto y del objetivo de migrar scripts geoespaciales a ejecución headless."
+  },
+  {
+    "objectID": "docs/README-headless.html#alcance",
+    "href": "docs/README-headless.html#alcance",
+    "title": "README-headless",
+    "section": "",
+    "text": "Qué procesos cubre: - raster alineado a plantilla - reproyección - rasterización - procesamiento NetCDF - recorte con máscara - exportación tabular/vectorial"
+  },
+  {
+    "objectID": "docs/README-headless.html#principios-de-diseño",
+    "href": "docs/README-headless.html#principios-de-diseño",
+    "title": "README-headless",
+    "section": "",
+    "text": "headless-first\nreproducibilidad\nseparación entre análisis y visualización\nalineación estricta a raster plantilla\nvalidación formal con pytest"
+  },
+  {
+    "objectID": "docs/README-headless.html#entorno-computacional",
+    "href": "docs/README-headless.html#entorno-computacional",
+    "title": "README-headless",
+    "section": "",
+    "text": "nombre del entorno: qgis_env\nbibliotecas disponibles\nversión recomendada de Python\nobservaciones de compatibilidad"
+  },
+  {
+    "objectID": "docs/README-headless.html#bibliotecas-y-criterio-de-uso",
+    "href": "docs/README-headless.html#bibliotecas-y-criterio-de-uso",
+    "title": "README-headless",
+    "section": "",
+    "text": "GDAL/OGR/OSR: raster, reproyección, rasterización\nxarray/rioxarray/netCDF4: NetCDF y cubos climáticos\ndask: procesamiento escalable\ngeopandas: vectores cuando simplifique\nqgis.core: solo si aporta valor real, sin GUI"
+  },
+  {
+    "objectID": "docs/README-headless.html#convenciones-metodológicas",
+    "href": "docs/README-headless.html#convenciones-metodológicas",
+    "title": "README-headless",
+    "section": "",
+    "text": "raster plantilla: reg_unidas\nresample categórico: near\nresample continuo: bilinear\ndefinición explícita de NoData\nuso de main() y manejo de errores\nlimpieza opcional de temporales"
+  },
+  {
+    "objectID": "docs/README-headless.html#estructura-del-proyecto",
+    "href": "docs/README-headless.html#estructura-del-proyecto",
+    "title": "README-headless",
+    "section": "",
+    "text": "Resumen del árbol de directorios."
+  },
+  {
+    "objectID": "docs/README-headless.html#ejecución",
+    "href": "docs/README-headless.html#ejecución",
+    "title": "README-headless",
+    "section": "",
+    "text": "ejecución directa de scripts\nejecución con Snakemake\ndry-run\nlogs\nrerun de pasos"
+  },
+  {
+    "objectID": "docs/README-headless.html#validación",
+    "href": "docs/README-headless.html#validación",
+    "title": "README-headless",
+    "section": "",
+    "text": "pruebas unitarias\npruebas de integración\ncriterios mínimos de aceptación"
+  },
+  {
+    "objectID": "docs/README-headless.html#limitaciones-y-pendientes",
+    "href": "docs/README-headless.html#limitaciones-y-pendientes",
+    "title": "README-headless",
+    "section": "",
+    "text": "datos muy grandes\nsupuestos de CRS\ncampos esperados en vectores\nmejoras futuras"
+  },
+  {
+    "objectID": "docs/Requerimientos.html",
+    "href": "docs/Requerimientos.html",
+    "title": "Requerimientos para la configuración del entorno virtual",
+    "section": "",
+    "text": "Este documento define los requerimientos técnicos mínimos para configurar un entorno virtual reproducible y operativo para el workflow de producción del Índice de Integridad Ecosistémica.\nSu propósito es servir como guía para:\n\npreparar estaciones de trabajo;\ndefinir entornos reproducibles;\nreducir conflictos entre dependencias;\nasegurar que el pipeline pueda ejecutarse de manera consistente."
+  },
+  {
+    "objectID": "docs/Requerimientos.html#lenguaje",
+    "href": "docs/Requerimientos.html#lenguaje",
+    "title": "Requerimientos para la configuración del entorno virtual",
+    "section": "4.1 Lenguaje",
+    "text": "4.1 Lenguaje\n\nPython 3.x en una versión estable y soportada por las bibliotecas geoespaciales seleccionadas."
+  },
+  {
+    "objectID": "docs/Requerimientos.html#bibliotecas-python-requeridas",
+    "href": "docs/Requerimientos.html#bibliotecas-python-requeridas",
+    "title": "Requerimientos para la configuración del entorno virtual",
+    "section": "4.2 Bibliotecas Python requeridas",
+    "text": "4.2 Bibliotecas Python requeridas\n\n4.2.1 Núcleo numérico y tabular\n\nnumpy\npandas\n\n\n\n4.2.2 Serialización tabular\n\npyarrow\n\n\n\n4.2.3 Geoespacial vectorial\n\ngeopandas\nshapely\npyproj\nfiona o pyogrio\n\n\n\n4.2.4 Geoespacial raster\n\nrasterio\naffine\n\n\n\n4.2.5 Modelado y análisis auxiliar\n\nscipy\nscikit-learn\n\n\n\n4.2.6 Modelado probabilístico (según etapa)\n\npgmpy\n\n\n\n4.2.7 Visualización auxiliar\n\nmatplotlib\n\n\n\n4.2.8 Workflow\n\nsnakemake\n\n\n\n4.2.9 Pruebas\n\npytest"
+  },
+  {
+    "objectID": "docs/Requerimientos.html#dependencias-nativas-requeridas",
+    "href": "docs/Requerimientos.html#dependencias-nativas-requeridas",
+    "title": "Requerimientos para la configuración del entorno virtual",
+    "section": "4.3 Dependencias nativas requeridas",
+    "text": "4.3 Dependencias nativas requeridas\nEl entorno debe asegurar compatibilidad con bibliotecas del sistema requeridas por el stack geoespacial:\n\nGDAL\nPROJ\nGEOS\n\nEstas dependencias deben ser consistentes con las versiones de rasterio, geopandas, shapely y pyproj."
+  },
+  {
+    "objectID": "docs/Requerimientos.html#recomendación-general",
+    "href": "docs/Requerimientos.html#recomendación-general",
+    "title": "Requerimientos para la configuración del entorno virtual",
+    "section": "5.1 Recomendación general",
+    "text": "5.1 Recomendación general\nSe recomienda usar un mecanismo de gestión de entorno que permita controlar bien dependencias geoespaciales. El proyecto puede operar con:\n\nvenv + instalación cuidadosa de wheels compatibles, o\nconda / mamba si se busca más robustez geoespacial.\n\nLa decisión depende del contexto operativo del proyecto. Para flujos con muchas dependencias geoespaciales, suele ser conveniente priorizar una estrategia que reduzca conflictos binarios."
+  },
+  {
+    "objectID": "docs/Requerimientos.html#requerimiento-de-aislamiento",
+    "href": "docs/Requerimientos.html#requerimiento-de-aislamiento",
+    "title": "Requerimientos para la configuración del entorno virtual",
+    "section": "5.2 Requerimiento de aislamiento",
+    "text": "5.2 Requerimiento de aislamiento\nEl entorno del proyecto debe estar aislado de:\n\nla instalación global de Python;\notros proyectos con dependencias incompatibles;\nbibliotecas geoespaciales de sistema no controladas por el proyecto, cuando eso pueda generar conflictos."
+  },
+  {
+    "objectID": "docs/Requerimientos.html#requerimiento-de-exportación",
+    "href": "docs/Requerimientos.html#requerimiento-de-exportación",
+    "title": "Requerimientos para la configuración del entorno virtual",
+    "section": "5.3 Requerimiento de exportación",
+    "text": "5.3 Requerimiento de exportación\nLa configuración del entorno debe poder exportarse en un archivo reproducible, por ejemplo:\n\nrequirements.txt\npyproject.toml\nenvironment.yml"
+  },
+  {
+    "objectID": "workflow/docs/uso-del-workflow.html",
+    "href": "workflow/docs/uso-del-workflow.html",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "",
+    "text": "Suposiciones previas:\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
+  },
+  {
+    "objectID": "workflow/docs/uso-del-workflow.html#contexto-de-uso",
+    "href": "workflow/docs/uso-del-workflow.html#contexto-de-uso",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "",
+    "text": "Suposiciones previas:\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
+  },
+  {
+    "objectID": "workflow/docs/uso-del-workflow.html#tabla-rápida-uso-y-comando",
+    "href": "workflow/docs/uso-del-workflow.html#tabla-rápida-uso-y-comando",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Tabla rápida: uso y comando",
+    "text": "Tabla rápida: uso y comando\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nVer qué se ejecutaría, sin correr nada\nsnakemake -n\n\n\nVer qué se ejecutaría para un archivo objetivo\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nCorrer todo el workflow definido en rule all\nsnakemake -j1\n\n\nCorrer un objetivo específico\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nCorrer una regla forzándola\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar una regla y ver comandos en pantalla\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nMostrar también el motivo de ejecución\nsnakemake -j1 -p --reason C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar con varios núcleos\nsnakemake -j8\n\n\nSeguir aunque una regla falle\nsnakemake -j4 --keep-going\n\n\nMostrar menos ruido en pantalla\nsnakemake -j1 --quiet progress rules\n\n\nMostrar resumen de archivos y estado\nsnakemake --summary\n\n\nMostrar resumen detallado\nsnakemake --detailed-summary\n\n\nListar reglas disponibles\nsnakemake --list-rules\n\n\nListar sólo las reglas objetivo\nsnakemake --list-target-rules\n\n\nForzar recreación de un archivo ya existente\nsnakemake -j1 -f C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar toda una regla, aunque los archivos existan\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/training/master_features.parquet\n\n\nBorrar outputs temporales innecesarios\nsnakemake --delete-temp-output\n\n\nLimpiar metadatos de un archivo\nsnakemake --cleanup-metadata C:/wf-ie-data/results/training/bn_input.csv\n\n\nIgnorar provenance y usar sólo fechas de modificación\nsnakemake -j1 --rerun-triggers mtime\n\n\nDesbloquear el workflow si quedó “locked”\nsnakemake --unlock\n\n\nVer el DAG en texto\nsnakemake --dag\n\n\nExportar el DAG para Graphviz\nsnakemake --dag \\| dot -Tpdf &gt; dag.pdf\n\n\nVer por qué se quiere ejecutar algo (dry-run + razones)\nsnakemake -n -r C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar hasta una regla, sin pasar de ahí\nsnakemake -j1 --until prepare_bn_table\n\n\nVer comandos de shell ejecutados\nsnakemake -j1 -p\n\n\nVer logs más completos para diagnóstico\nsnakemake -j1 --printshellcmds --reason --verbose"
+  },
+  {
+    "objectID": "workflow/docs/uso-del-workflow.html#comandos-especialmente-útiles-en-este-workflow",
+    "href": "workflow/docs/uso-del-workflow.html#comandos-especialmente-útiles-en-este-workflow",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Comandos especialmente útiles en este workflow",
+    "text": "Comandos especialmente útiles en este workflow\n\n1. Regenerar la tabla maestra de features\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run de la tabla maestra\nsnakemake -n C:/wf-ie-data/results/training/master_features.parquet\n\n\nConstruir la tabla maestra\nsnakemake -j1 C:/wf-ie-data/results/training/master_features.parquet\n\n\nForzar reconstrucción de master_features\nsnakemake -j1 -R assemble_training_table C:/wf-ie-data/results/training/master_features.parquet\n\n\n\n\n\n2. Regenerar bn_input.csv\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run de bn_input.csv\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nConstruir bn_input.csv\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar sólo la regla correspondiente\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\n\n\n\n3. Regenerar un feature regional\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nForzar erosión en region_1\nsnakemake -j1 -R feature_tasa_erosion C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet\n\n\nForzar viento en region_1\nsnakemake -j1 -R feature_wind_speed C:/wf-ie-data/results/features/velocidad_del_viento/region_1.parquet\n\n\nForzar ZVH en region_1\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/features/zvh/region_1.parquet\n\n\n\n\n\n4. Regenerar mapas de IE\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nConstruir mapas IE\nsnakemake -j1 -R create_ie_rasters\n\n\nForzar mapas IE y ver comandos\nsnakemake -j1 -p -R create_ie_rasters\n\n\n\n\n\n5. Validar mapas IE contra ei_qnint\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nEjecutar validación base vs referencia\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nForzar validación base vs referencia\nsnakemake -j1 -R validate_ie_base_vs_reference C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nEjecutar validación base vs alterna vs referencia\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_alterna_vs_ei_qnint_summary.csv"
+  },
+  {
+    "objectID": "workflow/docs/uso-del-workflow.html#combinaciones-muy-prácticas",
+    "href": "workflow/docs/uso-del-workflow.html#combinaciones-muy-prácticas",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Combinaciones muy prácticas",
+    "text": "Combinaciones muy prácticas\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run con razones y comandos\nsnakemake -n -r -p\n\n\nEjecutar mostrando comandos y razones\nsnakemake -j1 -p --reason\n\n\nEjecutar compacto pero informativo\nsnakemake -j1 --quiet progress rules\n\n\nRehacer algo usando sólo mtime\nsnakemake -j1 --rerun-triggers mtime\n\n\nSi algo quedó “atascado”\nsnakemake --unlock"
+  },
+  {
+    "objectID": "workflow/docs/uso-del-workflow.html#mis-comandos-favoritos-para-uso-diario",
+    "href": "workflow/docs/uso-del-workflow.html#mis-comandos-favoritos-para-uso-diario",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Mis comandos favoritos para uso diario",
+    "text": "Mis comandos favoritos para uso diario\n\nRevisar qué haría\nsnakemake -n -r -p C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar un producto puntual\nsnakemake -j1 -p C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar una regla concreta\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nSalida más compacta\nsnakemake -j1 --quiet progress rules\n\n\nDesbloquear el workflow\nsnakemake --unlock"
+  },
+  {
+    "objectID": "workflow/docs/uso-del-workflow.html#regla-práctica-de-interpretación",
+    "href": "workflow/docs/uso-del-workflow.html#regla-práctica-de-interpretación",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Regla práctica de interpretación",
+    "text": "Regla práctica de interpretación\n\n-n = no ejecuta, sólo simula\n-jN = número de cores\n-R regla = fuerza una regla\n-p = imprime comandos shell\n--reason = explica por qué corre algo\n--quiet progress rules = menos ruido\n--unlock = quita locks\n--summary = estado general del workflow"
+  },
+  {
+    "objectID": "workflow/docs/uso-del-workflow.html#nota-final",
+    "href": "workflow/docs/uso-del-workflow.html#nota-final",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Nota final",
+    "text": "Nota final\nEn este proyecto, los usos más frecuentes son:\n\nprobar en dry-run\nforzar una regla específica\npedir un objetivo concreto\nusar salida compacta\ndesbloquear cuando un proceso anterior se interrumpió\n\nUna combinación muy útil como valor por defecto es:\nsnakemake -j1 -p --reason\ny, para revisión previa:\nsnakemake -n -r -p"
+  }
+]
