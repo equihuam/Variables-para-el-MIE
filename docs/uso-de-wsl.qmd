@@ -14,7 +14,7 @@ format:
 
 ## Resumen Ejecutivo
 
-Este documento detalla la arquitectura y los pasos de configuración técnica implementados para establecer un entorno de desarrollo geoespacial y de automatización robusto. El entorno aprovecha las capacidades de **WSL2 (Windows Subsystem for Linux)**, operando bajo un esquema híbrido de almacenamiento en disco, aislamiento de entornos virtuales con **Micromamba** y acceso colaborativo remoto mediante **OpenSSH** y **PyCharm Professional**.
+Este documento detalla la arquitectura y los pasos de configuración técnica implementados para establecer un entorno de desarrollo geoespacial y de automatización robusto. El entorno aprovecha las capacidades de **WSL2 (Windows Subsystem for Linux)**, operando bajo un esquema híbrido de almacenamiento en disco, aislamiento de entornos virtuales con **Micromamba** y acceso colaborativo remoto mediante **OpenSSH** y eventualmente **PyCharm Professional** como **IDE** estándar.
 
 ---
 
@@ -22,14 +22,14 @@ Este documento detalla la arquitectura y los pasos de configuración técnica im
 
 Para maximizar el rendimiento del sistema sin comprometer la capacidad de almacenamiento, se definió un enfoque de dos niveles:
 
-* **Unidad C: (SSD):** Alberga la instalación nativa de WSL2 (`ext4`), los entornos de desarrollo, scripts y el área de trabajo activa (`/srv/iie/`). Esto garantiza la máxima velocidad en operaciones críticas de lectura/escritura (I/O).  
+* **Unidad C: (SSD):** Alberga la instalación nativa de WSL2 (`ext4`), los entornos de desarrollo, scripts y el área de trabajo activa se ubican en `/srv/iie/`. Esto garantiza la máxima velocidad en operaciones críticas de lectura/escritura (I/O).  
 * **Unidad D: (HDD Mecánico):** Se reserva exclusivamente desde el entorno Windows para almacenamiento masivo de datos crudos, copias de seguridad y datasets históricos, evitando la degradación del rendimiento de WSL2.*
 
 ---
 
 ## 2. Configuración del Espacio de Trabajo y Permisos en Linux
 
-*Se creó el directorio del proyecto bajo el estándar `/srv` y se estableció un sistema de permisos basado en herencia para permitir la colaboración sin conflictos de acceso.
+Se creó el directorio del proyecto bajo el estándar `/srv` y se estableció un sistema de permisos basado en herencia para permitir la colaboración sin conflictos de acceso.
 
 ```bash  
 # Crear el directorio del proyecto IIE  
@@ -44,7 +44,7 @@ sudo chown -R :analistas /srv/iie
 
 ### **Permisos automáticos**
 
-Por defecto en Linux, si el usuario_A crea un archivo, el usuario_B no siempre puede editarlo. Para evitar que tengan que usar chmod a cada rato, activaremos el bit SetGID (colocando un 2 al principio de la máscara octal). Esto obliga a que cualquier archivo o carpeta nueva herede automáticamente el grupo analistas.
+Por defecto en Linux, si el usuario_A crea un archivo, el usuario_B no siempre puede editarlo. Para evitar que tengan que usar `chmod` a cada rato, activaremos el bit `SetGID` (colocando un 2 al principio de la máscara octal). Esto obliga a que cualquier archivo o carpeta nueva herede automáticamente el *grupo analistas*.
 
 ```bash  
 # Asignar lectura, escritura y ejecución para dueño y grupo + SetGID  
@@ -53,7 +53,7 @@ sudo chmod -R 2775 /srv/iie
 
 ### **Dar de alta a los colaboradores**
 
-Para cada compañero de equipo, debes crearle su propio usuario de Linux y meterlo al grupo que creamos.
+Para cada compañero de equipo, se crea un usuario de Linux específico y se le agrega al grupo *analistas* que hemos creado para el propósito.
 
 ```bash  
 # 1. Crear el usuario (te pedirá asignarle una contraseña)  
@@ -65,8 +65,7 @@ sudo usermod -aG analistas nombre_colaborador
 
 ### **Ajustar el umask (Evita bloqueos de archivos)**
 
-Hay un último detalle técnico: por defecto, Linux crea archivos nuevos con permisos que impiden que otros miembros del grupo los editen, aunque pertenezcan al mismo grupo (los crea como rw-r--r--). Para solucionar esto, debemos cambiar el umask del sistema a 002 para todos los usuarios. Así, cada archivo nuevo nacerá con permisos rw-rw-r-- (el grupo podrá editar).  
-Edita el archivo de configuración global de Bash:
+Hay un último detalle técnico: por defecto, Linux crea archivos nuevos con permisos que impiden que otros miembros del grupo los editen, aunque pertenezcan al mismo grupo (los crea con la máscara de permisos `rw-r--r--`). Para solucionar esto, debemos cambiar el umask del sistema a 002 para todos los usuarios. Así, cada archivo nuevo nacerá con permisos `rw-rw-r--` (el grupo podrá editar). Para lograr esto hay que editar el archivo de configuración global de Bash. Por simolicidad lo haremos con el editor nativo de Linux `nano`:
 
 ```bash  
 sudo nano /etc/bash.bashrc
@@ -78,18 +77,19 @@ Ve al final del archivo y agrega esta línea:
 umask 002
 ```
 
-Guarda (En nano: Ctrl + O, Enter) y sal (Ctrl + X).
+Guarda (en `nano` se hace con: Ctrl + O, Enter) y sal del editor (Ctrl + X).
 
 ### **Configurar el disco D: para que respete a los usuarios de Linux**
 
-Por defecto, los archivos en /mnt/d/ (que es formato NTFS de Windows) no entienden de usuarios de Linux, lo que rompería la configuración de colaboradores que planeas hacer. Para solucionar esto y poder usar ambos discos compartidos, haz lo siguiente:  
-Entra a tu terminal de WSL y edita el archivo de configuración global:
+Por defecto, los archivos en /mnt/d/ (que es el formato NTFS de Windows), no entienden de usuarios de Linux, lo que rompería la configuración de colaboradores que se ha planeado. Para solucionar esto y poder usar ambos discos compartidos, hay que hacer lo siguiente: 
+
+Entra a la terminal de WSL y editar el archivo de configuración global:
 
 ```bash  
 sudo nano /etc/wsl.conf
 ```
 
-Asegúrate de que tenga estas líneas (si ya tenías algo en [automount], solo añade las opciones):
+Asegúrarse de tener estas líneas (si ya tenías algo en [automount], solo añade las opciones):
 
 ```TOML  
 [automount]  
@@ -99,9 +99,39 @@ options = "metadata,umask=002,fmask=111"
 
 Guarda (Ctrl + O, Enter) y sal (Ctrl + X).
 
+| 
+
 ## **3. Gestión de Entornos Virtuales con Micromamba**
 
-Para evitar la pesadez de una instalación completa de Conda, se utiliza **Micromamba** como gestor de paquetes de C++ ultraveloz y autónomo. Los entornos se configuran con un núcleo rígido de **Python 3.11** para blindar la compatibilidad a largo plazo de las librerías geoespaciales y evitar quiebres por dependencias futuras.
+Para evitar la pesadez de una instalación completa de Conda, se optó por utilizar **Micromamba** como gestor de paquetes de C++ ultraveloz y autónomo. Los entornos se configuran con un núcleo rígido de **Python 3.11** para blindar la compatibilidad a largo plazo de las librerías geoespaciales y evitar quiebres por dependencias futuras.
+
+### Instalar Miromamba
+
++ Preparar el instalador automático. Abre tu terminal de WSL y ejecuta el siguiente comando para descargar e iniciar el asistente:
+
+```bash
+curl -Ls https://micro.mamba.pm/install.sh | bash
+```
+
+Sigue las indicaciones y dale permiso de hacer la tarea cuando te pregunte. Para activar la nueva instalación da el siguiente comando. Algunos detalles más de preparación
+
+```bash
+# Hacer que micromamba arranque al iniciar wsl
+micromamba shell init -s bash -p ~/micromamba
+```
+
+Baja hasta el final del archivo y añade esta línea nueva:
+
+```bash
+   micromamba activate base
+```
+
+Reinicia el sistema wsl para que entre en efecto lo que acabas de hacer.
+
+```bash
+source ~/.bashrc
+```
+
 
 ### **Inicialización y Canales**
 
@@ -118,31 +148,35 @@ Se definen dos entornos aislados que operan de forma simultánea sobre el reposi
 
 ```bash  
 # 1. Crear entorno principal geoespacial (QGIS LTR, GDAL, Snakemake)  
-micromamba create -f qgis_env.yml
-```
+micromamba create -p /srv/iie/envs/qgis_env -f qgis_env.yml
 
 # 2. Crear entorno secundario de auditoría (ydata-profiling, missingno)  
-micromamba create -f profiling_env.yml
+micromamba create -p /srv/iie/envs/qgis_env -f profiling_env.yml
+```
+Como al hacer que micromamba opere en `/srv/`rompemos con la pr´sctia esperada normal, habrá que hacer algunas previsiones. Para que los colegas los usen deberán dar de alta esas ubicaciones (`/srv/iie/envs/`). Para que puedan activarlos desde la terminal usando el comando tradicional (micromamba activate qgis_env), sus instancias de Micromamba necesitan saber dónde buscar. Tendrían que agregar esta línea en su archivo de configuración } ~/.mambarc` o ejecutar:
 
-### **Rutas de Intérpretes para IDEs (PyCharm Pro / RStudio)**
+```bash
+micromamba config append envs_dirs /srv/iie/envs
+```
+
+### **Rutas de Intérpretes para IDEs (PyCharm / RStudio)**
 
 Cada entorno almacena sus binarios de manera independiente. Para vincular los entornos virtuales a editores de código en Windows (como PyCharm Professional en modo WSL Target), las rutas absolutas dentro del sistema de archivos de Linux son:
 
-* **Entorno QGIS:** /home/equihuam/micromamba/envs/qgis_env/bin/python3.11  
-* **Entorno Profiling:** /home/equihuam/micromamba/envs/profiling_env/bin/python3.11
+* **Entorno QGIS:** /srv/iie/envs/qgis_env/bin/python3.11  
+* **Entorno Profiling:** /srv/iie/envs/qgis_env/profiling_env/bin/python3.11
 
-## **4. Configurar el servidor SSH dentro de WSL**
 
-Por defecto, el servicio SSH que viene preinstalado en WSL está limitado. Vamos a reinstalar la versión completa del servidor OpenSSH.  
-Abre tu terminal de WSL y ejecuta:
+## **4. Acceso por terminal: servidor SSH en WSL**
+
+Por defecto, el servicio SSH que viene preinstalado en WSL está limitado. Vamos a reinstalar la versión completa del servidor OpenSSH.  Abre la terminal de WSL y ejecuta:
 
 ```bash  
 sudo apt update  
 sudo apt remove openssh-server -y && sudo apt install openssh-server -y
 ```
 
-
-Ahora debemos editar la configuración de SSH para permitir que los usuarios se conecten mediante su contraseña. Abre el archivo de configuración:
+Ahora hay que editar la configuración de SSH para permitir que los usuarios se conecten mediante sus propias credenciales. Abre el archivo de configuración:
 
 ```bash  
 sudo nano /etc/ssh/sshd_config
@@ -155,19 +189,17 @@ Port 2222
 ListenAddress 0.0.0.0  
 PasswordAuthentication yes
 ```
-
-
-Nota: Cambiamos el puerto al 2222 porque el puerto 22 por defecto suele estar reservado o en conflicto con los servicios del propio Windows.  
 Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X). Inicia el servicio SSH en Linux:
+
+Nota: Cambiamos el puerto al 2222 porque el puerto 22 por defecto suele estar reservado o en conflicto con los servicios del propio Windows. Cuando todo esté listo reinicia el servidor de protocolo SSH.  
 
 ```bash  
 sudo service ssh restart
 ```
 
-### **El puente en Windows (Port Forwarding)**
+### **El puente con Windows (Port Forwarding)**
 
-Como WSL está escondido detrás de Windows, necesitamos decirle a tu sistema operativo Windows: "Cualquier conexión que llegue desde la red local al puerto 2222, mándala directo a WSL". Para automatizar esto (ya que la IP interna de WSL cambia cada vez que reinicias la computadora), utilizaremos un pequeño script en PowerShell.  
-En Windows, busca **PowerShell**, haz clic derecho sobre él y selecciona **Ejecutar como Administrador**. Copia y pega el siguiente bloque de comandos y presiona Enter:
+Como WSL está escondido detrás de Windows, necesitamos decirle a tu sistema operativo Windows que dirija directamente a WSL "Cualquier conexión que llegue desde la red local al puerto 2222". Para automatizar esto (ya que la IP interna de WSL cambia cada vez que reinicias la computadora), utilizaremos un pequeño script en PowerShell. En Windows, busca **PowerShell**, haz *clic derecho* sobre él y selecciona **Ejecutar como Administrador**. Copia y pega el siguiente bloque de comandos y presiona Enter:
 
 ```powershell  
 # 1. Obtener la IP interna actual de WSL  
@@ -188,16 +220,16 @@ New-NetFirewallRule -DisplayName "WSL SSH" -Direction Inbound -Action Allow -Pro
 Write-Host "Puente configurado con éxito hacia la IP de WSL: $wslIp" -ForegroundColor Green
 ```
 
-Nota operativa: Como la IP de WSL cambia al reiniciar la máquina, si un día tus colaboradores no pueden conectarse, solo debes volver a abrir PowerShell como Administrador y ejecutar estas líneas para actualizar el puente.
+Nota operativa: Así ya puedes, si la IP de WSL cambia y se rompe el acceso, volver a abrir **PowerShell** como Administrador y ejecutar estas líneas para actualizar el puente.
 
 ### **¿Cómo se conectan los colaboradores?**
 
 Para que tus compañeros puedan acceder desde sus computadoras, necesitan dos datos que tú les vas a proporcionar:
 
-1. Tu IP en la red local (la de tu Windows). La puedes averiguar en Windows ejecutando ipconfig (ejemplo: 172.19.48.xxx).  
+1. Tu IP en la red local (la de tu Windows). La puedes averiguar en Windows ejecutando `ipconfig` (ejemplo: 172.19.48.xxx).  
 2. Su usuario y contraseña de Linux: Los mismos que creamos previamente (ejemplo: usuario_colaborador).
 
-Desde su terminal (Linux/Mac o Git Bash/PowerShell en Windows), ellos solo tendrán que ejecutar el siguiente comando en sus propias computadoras para acceder directo a tu WSL:
+Desde su terminal (Linux/Mac o Git Bash/PowerShell en Windows), solo tienen que ejecutar el siguiente comando en sus propias computadoras para acceder directo al WSL:
 
 ```bash  
 ssh -p 2222 usuario_colaborador@IP_DE_TU_WINDOWS
@@ -205,14 +237,14 @@ ssh -p 2222 usuario_colaborador@IP_DE_TU_WINDOWS
 
 ### **Limpiar y regenerar las llaves del servidor**
 
-A veces, al instalar o reinstalar OpenSSH, las llaves criptográficas del servidor no se generan correctamente o se quedan corruptas. Forcemos su creación:
+A veces, al instalar o reinstalar `OpenSSH`, las llaves criptográficas del servidor no se generan correctamente o se quedan corruptas. Forcemos su creación:
 
 ```bash  
 sudo rm -f /etc/ssh/ssh_host_*  
 sudo dpkg-reconfigure openssh-server
 ```
 
-Ahora, ajusta el archivo sshd_config. OpenSSH por defecto es muy estricto con quién lo intenta contactar. Vamos a asegurarnos de que no esté bloqueando las conexiones externas. Abre el archivo:
+Ahora, ajusta el archivo `sshd_config`. OpenSSH por defecto es muy estricto con quién lo intenta contactar. Vamos a asegurarnos de que no esté bloqueando las conexiones externas. Abre el archivo:
 
 ```bash  
 sudo nano /etc/ssh/sshd_config
@@ -225,13 +257,14 @@ LoginGraceTime 120
 PermitRootLogin no  
 StrictModes no
 ```
-
-StrictModes no: Es vital en WSL. Si está en yes, SSH rechazará las conexiones si nota alguna discrepancia menor en los permisos de las carpetas de los usuarios en Linux.  
 Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X).
+
+`StrictModes no` es una configuración vital en WSL. Si está en yes, SSH rechazará las conexiones si nota alguna discrepancia menor en los permisos de las carpetas de los usuarios en Linux. 
+
 
 ### **Verificar los archivos de control de acceso**
 
-Linux tiene dos archivos "cadeneros" que deciden quién entra y quién no por red. Vamos a garantizar que estén vacíos o que permitan el acceso. Ejecuta estos dos comandos para asegurarte de que no haya IPs bloqueadas:
+Linux tiene dos archivos "cadeneros" que deciden quién entra y quién no por la red. Vamos a garantizar que estén vacíos o que permitan el acceso. Ejecuta estos dos comandos para asegurar que no haya IPs bloqueadas:
 
 ```bash  
 sudo truncate -s 0 /etc/hosts.allow  
