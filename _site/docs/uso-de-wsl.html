@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>criterios-validacion – Workflow IIE-3T</title>
+<title>uso-de-wsl – Workflow IIE-3T</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -106,8 +106,19 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">En esta página</h2>
+   
+  <ul>
+  <li><a href="#resumen-ejecutivo" id="toc-resumen-ejecutivo" class="nav-link active" data-scroll-target="#resumen-ejecutivo">Resumen Ejecutivo</a></li>
+  <li><a href="#estrategia-de-almacenamiento-híbrido" id="toc-estrategia-de-almacenamiento-híbrido" class="nav-link" data-scroll-target="#estrategia-de-almacenamiento-híbrido">1. Estrategia de Almacenamiento Híbrido</a></li>
+  <li><a href="#configuración-del-espacio-de-trabajo-y-permisos-en-linux" id="toc-configuración-del-espacio-de-trabajo-y-permisos-en-linux" class="nav-link" data-scroll-target="#configuración-del-espacio-de-trabajo-y-permisos-en-linux">2. Configuración del Espacio de Trabajo y Permisos en Linux</a></li>
+  <li><a href="#crear-el-grupo-de-trabajo-para-los-colaboradores" id="toc-crear-el-grupo-de-trabajo-para-los-colaboradores" class="nav-link" data-scroll-target="#crear-el-grupo-de-trabajo-para-los-colaboradores">Crear el grupo de trabajo para los colaboradores</a></li>
+  <li><a href="#asignar-la-propiedad-del-grupo-a-la-carpeta" id="toc-asignar-la-propiedad-del-grupo-a-la-carpeta" class="nav-link" data-scroll-target="#asignar-la-propiedad-del-grupo-a-la-carpeta">Asignar la propiedad del grupo a la carpeta</a></li>
+  <li><a href="#configurar-permisos-con-setgid-2-para-forzar-herencia-de-grupo-en-nuevos-archivos" id="toc-configurar-permisos-con-setgid-2-para-forzar-herencia-de-grupo-en-nuevos-archivos" class="nav-link" data-scroll-target="#configurar-permisos-con-setgid-2-para-forzar-herencia-de-grupo-en-nuevos-archivos">Configurar permisos con SetGID (2) para forzar herencia de grupo en nuevos archivos</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
@@ -115,8 +126,41 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+<hr>
+<p>title: “Configuración del Entorno de Trabajo Multiusuario y Remoto en WSL” subtitle: “Estructura de alto rendimiento para el equipo IIE” author: “Miguel Equihua Zamora” date: “2026-05-19” format: html: theme: cosmo toc: true toc-depth: 3 code-fold: false —</p>
+<section id="resumen-ejecutivo" class="level2">
+<h2 class="anchored" data-anchor-id="resumen-ejecutivo">Resumen Ejecutivo</h2>
+<p>Este documento detalla la arquitectura y los pasos de configuración técnica implementados para establecer un entorno de desarrollo geoespacial y de automatización robusto. El entorno aprovecha las capacidades de <strong>WSL2 (Windows Subsystem for Linux)</strong>, operando bajo un esquema híbrido de almacenamiento en disco, aislamiento de entornos virtuales con <strong>Micromamba</strong> y acceso colaborativo remoto mediante <strong>OpenSSH</strong> y <strong>PyCharm Professional</strong>.</p>
+<hr>
+</section>
+<section id="estrategia-de-almacenamiento-híbrido" class="level2">
+<h2 class="anchored" data-anchor-id="estrategia-de-almacenamiento-híbrido">1. Estrategia de Almacenamiento Híbrido</h2>
+<p>Para maximizar el rendimiento del sistema sin comprometer la capacidad de almacenamiento, se definió un enfoque de dos niveles:</p>
+<ul>
+<li><strong>Unidad C: (SSD):</strong> Alberga la instalación nativa de WSL2 (<code>ext4</code>), los entornos de desarrollo, scripts y el área de trabajo activa (<code>/srv/iie/</code>). Esto garantiza la máxima velocidad en operaciones críticas de lectura/escritura (I/O).</li>
+<li><strong>Unidad D: (HDD Mecánico):</strong> Se reserva exclusivamente desde el entorno Windows para almacenamiento masivo de datos crudos, copias de seguridad y datasets históricos, evitando la degradación del rendimiento de WSL2.</li>
+</ul>
+<hr>
+</section>
+<section id="configuración-del-espacio-de-trabajo-y-permisos-en-linux" class="level2">
+<h2 class="anchored" data-anchor-id="configuración-del-espacio-de-trabajo-y-permisos-en-linux">2. Configuración del Espacio de Trabajo y Permisos en Linux</h2>
+<p>Se creó el directorio del proyecto bajo el estándar <code>/srv</code> y se estableció un sistema de permisos basado en herencia para permitir la colaboración sin conflictos de acceso.</p>
+<p>```bash # Crear el directorio del proyecto IIE sudo mkdir -p /srv/iie</p>
+</section>
+<section id="crear-el-grupo-de-trabajo-para-los-colaboradores" class="level1">
+<h1>Crear el grupo de trabajo para los colaboradores</h1>
+<p>sudo groupadd analistas</p>
+</section>
+<section id="asignar-la-propiedad-del-grupo-a-la-carpeta" class="level1">
+<h1>Asignar la propiedad del grupo a la carpeta</h1>
+<p>sudo chown -R :analistas /srv/iie</p>
+</section>
+<section id="configurar-permisos-con-setgid-2-para-forzar-herencia-de-grupo-en-nuevos-archivos" class="level1">
+<h1>Configurar permisos con SetGID (2) para forzar herencia de grupo en nuevos archivos</h1>
+<p>sudo chmod -R 2775 /srv/iie</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -1,0 +1,45 @@
+---
+title: "Configuración del Entorno de Trabajo Multiusuario y Remoto en WSL"
+subtitle: "Estructura de alto rendimiento para el equipo IIE"
+author: "Miguel Equihua Zamora"
+date: "2026-05-19"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    self-contained:
+---
+
+## Resumen Ejecutivo
+
+Este documento detalla la arquitectura y los pasos de configuración técnica implementados para establecer un entorno de desarrollo geoespacial y de automatización robusto. El entorno aprovecha las capacidades de **WSL2 (Windows Subsystem for Linux)**, operando bajo un esquema híbrido de almacenamiento en disco, aislamiento de entornos virtuales con **Micromamba** y acceso colaborativo remoto mediante **OpenSSH** y **PyCharm Professional**.
+
+---
+
+## 1. Estrategia de Almacenamiento Híbrido
+
+Para maximizar el rendimiento del sistema sin comprometer la capacidad de almacenamiento, se definió un enfoque de dos niveles:
+
+* **Unidad C: (SSD):** Alberga la instalación nativa de WSL2 (`ext4`), los entornos de desarrollo, scripts y el área de trabajo activa (`/srv/iie/`). Esto garantiza la máxima velocidad en operaciones críticas de lectura/escritura (I/O).
+* **Unidad D: (HDD Mecánico):** Se reserva exclusivamente desde el entorno Windows para almacenamiento masivo de datos crudos, copias de seguridad y datasets históricos, evitando la degradación del rendimiento de WSL2.
+
+---
+
+## 2. Configuración del Espacio de Trabajo y Permisos en Linux
+
+Se creó el directorio del proyecto bajo el estándar `/srv` y se estableció un sistema de permisos basado en herencia para permitir la colaboración sin conflictos de acceso.
+
+```bash
+# Crear el directorio del proyecto IIE
+sudo mkdir -p /srv/iie
+
+# Crear el grupo de trabajo para los colaboradores
+sudo groupadd analistas
+
+# Asignar la propiedad del grupo a la carpeta
+sudo chown -R :analistas /srv/iie
+
+# Configurar permisos con SetGID (2) para forzar herencia de grupo en nuevos archivos
+sudo chmod -R 2775 /srv/iie

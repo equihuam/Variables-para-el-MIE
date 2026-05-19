@@ -985,5 +985,159 @@
     "title": "Snakemake · Cheat Sheet",
     "section": "Nota final",
     "text": "Nota final\nEn este proyecto, los usos más frecuentes son:\n\nprobar en dry-run\nforzar una regla específica\npedir un objetivo concreto\nusar salida compacta\ndesbloquear cuando un proceso anterior se interrumpió\n\nUna combinación muy útil como valor por defecto es:\nsnakemake -j1 -p --reason\ny, para revisión previa:\nsnakemake -n -r -p"
+  },
+  {
+    "objectID": "docs/uso-de-wsl.html",
+    "href": "docs/uso-de-wsl.html",
+    "title": "Crear el grupo de trabajo para los colaboradores",
+    "section": "",
+    "text": "title: “Configuración del Entorno de Trabajo Multiusuario y Remoto en WSL” subtitle: “Estructura de alto rendimiento para el equipo IIE” author: “Miguel Equihua Zamora” date: “2026-05-19” format: html: theme: cosmo toc: true toc-depth: 3 code-fold: false —"
+  },
+  {
+    "objectID": "docs/uso-de-wsl.html#resumen-ejecutivo",
+    "href": "docs/uso-de-wsl.html#resumen-ejecutivo",
+    "title": "Crear el grupo de trabajo para los colaboradores",
+    "section": "Resumen Ejecutivo",
+    "text": "Resumen Ejecutivo\nEste documento detalla la arquitectura y los pasos de configuración técnica implementados para establecer un entorno de desarrollo geoespacial y de automatización robusto. El entorno aprovecha las capacidades de WSL2 (Windows Subsystem for Linux), operando bajo un esquema híbrido de almacenamiento en disco, aislamiento de entornos virtuales con Micromamba y acceso colaborativo remoto mediante OpenSSH y PyCharm Professional."
+  },
+  {
+    "objectID": "docs/uso-de-wsl.html#estrategia-de-almacenamiento-híbrido",
+    "href": "docs/uso-de-wsl.html#estrategia-de-almacenamiento-híbrido",
+    "title": "Crear el grupo de trabajo para los colaboradores",
+    "section": "1. Estrategia de Almacenamiento Híbrido",
+    "text": "1. Estrategia de Almacenamiento Híbrido\nPara maximizar el rendimiento del sistema sin comprometer la capacidad de almacenamiento, se definió un enfoque de dos niveles:\n\nUnidad C: (SSD): Alberga la instalación nativa de WSL2 (ext4), los entornos de desarrollo, scripts y el área de trabajo activa (/srv/iie/). Esto garantiza la máxima velocidad en operaciones críticas de lectura/escritura (I/O).\nUnidad D: (HDD Mecánico): Se reserva exclusivamente desde el entorno Windows para almacenamiento masivo de datos crudos, copias de seguridad y datasets históricos, evitando la degradación del rendimiento de WSL2."
+  },
+  {
+    "objectID": "docs/uso-de-wsl.html#configuración-del-espacio-de-trabajo-y-permisos-en-linux",
+    "href": "docs/uso-de-wsl.html#configuración-del-espacio-de-trabajo-y-permisos-en-linux",
+    "title": "Crear el grupo de trabajo para los colaboradores",
+    "section": "2. Configuración del Espacio de Trabajo y Permisos en Linux",
+    "text": "2. Configuración del Espacio de Trabajo y Permisos en Linux\nSe creó el directorio del proyecto bajo el estándar /srv y se estableció un sistema de permisos basado en herencia para permitir la colaboración sin conflictos de acceso.\n```bash # Crear el directorio del proyecto IIE sudo mkdir -p /srv/iie"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "",
+    "text": "Suposiciones previas:\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#contexto-de-uso",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#contexto-de-uso",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "",
+    "text": "Suposiciones previas:\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#tabla-rápida-uso-y-comando",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#tabla-rápida-uso-y-comando",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Tabla rápida: uso y comando",
+    "text": "Tabla rápida: uso y comando\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nVer qué se ejecutaría, sin correr nada\nsnakemake -n\n\n\nVer qué se ejecutaría para un archivo objetivo\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nCorrer todo el workflow definido en rule all\nsnakemake -j1\n\n\nCorrer un objetivo específico\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nCorrer una regla forzándola\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar una regla y ver comandos en pantalla\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nMostrar también el motivo de ejecución\nsnakemake -j1 -p --reason C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar con varios núcleos\nsnakemake -j8\n\n\nSeguir aunque una regla falle\nsnakemake -j4 --keep-going\n\n\nMostrar menos ruido en pantalla\nsnakemake -j1 --quiet progress rules\n\n\nMostrar resumen de archivos y estado\nsnakemake --summary\n\n\nMostrar resumen detallado\nsnakemake --detailed-summary\n\n\nListar reglas disponibles\nsnakemake --list-rules\n\n\nListar sólo las reglas objetivo\nsnakemake --list-target-rules\n\n\nForzar recreación de un archivo ya existente\nsnakemake -j1 -f C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar toda una regla, aunque los archivos existan\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/training/master_features.parquet\n\n\nBorrar outputs temporales innecesarios\nsnakemake --delete-temp-output\n\n\nLimpiar metadatos de un archivo\nsnakemake --cleanup-metadata C:/wf-ie-data/results/training/bn_input.csv\n\n\nIgnorar provenance y usar sólo fechas de modificación\nsnakemake -j1 --rerun-triggers mtime\n\n\nDesbloquear el workflow si quedó “locked”\nsnakemake --unlock\n\n\nVer el DAG en texto\nsnakemake --dag\n\n\nExportar el DAG para Graphviz\nsnakemake --dag \\| dot -Tpdf &gt; dag.pdf\n\n\nVer por qué se quiere ejecutar algo (dry-run + razones)\nsnakemake -n -r C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar hasta una regla, sin pasar de ahí\nsnakemake -j1 --until prepare_bn_table\n\n\nVer comandos de shell ejecutados\nsnakemake -j1 -p\n\n\nVer logs más completos para diagnóstico\nsnakemake -j1 --printshellcmds --reason --verbose"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#comandos-especialmente-útiles-en-este-workflow",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#comandos-especialmente-útiles-en-este-workflow",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Comandos especialmente útiles en este workflow",
+    "text": "Comandos especialmente útiles en este workflow\n\n1. Regenerar la tabla maestra de features\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run de la tabla maestra\nsnakemake -n C:/wf-ie-data/results/training/master_features.parquet\n\n\nConstruir la tabla maestra\nsnakemake -j1 C:/wf-ie-data/results/training/master_features.parquet\n\n\nForzar reconstrucción de master_features\nsnakemake -j1 -R assemble_training_table C:/wf-ie-data/results/training/master_features.parquet\n\n\n\n\n\n2. Regenerar bn_input.csv\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run de bn_input.csv\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nConstruir bn_input.csv\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar sólo la regla correspondiente\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\n\n\n\n3. Regenerar un feature regional\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nForzar erosión en region_1\nsnakemake -j1 -R feature_tasa_erosion C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet\n\n\nForzar viento en region_1\nsnakemake -j1 -R feature_wind_speed C:/wf-ie-data/results/features/velocidad_del_viento/region_1.parquet\n\n\nForzar ZVH en region_1\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/features/zvh/region_1.parquet\n\n\n\n\n\n4. Regenerar mapas de IE\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nConstruir mapas IE\nsnakemake -j1 -R create_ie_rasters\n\n\nForzar mapas IE y ver comandos\nsnakemake -j1 -p -R create_ie_rasters\n\n\n\n\n\n5. Validar mapas IE contra ei_qnint\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nEjecutar validación base vs referencia\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nForzar validación base vs referencia\nsnakemake -j1 -R validate_ie_base_vs_reference C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nEjecutar validación base vs alterna vs referencia\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_alterna_vs_ei_qnint_summary.csv"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#combinaciones-muy-prácticas",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#combinaciones-muy-prácticas",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Combinaciones muy prácticas",
+    "text": "Combinaciones muy prácticas\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run con razones y comandos\nsnakemake -n -r -p\n\n\nEjecutar mostrando comandos y razones\nsnakemake -j1 -p --reason\n\n\nEjecutar compacto pero informativo\nsnakemake -j1 --quiet progress rules\n\n\nRehacer algo usando sólo mtime\nsnakemake -j1 --rerun-triggers mtime\n\n\nSi algo quedó “atascado”\nsnakemake --unlock"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#mis-comandos-favoritos-para-uso-diario",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#mis-comandos-favoritos-para-uso-diario",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Mis comandos favoritos para uso diario",
+    "text": "Mis comandos favoritos para uso diario\n\nRevisar qué haría\nsnakemake -n -r -p C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar un producto puntual\nsnakemake -j1 -p C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar una regla concreta\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nSalida más compacta\nsnakemake -j1 --quiet progress rules\n\n\nDesbloquear el workflow\nsnakemake --unlock"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#regla-práctica-de-interpretación",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#regla-práctica-de-interpretación",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Regla práctica de interpretación",
+    "text": "Regla práctica de interpretación\n\n-n = no ejecuta, sólo simula\n-jN = número de cores\n-R regla = fuerza una regla\n-p = imprime comandos shell\n--reason = explica por qué corre algo\n--quiet progress rules = menos ruido\n--unlock = quita locks\n--summary = estado general del workflow"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#nota-final",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#nota-final",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Nota final",
+    "text": "Nota final\nEn este proyecto, los usos más frecuentes son:\n\nprobar en dry-run\nforzar una regla específica\npedir un objetivo concreto\nusar salida compacta\ndesbloquear cuando un proceso anterior se interrumpió\n\nUna combinación muy útil como valor por defecto es:\nsnakemake -j1 -p --reason\ny, para revisión previa:\nsnakemake -n -r -p"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "",
+    "text": "Contexto típico\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#comandos-esenciales",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#comandos-esenciales",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "1. Comandos esenciales",
+    "text": "1. Comandos esenciales\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nSimular sin ejecutar\nsnakemake -n\n\n\nSimular un objetivo\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar todo lo definido en rule all\nsnakemake -j1\n\n\nEjecutar un objetivo concreto\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nMostrar comandos shell\nsnakemake -j1 -p\n\n\nMostrar razones de ejecución\nsnakemake -j1 --reason\n\n\nEjecutar con salida compacta\nsnakemake -j1 --quiet progress rules\n\n\nEjecutar con varios núcleos\nsnakemake -j8\n\n\nContinuar aunque falle algo\nsnakemake -j4 --keep-going\n\n\nDesbloquear workflow\nsnakemake --unlock"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#forzar-ejecución",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#forzar-ejecución",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "2. Forzar ejecución",
+    "text": "2. Forzar ejecución\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nForzar una regla específica\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar regla y ver comando shell\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar un archivo objetivo\nsnakemake -j1 -f C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar feature_zvh hacia tabla master\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/training/master_features.parquet\n\n\nUsar sólo fecha de modificación\nsnakemake -j1 --rerun-triggers mtime\n\n\nLimpiar metadata de un archivo\nsnakemake --cleanup-metadata C:/wf-ie-data/results/training/bn_input.csv"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#productos-centrales-del-workflow",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#productos-centrales-del-workflow",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "3. Productos centrales del workflow",
+    "text": "3. Productos centrales del workflow\n\n\n\n\n\n\n\nProducto\nComando\n\n\n\n\nTabla master de features\nsnakemake -j1 C:/wf-ie-data/results/training/master_features.parquet\n\n\nForzar tabla master\nsnakemake -j1 -R assemble_training_table C:/wf-ie-data/results/training/master_features.parquet\n\n\nTabla BN para Netica\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar preparación BN\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nMapas IE\nsnakemake -j1 -R create_ie_rasters\n\n\nValidación IE vs ei_qnint\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nForzar validación IE vs ei_qnint\nsnakemake -j1 -R validate_ie_base_vs_reference C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#features-regionales-frecuentes",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#features-regionales-frecuentes",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "4. Features regionales frecuentes",
+    "text": "4. Features regionales frecuentes\n\n\n\n\n\n\n\nFeature\nComando ejemplo\n\n\n\n\nErosión, region_1\nsnakemake -j1 -R feature_tasa_erosion C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet\n\n\nViento, region_1\nsnakemake -j1 -R feature_wind_speed C:/wf-ie-data/results/features/velocidad_del_viento/region_1.parquet\n\n\nZVH, region_1\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/features/zvh/region_1.parquet\n\n\nTipo de costa, region_1\nsnakemake -j1 -R feature_tipo_costa C:/wf-ie-data/results/features/tipo_costa/region_1.parquet\n\n\nCondición de dunas, region_1\nsnakemake -j1 -R feature_condicion_dunas C:/wf-ie-data/results/features/condicion_dunas/region_1.parquet"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#exportaciones-geotiff-de-features",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#exportaciones-geotiff-de-features",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "5. Exportaciones GeoTIFF de features",
+    "text": "5. Exportaciones GeoTIFF de features\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nExportar una variable\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/zvh\n\n\nForzar una exportación\nsnakemake -j1 -R export_feature_geotiff C:/wf-ie-data/results/feature_geotiffs/zvh\n\n\nExportar condición de dunas\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/condicion_dunas\n\n\nExportar tipo de costa\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/tipo_costa"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#inspección-del-workflow",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#inspección-del-workflow",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "6. Inspección del workflow",
+    "text": "6. Inspección del workflow\n\n\n\nUso\nComando\n\n\n\n\nListar reglas\nsnakemake --list-rules\n\n\nListar reglas objetivo\nsnakemake --list-target-rules\n\n\nResumen de estado\nsnakemake --summary\n\n\nResumen detallado\nsnakemake --detailed-summary\n\n\nVer DAG en texto\nsnakemake --dag\n\n\nExportar DAG a PDF\nsnakemake --dag | dot -Tpdf &gt; dag.pdf\n\n\nVer comandos y razones en dry-run\nsnakemake -n -r -p"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#diagnóstico-y-recuperación",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#diagnóstico-y-recuperación",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "7. Diagnóstico y recuperación",
+    "text": "7. Diagnóstico y recuperación\n\n\n\n\n\n\n\nSituación\nComando\n\n\n\n\nWorkflow quedó bloqueado\nsnakemake --unlock\n\n\nVer más detalle\nsnakemake -j1 --printshellcmds --reason --verbose\n\n\nBorrar outputs temporales\nsnakemake --delete-temp-output\n\n\nEjecutar hasta una regla\nsnakemake -j1 --until prepare_bn_table\n\n\nReanudar pidiendo un objetivo final\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#recordatorio-mental",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#recordatorio-mental",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "8. Recordatorio mental",
+    "text": "8. Recordatorio mental\n\n\n\nOpción\nSignificado\n\n\n\n\n-n\nDry-run: simula, no ejecuta\n\n\n-jN\nNúmero de núcleos\n\n\n-R regla\nFuerza una regla\n\n\n-f archivo\nFuerza un archivo objetivo\n\n\n-p\nImprime comandos shell\n\n\n--reason\nExplica por qué corre una regla\n\n\n--quiet progress rules\nReduce ruido\n\n\n--unlock\nLibera el lock del workflow\n\n\n--rerun-triggers mtime\nUsa sólo tiempos de modificación"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#flujo-recomendado-de-trabajo",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#flujo-recomendado-de-trabajo",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Flujo recomendado de trabajo",
+    "text": "Flujo recomendado de trabajo\n# 1. Revisar qué pasaría\nsnakemake -n -r -p C:/wf-ie-data/results/training/bn_input.csv\n\n# 2. Ejecutar el objetivo\nsnakemake -j1 -p C:/wf-ie-data/results/training/bn_input.csv\n\n# 3. Si cambió una regla específica, forzarla\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n# 4. Si algo quedó bloqueado\nsnakemake --unlock"
   }
 ]

@@ -1,0 +1,23 @@
+name: profiling_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - geopandas
+  - pyarrow
+  - openpyxl
+
+  # Las estrellas del Data Profiling
+  - ydata-profiling
+  - missingno
+  - sweetviz
+  - dtale
+
+  # Soporte para visualización avanzada y reportes
+  - matplotlib
+  - seaborn
+  - ipykernel     # Crucial si usas Jupyter o integración en IDEs como PyCharm
+  - openpyxl      # Para lectura/escritura de reportes en Excel si es necesario
+  
