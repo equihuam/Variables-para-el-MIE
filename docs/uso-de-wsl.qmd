@@ -303,7 +303,7 @@ wsl --export Ubuntu D:wsl_compartido_iie.tar
 4. Importa la máquina virtual compartida en su perfil de WSL:
 
 ```powershell  
-wsl --import Ubuntu_IIE D:WSL_IIE D:wsl_compartido_iie.tar
+wsl --import Ubuntu_IIE C:\WSL_IIE D:\wsl_compartido_iie.tar
 ```
 
 Para asegurarse de que al abrir la terminal entre directamente con su usuario de Linux y no como root, ejecuta este comando en su PowerShell:
@@ -313,3 +313,55 @@ wsl -d Ubuntu_IIE --set-default-user nombre_colaborador
 ```
 
 A partir de ese momento, cuando la otra persona escriba wsl -d Ubuntu_IIE en su cuenta, entrará exactamente al mismo sistema de archivos, con las mismas carpetas, Git, configuraciones y entornos de micromamba que tú preparaste.
+
+
+### Borrar distro WSL no usado
+
+Para que el cambio sea limpio y no queden archivos residuales ni conflictos de nombres en Windows, el orden correcto de los pasos en su cuenta de Windows es el siguiente:
+
+
+#### Paso 1: Dar de baja el Ubuntu viejo (Limpieza)
+
+Antes de importar tu copia, debes borrar la distribución de Ubuntu que no se usa. Esto eliminará su disco virtual viejo y liberará el nombre en el registro de WSL.
+
+1. Inicia sesión en la cuenta de Windows del usuario que recibirá tu máquina wsl virtual.
+2. Abre **PowerShell como Administrador** y ejecuta:
+
+
+```powershell
+wsl --unregister Ubuntu
+
+```
+*(Nota: Si su distribución en la lista de `wsl --list` se llamaba exactamente "Ubuntu", esto la borrará por completo en un segundo).*
+
+
+
+#### Paso 2: Importar la copia que se ha prepsrado como nueva distribución oficial
+
+Ahora que el nombre quedó libre, puedes importar el archivo `.tar` dándole el nombre estándar de `Ubuntu` (o el que prefieras) para que sea el entorno principal.
+
+Asegúrate de que la carpeta de destino (`D:\WSL_IIE`) esté creada y completamente vacía antes de lanzar el comando:
+
+```powershell
+wsl --import Ubuntu_IIE C:\WSL_IIE D:\wsl_compartido_iie.tar
+
+```
+
+#### Paso 3: Configurar el usuario por defecto
+
+Al importar una máquina virtual, WSL por defecto arranca siempre como el superusuario `root`. Para evitar que el uso accidental de `root` (lo cual rompería el esquema de permisos del grupo `analistas` que configuramos), debes indicarle a Windows cuál es su usuario normal de Linux:
+
+```powershell
+wsl -d Ubuntu --set-default-user nombre_del_colaborador
+
+```
+
+(Sustituye `nombre_del_colaborador` por el usuario de Linux que le creaste previamente en tu sesión ).
+
+---
+
+#### ⏱️ ¿Qué se verá al activar la copia de máquina virtual?
+
+La próxima vez que el nuevo usuario abra la terminal de Ubuntu en su cuenta de Windows, entrará instantáneamente a la misma máquina virtual compartida.
+
+Verá la carpeta `/srv/iie/repositorio-iie`, tendrá acceso a los entornos de Micromamba centralizados en `/srv/iie/envs/` y podrá trabajar de forma local en el mismo entorno exacto que usan los usuarios remotos por SSH. ¡Ecosistema unificado con éxito!

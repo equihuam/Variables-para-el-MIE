@@ -4097,6 +4097,7 @@ vertical-align: -.125em;
   <ul class="collapse">
   <li><a href="#paso-a-exportar-tu-wsl-actual-desde-tu-usuario-de-windows" id="toc-paso-a-exportar-tu-wsl-actual-desde-tu-usuario-de-windows" class="nav-link" data-scroll-target="#paso-a-exportar-tu-wsl-actual-desde-tu-usuario-de-windows"><strong>Paso A: Exportar tu WSL actual (Desde tu usuario de Windows)</strong></a></li>
   <li><a href="#paso-b-importar-la-instancia-en-la-cuenta-de-windows-de-tu-colega" id="toc-paso-b-importar-la-instancia-en-la-cuenta-de-windows-de-tu-colega" class="nav-link" data-scroll-target="#paso-b-importar-la-instancia-en-la-cuenta-de-windows-de-tu-colega"><strong>Paso B: Importar la instancia en la cuenta de Windows de tu colega</strong></a></li>
+  <li><a href="#borrar-distro-wsl-no-usado" id="toc-borrar-distro-wsl-no-usado" class="nav-link" data-scroll-target="#borrar-distro-wsl-no-usado">Borrar distro WSL no usado</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -4336,8 +4337,40 @@ StrictModes no</code></pre>
 <p>Para asegurarse de que al abrir la terminal entre directamente con su usuario de Linux y no como root, ejecuta este comando en su PowerShell:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu_IIE <span class="op">--</span>set-default-user nombre_colaborador</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A partir de ese momento, cuando la otra persona escriba wsl -d Ubuntu_IIE en su cuenta, entrará exactamente al mismo sistema de archivos, con las mismas carpetas, Git, configuraciones y entornos de micromamba que tú preparaste.</p>
+</section>
+<section id="borrar-distro-wsl-no-usado" class="level3">
+<h3 class="anchored" data-anchor-id="borrar-distro-wsl-no-usado">Borrar distro WSL no usado</h3>
+<p>Para que el cambio sea limpio y no queden archivos residuales ni conflictos de nombres en Windows, el orden correcto de los pasos en su cuenta de Windows es el siguiente:</p>
+<section id="paso-1-dar-de-baja-el-ubuntu-viejo-limpieza" class="level4">
+<h4 class="anchored" data-anchor-id="paso-1-dar-de-baja-el-ubuntu-viejo-limpieza">Paso 1: Dar de baja el Ubuntu viejo (Limpieza)</h4>
+<p>Antes de importar tu copia, debes borrar la distribución de Ubuntu que no se usa. Esto eliminará su disco virtual viejo y liberará el nombre en el registro de WSL.</p>
+<ol type="1">
+<li>Inicia sesión en la cuenta de Windows del usuario que recibirá tu máquina wsl virtual.</li>
+<li>Abre <strong>PowerShell como Administrador</strong> y ejecuta:</li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>unregister Ubuntu</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><em>(Nota: Si su distribución en la lista de <code>wsl --list</code> se llamaba exactamente “Ubuntu”, esto la borrará por completo en un segundo).</em></p>
+</section>
+<section id="paso-2-importar-la-copia-que-se-ha-prepsrado-como-nueva-distribución-oficial" class="level4">
+<h4 class="anchored" data-anchor-id="paso-2-importar-la-copia-que-se-ha-prepsrado-como-nueva-distribución-oficial">Paso 2: Importar la copia que se ha prepsrado como nueva distribución oficial</h4>
+<p>Ahora que el nombre quedó libre, puedes importar el archivo <code>.tar</code> dándole el nombre estándar de <code>Ubuntu</code> (o el que prefieras) para que sea el entorno principal.</p>
+<p>Asegúrate de que la carpeta de destino (<code>D:\WSL_IIE</code>) esté creada y completamente vacía antes de lanzar el comando:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>import Ubuntu D<span class="op">:</span>\WSL_IIE D<span class="op">:</span>\wsl_compartido_iie<span class="op">.</span><span class="fu">tar</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="paso-3-configurar-el-usuario-por-defecto" class="level4">
+<h4 class="anchored" data-anchor-id="paso-3-configurar-el-usuario-por-defecto">Paso 3: Configurar el usuario por defecto</h4>
+<p>Al importar una máquina virtual, WSL por defecto arranca siempre como el superusuario <code>root</code>. Para evitar que el uso accidental de <code>root</code> (lo cual rompería el esquema de permisos del grupo <code>analistas</code> que configuramos), debes indicarle a Windows cuál es su usuario normal de Linux:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu <span class="op">--</span>set-default-user nombre_del_colaborador</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>(Sustituye <code>nombre_del_colaborador</code> por el usuario de Linux que le creaste previamente en tu sesión ).</p>
+<hr>
+</section>
+<section id="qué-se-verá-al-activar-la-copia-de-máquina-virtual" class="level4">
+<h4 class="anchored" data-anchor-id="qué-se-verá-al-activar-la-copia-de-máquina-virtual">⏱️ ¿Qué se verá al activar la copia de máquina virtual?</h4>
+<p>La próxima vez que el nuevo usuario abra la terminal de Ubuntu en su cuenta de Windows, entrará instantáneamente a la misma máquina virtual compartida.</p>
+<p>Verá la carpeta <code>/srv/iie/repositorio-iie</code>, tendrá acceso a los entornos de Micromamba centralizados en <code>/srv/iie/envs/</code> y podrá trabajar de forma local en el mismo entorno exacto que usan los usuarios remotos por SSH. ¡Ecosistema unificado con éxito!</p>
 
 
+</section>
 </section>
 </section>
 
