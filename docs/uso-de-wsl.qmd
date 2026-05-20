@@ -151,7 +151,7 @@ Se definen dos entornos aislados que operan de forma simultánea sobre el reposi
 micromamba create -p /srv/iie/envs/qgis_env -f qgis_env.yml
 
 # 2. Crear entorno secundario de auditoría (ydata-profiling, missingno)  
-micromamba create -p /srv/iie/envs/qgis_env -f profiling_env.yml
+micromamba create -p /srv/iie/envs/profiling_env -f profiling_env.yml
 ```
 Como al hacer que micromamba opere en `/srv/`rompemos con la práctica esperada normal, habrá que hacer algunas previsiones. Para que los colegas los usen deberán dar de alta esa ubicación (`/srv/iie/envs/`). Para que puedan activarlos desde la terminal usando el comando tradicional (micromamba activate qgis_env), sus instancias de Micromamba necesitan saber dónde buscar. Tendrían que agregar esta línea en su archivo de configuración } ~/.mambarc` o ejecutar:
 
