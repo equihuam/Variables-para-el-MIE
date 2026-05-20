@@ -4081,15 +4081,14 @@ vertical-align: -.125em;
   </ul></li>
   <li><a href="#gestión-de-entornos-virtuales-con-micromamba" id="toc-gestión-de-entornos-virtuales-con-micromamba" class="nav-link" data-scroll-target="#gestión-de-entornos-virtuales-con-micromamba"><strong>3. Gestión de Entornos Virtuales con Micromamba</strong></a>
   <ul class="collapse">
+  <li><a href="#instalar-miromamba" id="toc-instalar-miromamba" class="nav-link" data-scroll-target="#instalar-miromamba">Instalar Miromamba</a></li>
   <li><a href="#inicialización-y-canales" id="toc-inicialización-y-canales" class="nav-link" data-scroll-target="#inicialización-y-canales"><strong>Inicialización y Canales</strong></a></li>
   <li><a href="#construcción-de-los-laboratorios-virtuales" id="toc-construcción-de-los-laboratorios-virtuales" class="nav-link" data-scroll-target="#construcción-de-los-laboratorios-virtuales"><strong>Construcción de los laboratorios virtuales</strong></a></li>
+  <li><a href="#rutas-de-intérpretes-para-ides-pycharm-rstudio" id="toc-rutas-de-intérpretes-para-ides-pycharm-rstudio" class="nav-link" data-scroll-target="#rutas-de-intérpretes-para-ides-pycharm-rstudio"><strong>Rutas de Intérpretes para IDEs (PyCharm / RStudio)</strong></a></li>
   </ul></li>
-  <li><a href="#crear-entorno-secundario-de-auditoría-ydata-profiling-missingno" id="toc-crear-entorno-secundario-de-auditoría-ydata-profiling-missingno" class="nav-link" data-scroll-target="#crear-entorno-secundario-de-auditoría-ydata-profiling-missingno">2. Crear entorno secundario de auditoría (ydata-profiling, missingno)</a>
+  <li><a href="#acceso-por-terminal-servidor-ssh-en-wsl" id="toc-acceso-por-terminal-servidor-ssh-en-wsl" class="nav-link" data-scroll-target="#acceso-por-terminal-servidor-ssh-en-wsl"><strong>4. Acceso por terminal: servidor SSH en WSL</strong></a>
   <ul class="collapse">
-  <li><a href="#rutas-de-intérpretes-para-ides-pycharm-pro-rstudio" id="toc-rutas-de-intérpretes-para-ides-pycharm-pro-rstudio" class="nav-link" data-scroll-target="#rutas-de-intérpretes-para-ides-pycharm-pro-rstudio"><strong>Rutas de Intérpretes para IDEs (PyCharm Pro / RStudio)</strong></a></li>
-  <li><a href="#configurar-el-servidor-ssh-dentro-de-wsl" id="toc-configurar-el-servidor-ssh-dentro-de-wsl" class="nav-link" data-scroll-target="#configurar-el-servidor-ssh-dentro-de-wsl"><strong>4. Configurar el servidor SSH dentro de WSL</strong></a>
-  <ul class="collapse">
-  <li><a href="#el-puente-en-windows-port-forwarding" id="toc-el-puente-en-windows-port-forwarding" class="nav-link" data-scroll-target="#el-puente-en-windows-port-forwarding"><strong>El puente en Windows (Port Forwarding)</strong></a></li>
+  <li><a href="#el-puente-con-windows-port-forwarding" id="toc-el-puente-con-windows-port-forwarding" class="nav-link" data-scroll-target="#el-puente-con-windows-port-forwarding"><strong>El puente con Windows (Port Forwarding)</strong></a></li>
   <li><a href="#cómo-se-conectan-los-colaboradores" id="toc-cómo-se-conectan-los-colaboradores" class="nav-link" data-scroll-target="#cómo-se-conectan-los-colaboradores"><strong>¿Cómo se conectan los colaboradores?</strong></a></li>
   <li><a href="#limpiar-y-regenerar-las-llaves-del-servidor" id="toc-limpiar-y-regenerar-las-llaves-del-servidor" class="nav-link" data-scroll-target="#limpiar-y-regenerar-las-llaves-del-servidor"><strong>Limpiar y regenerar las llaves del servidor</strong></a></li>
   <li><a href="#verificar-los-archivos-de-control-de-acceso" id="toc-verificar-los-archivos-de-control-de-acceso" class="nav-link" data-scroll-target="#verificar-los-archivos-de-control-de-acceso"><strong>Verificar los archivos de control de acceso</strong></a></li>
@@ -4098,7 +4097,6 @@ vertical-align: -.125em;
   <ul class="collapse">
   <li><a href="#paso-a-exportar-tu-wsl-actual-desde-tu-usuario-de-windows" id="toc-paso-a-exportar-tu-wsl-actual-desde-tu-usuario-de-windows" class="nav-link" data-scroll-target="#paso-a-exportar-tu-wsl-actual-desde-tu-usuario-de-windows"><strong>Paso A: Exportar tu WSL actual (Desde tu usuario de Windows)</strong></a></li>
   <li><a href="#paso-b-importar-la-instancia-en-la-cuenta-de-windows-de-tu-colega" id="toc-paso-b-importar-la-instancia-en-la-cuenta-de-windows-de-tu-colega" class="nav-link" data-scroll-target="#paso-b-importar-la-instancia-en-la-cuenta-de-windows-de-tu-colega"><strong>Paso B: Importar la instancia en la cuenta de Windows de tu colega</strong></a></li>
-  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -4140,14 +4138,14 @@ vertical-align: -.125em;
 
 <section id="resumen-ejecutivo" class="level2">
 <h2 class="anchored" data-anchor-id="resumen-ejecutivo">Resumen Ejecutivo</h2>
-<p>Este documento detalla la arquitectura y los pasos de configuración técnica implementados para establecer un entorno de desarrollo geoespacial y de automatización robusto. El entorno aprovecha las capacidades de <strong>WSL2 (Windows Subsystem for Linux)</strong>, operando bajo un esquema híbrido de almacenamiento en disco, aislamiento de entornos virtuales con <strong>Micromamba</strong> y acceso colaborativo remoto mediante <strong>OpenSSH</strong> y <strong>PyCharm Professional</strong>.</p>
+<p>Este documento detalla la arquitectura y los pasos de configuración técnica implementados para establecer un entorno de desarrollo geoespacial y de automatización robusto. El entorno aprovecha las capacidades de <strong>WSL2 (Windows Subsystem for Linux)</strong>, operando bajo un esquema híbrido de almacenamiento en disco, aislamiento de entornos virtuales con <strong>Micromamba</strong> y acceso colaborativo remoto mediante <strong>OpenSSH</strong> y eventualmente <strong>PyCharm Professional</strong> como <strong>IDE</strong> estándar.</p>
 <hr>
 </section>
 <section id="estrategia-de-almacenamiento-híbrido" class="level2">
 <h2 class="anchored" data-anchor-id="estrategia-de-almacenamiento-híbrido">1. Estrategia de Almacenamiento Híbrido</h2>
 <p>Para maximizar el rendimiento del sistema sin comprometer la capacidad de almacenamiento, se definió un enfoque de dos niveles:</p>
 <ul>
-<li><strong>Unidad C: (SSD):</strong> Alberga la instalación nativa de WSL2 (<code>ext4</code>), los entornos de desarrollo, scripts y el área de trabajo activa (<code>/srv/iie/</code>). Esto garantiza la máxima velocidad en operaciones críticas de lectura/escritura (I/O).<br>
+<li><strong>Unidad C: (SSD):</strong> Alberga la instalación nativa de WSL2 (<code>ext4</code>), los entornos de desarrollo, scripts y el área de trabajo activa se ubican en <code>/srv/iie/</code>. Esto garantiza la máxima velocidad en operaciones críticas de lectura/escritura (I/O).<br>
 </li>
 <li><strong>Unidad D: (HDD Mecánico):</strong> Se reserva exclusivamente desde el entorno Windows para almacenamiento masivo de datos crudos, copias de seguridad y datasets históricos, evitando la degradación del rendimiento de WSL2.*</li>
 </ul>
@@ -4155,7 +4153,7 @@ vertical-align: -.125em;
 </section>
 <section id="configuración-del-espacio-de-trabajo-y-permisos-en-linux" class="level2">
 <h2 class="anchored" data-anchor-id="configuración-del-espacio-de-trabajo-y-permisos-en-linux">2. Configuración del Espacio de Trabajo y Permisos en Linux</h2>
-<p>*Se creó el directorio del proyecto bajo el estándar <code>/srv</code> y se estableció un sistema de permisos basado en herencia para permitir la colaboración sin conflictos de acceso.</p>
+<p>Se creó el directorio del proyecto bajo el estándar <code>/srv</code> y se estableció un sistema de permisos basado en herencia para permitir la colaboración sin conflictos de acceso.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Crear el directorio del proyecto IIE  </span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /srv/iie</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -4166,13 +4164,13 @@ vertical-align: -.125em;
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chown <span class="at">-R</span> :analistas /srv/iie</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <section id="permisos-automáticos" class="level3">
 <h3 class="anchored" data-anchor-id="permisos-automáticos"><strong>Permisos automáticos</strong></h3>
-<p>Por defecto en Linux, si el usuario_A crea un archivo, el usuario_B no siempre puede editarlo. Para evitar que tengan que usar chmod a cada rato, activaremos el bit SetGID (colocando un 2 al principio de la máscara octal). Esto obliga a que cualquier archivo o carpeta nueva herede automáticamente el grupo analistas.</p>
+<p>Por defecto en Linux, si el usuario_A crea un archivo, el usuario_B no siempre puede editarlo. Para evitar que tengan que usar <code>chmod</code> a cada rato, activaremos el bit <code>SetGID</code> (colocando un 2 al principio de la máscara octal). Esto obliga a que cualquier archivo o carpeta nueva herede automáticamente el <em>grupo analistas</em>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Asignar lectura, escritura y ejecución para dueño y grupo + SetGID  </span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod <span class="at">-R</span> 2775 /srv/iie</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="dar-de-alta-a-los-colaboradores" class="level3">
 <h3 class="anchored" data-anchor-id="dar-de-alta-a-los-colaboradores"><strong>Dar de alta a los colaboradores</strong></h3>
-<p>Para cada compañero de equipo, debes crearle su propio usuario de Linux y meterlo al grupo que creamos.</p>
+<p>Para cada compañero de equipo, se crea un usuario de Linux específico y se le agrega al grupo <em>analistas</em> que hemos creado para el propósito.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Crear el usuario (te pedirá asignarle una contraseña)  </span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> adduser nombre_colaborador</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -4181,122 +4179,136 @@ vertical-align: -.125em;
 </section>
 <section id="ajustar-el-umask-evita-bloqueos-de-archivos" class="level3">
 <h3 class="anchored" data-anchor-id="ajustar-el-umask-evita-bloqueos-de-archivos"><strong>Ajustar el umask (Evita bloqueos de archivos)</strong></h3>
-<p>Hay un último detalle técnico: por defecto, Linux crea archivos nuevos con permisos que impiden que otros miembros del grupo los editen, aunque pertenezcan al mismo grupo (los crea como rw-r–r–). Para solucionar esto, debemos cambiar el umask del sistema a 002 para todos los usuarios. Así, cada archivo nuevo nacerá con permisos rw-rw-r– (el grupo podrá editar).<br>
-Edita el archivo de configuración global de Bash:</p>
+<p>Hay un último detalle técnico: por defecto, Linux crea archivos nuevos con permisos que impiden que otros miembros del grupo los editen, aunque pertenezcan al mismo grupo (los crea con la máscara de permisos <code>rw-r--r--</code>). Para solucionar esto, debemos cambiar el umask del sistema a 002 para todos los usuarios. Así, cada archivo nuevo nacerá con permisos <code>rw-rw-r--</code> (el grupo podrá editar). Para lograr esto hay que editar el archivo de configuración global de Bash. Por simolicidad lo haremos con el editor nativo de Linux <code>nano</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/bash.bashrc</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Ve al final del archivo y agrega esta línea:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">umask</span> 002</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Guarda (En nano: Ctrl + O, Enter) y sal (Ctrl + X).</p>
+<p>Guarda (en <code>nano</code> se hace con: Ctrl + O, Enter) y sal del editor (Ctrl + X).</p>
 </section>
 <section id="configurar-el-disco-d-para-que-respete-a-los-usuarios-de-linux" class="level3">
 <h3 class="anchored" data-anchor-id="configurar-el-disco-d-para-que-respete-a-los-usuarios-de-linux"><strong>Configurar el disco D: para que respete a los usuarios de Linux</strong></h3>
-<p>Por defecto, los archivos en /mnt/d/ (que es formato NTFS de Windows) no entienden de usuarios de Linux, lo que rompería la configuración de colaboradores que planeas hacer. Para solucionar esto y poder usar ambos discos compartidos, haz lo siguiente:<br>
-Entra a tu terminal de WSL y edita el archivo de configuración global:</p>
+<p>Por defecto, los archivos en /mnt/d/ (que es el formato NTFS de Windows), no entienden de usuarios de Linux, lo que rompería la configuración de colaboradores que se ha planeado. Para solucionar esto y poder usar ambos discos compartidos, hay que hacer lo siguiente:</p>
+<p>Entra a la terminal de WSL y editar el archivo de configuración global:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/wsl.conf</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Asegúrate de que tenga estas líneas (si ya tenías algo en [automount], solo añade las opciones):</p>
+<p>Asegúrarse de tener estas líneas (si ya tenías algo en [automount], solo añade las opciones):</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode toml code-with-copy"><code class="sourceCode toml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[automount]</span>  </span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="dt">enabled</span> <span class="op">=</span> <span class="cn">true</span>  </span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="dt">options</span> <span class="op">=</span> <span class="st">&quot;metadata,umask=002,fmask=111&quot;</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Guarda (Ctrl + O, Enter) y sal (Ctrl + X).</p>
+<div class="line-block"></div>
 </section>
 </section>
 <section id="gestión-de-entornos-virtuales-con-micromamba" class="level2">
 <h2 class="anchored" data-anchor-id="gestión-de-entornos-virtuales-con-micromamba"><strong>3. Gestión de Entornos Virtuales con Micromamba</strong></h2>
-<p>Para evitar la pesadez de una instalación completa de Conda, se utiliza <strong>Micromamba</strong> como gestor de paquetes de C++ ultraveloz y autónomo. Los entornos se configuran con un núcleo rígido de <strong>Python 3.11</strong> para blindar la compatibilidad a largo plazo de las librerías geoespaciales y evitar quiebres por dependencias futuras.</p>
+<p>Para evitar la pesadez de una instalación completa de Conda, se optó por utilizar <strong>Micromamba</strong> como gestor de paquetes de C++ ultraveloz y autónomo. Los entornos se configuran con un núcleo rígido de <strong>Python 3.11</strong> para blindar la compatibilidad a largo plazo de las librerías geoespaciales y evitar quiebres por dependencias futuras.</p>
+<section id="instalar-miromamba" class="level3">
+<h3 class="anchored" data-anchor-id="instalar-miromamba">Instalar Miromamba</h3>
+<ul>
+<li>Preparar el instalador automático. Abre tu terminal de WSL y ejecuta el siguiente comando para descargar e iniciar el asistente:</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-Ls</span> https://micro.mamba.pm/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Sigue las indicaciones y dale permiso de hacer la tarea cuando te pregunte. Para activar la nueva instalación da el siguiente comando. Algunos detalles más de preparación</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hacer que micromamba arranque al iniciar wsl</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> shell init <span class="at">-s</span> bash <span class="at">-p</span> ~/micromamba</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Baja hasta el final del archivo y añade esta línea nueva:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>   <span class="ex">micromamba</span> activate base</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Reinicia el sistema wsl para que entre en efecto lo que acabas de hacer.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
 <section id="inicialización-y-canales" class="level3">
 <h3 class="anchored" data-anchor-id="inicialización-y-canales"><strong>Inicialización y Canales</strong></h3>
 <p>Antes de construir los entornos, se debe asegurar que el gestor use prioritariamente el canal comunitario conda-forge:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> config append channels conda-forge  </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> config set channel_priority strict</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> config append channels conda-forge  </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> config set channel_priority strict</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="construcción-de-los-laboratorios-virtuales" class="level3">
 <h3 class="anchored" data-anchor-id="construcción-de-los-laboratorios-virtuales"><strong>Construcción de los laboratorios virtuales</strong></h3>
 <p>Se definen dos entornos aislados que operan de forma simultánea sobre el repositorio. Para crearlos a partir de sus archivos de configuración .yml, ejecuta:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Crear entorno principal geoespacial (QGIS LTR, GDAL, Snakemake)  </span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> create <span class="at">-f</span> qgis_env.yml</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Crear entorno principal geoespacial (QGIS LTR, GDAL, Snakemake)  </span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> create <span class="at">-p</span> /srv/iie/envs/qgis_env <span class="at">-f</span> qgis_env.yml</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Crear entorno secundario de auditoría (ydata-profiling, missingno)  </span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> create <span class="at">-p</span> /srv/iie/envs/qgis_env <span class="at">-f</span> profiling_env.yml</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Como al hacer que micromamba opere en <code>/srv/</code>rompemos con la práctica esperada normal, habrá que hacer algunas previsiones. Para que los colegas los usen deberán dar de alta esa ubicación (<code>/srv/iie/envs/</code>). Para que puedan activarlos desde la terminal usando el comando tradicional (micromamba activate qgis_env), sus instancias de Micromamba necesitan saber dónde buscar. Tendrían que agregar esta línea en su archivo de configuración } ~/.mambarc` o ejecutar:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> config append envs_dirs /srv/iie/envs</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-</section>
-<section id="crear-entorno-secundario-de-auditoría-ydata-profiling-missingno" class="level1">
-<h1>2. Crear entorno secundario de auditoría (ydata-profiling, missingno)</h1>
-<p>micromamba create -f profiling_env.yml</p>
-<section id="rutas-de-intérpretes-para-ides-pycharm-pro-rstudio" class="level3">
-<h3 class="anchored" data-anchor-id="rutas-de-intérpretes-para-ides-pycharm-pro-rstudio"><strong>Rutas de Intérpretes para IDEs (PyCharm Pro / RStudio)</strong></h3>
+<section id="rutas-de-intérpretes-para-ides-pycharm-rstudio" class="level3">
+<h3 class="anchored" data-anchor-id="rutas-de-intérpretes-para-ides-pycharm-rstudio"><strong>Rutas de Intérpretes para IDEs (PyCharm / RStudio)</strong></h3>
 <p>Cada entorno almacena sus binarios de manera independiente. Para vincular los entornos virtuales a editores de código en Windows (como PyCharm Professional en modo WSL Target), las rutas absolutas dentro del sistema de archivos de Linux son:</p>
 <ul>
-<li><strong>Entorno QGIS:</strong> /home/equihuam/micromamba/envs/qgis_env/bin/python3.11<br>
+<li><strong>Entorno QGIS:</strong> /srv/iie/envs/qgis_env/bin/python3.11<br>
 </li>
-<li><strong>Entorno Profiling:</strong> /home/equihuam/micromamba/envs/profiling_env/bin/python3.11</li>
+<li><strong>Entorno Profiling:</strong> /srv/iie/envs/qgis_env/profiling_env/bin/python3.11</li>
 </ul>
 </section>
-<section id="configurar-el-servidor-ssh-dentro-de-wsl" class="level2">
-<h2 class="anchored" data-anchor-id="configurar-el-servidor-ssh-dentro-de-wsl"><strong>4. Configurar el servidor SSH dentro de WSL</strong></h2>
-<p>Por defecto, el servicio SSH que viene preinstalado en WSL está limitado. Vamos a reinstalar la versión completa del servidor OpenSSH.<br>
-Abre tu terminal de WSL y ejecuta:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update  </span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt remove openssh-server <span class="at">-y</span> <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install openssh-server <span class="at">-y</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Ahora debemos editar la configuración de SSH para permitir que los usuarios se conecten mediante su contraseña. Abre el archivo de configuración:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="acceso-por-terminal-servidor-ssh-en-wsl" class="level2">
+<h2 class="anchored" data-anchor-id="acceso-por-terminal-servidor-ssh-en-wsl"><strong>4. Acceso por terminal: servidor SSH en WSL</strong></h2>
+<p>Por defecto, el servicio SSH que viene preinstalado en WSL está limitado. Vamos a reinstalar la versión completa del servidor OpenSSH. Abre la terminal de WSL y ejecuta:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update  </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt remove openssh-server <span class="at">-y</span> <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install openssh-server <span class="at">-y</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ahora hay que editar la configuración de SSH para permitir que los usuarios se conecten mediante sus propias credenciales. Abre el archivo de configuración:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Busca las siguientes líneas en el archivo (si tienen un símbolo # al principio, bórralo para activarlas) y asegúrate de que queden exactamente así:</p>
 <pre class="plaintext"><code>Port 2222  
 ListenAddress 0.0.0.0  
 PasswordAuthentication yes</code></pre>
-<p>Nota: Cambiamos el puerto al 2222 porque el puerto 22 por defecto suele estar reservado o en conflicto con los servicios del propio Windows.<br>
-Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X). Inicia el servicio SSH en Linux:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> service ssh restart</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<section id="el-puente-en-windows-port-forwarding" class="level3">
-<h3 class="anchored" data-anchor-id="el-puente-en-windows-port-forwarding"><strong>El puente en Windows (Port Forwarding)</strong></h3>
-<p>Como WSL está escondido detrás de Windows, necesitamos decirle a tu sistema operativo Windows: “Cualquier conexión que llegue desde la red local al puerto 2222, mándala directo a WSL”. Para automatizar esto (ya que la IP interna de WSL cambia cada vez que reinicias la computadora), utilizaremos un pequeño script en PowerShell.<br>
-En Windows, busca <strong>PowerShell</strong>, haz clic derecho sobre él y selecciona <strong>Ejecutar como Administrador</strong>. Copia y pega el siguiente bloque de comandos y presiona Enter:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Obtener la IP interna actual de WSL  </span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="va">$wslIp</span> <span class="op">=</span> <span class="op">(</span>wsl exec hostname <span class="op">-</span>I<span class="op">).</span><span class="fu">Split</span><span class="op">(</span><span class="st">&quot; &quot;</span><span class="op">)[</span><span class="dv">0</span><span class="op">]</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Definir el puerto de escucha  </span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="va">$port</span> <span class="op">=</span> <span class="dv">2222</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Eliminar cualquier regla previa en ese puerto para evitar conflictos  </span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>netsh interface portproxy delete v4tov4 listenport<span class="op">=</span><span class="va">$port</span> listenaddress<span class="op">=</span><span class="dv">0.0</span><span class="op">.</span><span class="dv">0.0</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Crear el puente de Windows hacia la IP de WSL  </span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>netsh interface portproxy add v4tov4 listenport<span class="op">=</span><span class="va">$port</span> listenaddress<span class="op">=</span><span class="dv">0.0</span><span class="op">.</span><span class="dv">0.0</span> connectport<span class="op">=</span><span class="va">$port</span> connectaddress<span class="op">=</span><span class="va">$wslIp</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Abrir el puerto en el Firewall de Windows para que permita conexiones entrantes  </span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>New-NetFirewallRule <span class="op">-</span>DisplayName <span class="st">&quot;WSL SSH&quot;</span> <span class="op">-</span>Direction Inbound <span class="op">-</span>Action Allow <span class="op">-</span>Protocol TCP <span class="op">-</span>LocalPort <span class="va">$port</span> <span class="op">-</span>ErrorAction SilentlyContinue</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">Write-Host</span> <span class="st">&quot;Puente configurado con éxito hacia la IP de WSL: </span><span class="va">$wslIp</span><span class="st">&quot;</span> <span class="op">-</span>ForegroundColor Green</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Nota operativa: Como la IP de WSL cambia al reiniciar la máquina, si un día tus colaboradores no pueden conectarse, solo debes volver a abrir PowerShell como Administrador y ejecutar estas líneas para actualizar el puente.</p>
+<p>Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X). Inicia el servicio SSH en Linux:</p>
+<p>Nota: Cambiamos el puerto al 2222 porque el puerto 22 por defecto suele estar reservado o en conflicto con los servicios del propio Windows. Cuando todo esté listo reinicia el servidor de protocolo SSH.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> service ssh restart</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="el-puente-con-windows-port-forwarding" class="level3">
+<h3 class="anchored" data-anchor-id="el-puente-con-windows-port-forwarding"><strong>El puente con Windows (Port Forwarding)</strong></h3>
+<p>Como WSL está escondido detrás de Windows, necesitamos decirle a tu sistema operativo Windows que dirija directamente a WSL “Cualquier conexión que llegue desde la red local al puerto 2222”. Para automatizar esto (ya que la IP interna de WSL cambia cada vez que reinicias la computadora), utilizaremos un pequeño script en PowerShell. En Windows, busca <strong>PowerShell</strong>, haz <em>clic derecho</em> sobre él y selecciona <strong>Ejecutar como Administrador</strong>. Copia y pega el siguiente bloque de comandos y presiona Enter:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Obtener la IP interna actual de WSL  </span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="va">$wslIp</span> <span class="op">=</span> <span class="op">(</span>wsl exec hostname <span class="op">-</span>I<span class="op">).</span><span class="fu">Split</span><span class="op">(</span><span class="st">&quot; &quot;</span><span class="op">)[</span><span class="dv">0</span><span class="op">]</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Definir el puerto de escucha  </span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="va">$port</span> <span class="op">=</span> <span class="dv">2222</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Eliminar cualquier regla previa en ese puerto para evitar conflictos  </span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>netsh interface portproxy delete v4tov4 listenport<span class="op">=</span><span class="va">$port</span> listenaddress<span class="op">=</span><span class="dv">0.0</span><span class="op">.</span><span class="dv">0.0</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Crear el puente de Windows hacia la IP de WSL  </span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>netsh interface portproxy add v4tov4 listenport<span class="op">=</span><span class="va">$port</span> listenaddress<span class="op">=</span><span class="dv">0.0</span><span class="op">.</span><span class="dv">0.0</span> connectport<span class="op">=</span><span class="va">$port</span> connectaddress<span class="op">=</span><span class="va">$wslIp</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Abrir el puerto en el Firewall de Windows para que permita conexiones entrantes  </span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>New-NetFirewallRule <span class="op">-</span>DisplayName <span class="st">&quot;WSL SSH&quot;</span> <span class="op">-</span>Direction Inbound <span class="op">-</span>Action Allow <span class="op">-</span>Protocol TCP <span class="op">-</span>LocalPort <span class="va">$port</span> <span class="op">-</span>ErrorAction SilentlyContinue</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="fu">Write-Host</span> <span class="st">&quot;Puente configurado con éxito hacia la IP de WSL: </span><span class="va">$wslIp</span><span class="st">&quot;</span> <span class="op">-</span>ForegroundColor Green</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Nota operativa: Así ya puedes, si la IP de WSL cambia y se rompe el acceso, volver a abrir <strong>PowerShell</strong> como Administrador y ejecutar estas líneas para actualizar el puente.</p>
 </section>
 <section id="cómo-se-conectan-los-colaboradores" class="level3">
 <h3 class="anchored" data-anchor-id="cómo-se-conectan-los-colaboradores"><strong>¿Cómo se conectan los colaboradores?</strong></h3>
 <p>Para que tus compañeros puedan acceder desde sus computadoras, necesitan dos datos que tú les vas a proporcionar:</p>
 <ol type="1">
-<li>Tu IP en la red local (la de tu Windows). La puedes averiguar en Windows ejecutando ipconfig (ejemplo: 172.19.48.xxx).<br>
+<li>Tu IP en la red local (la de tu Windows). La puedes averiguar en Windows ejecutando <code>ipconfig</code> (ejemplo: 172.19.48.xxx).<br>
 </li>
 <li>Su usuario y contraseña de Linux: Los mismos que creamos previamente (ejemplo: usuario_colaborador).</li>
 </ol>
-<p>Desde su terminal (Linux/Mac o Git Bash/PowerShell en Windows), ellos solo tendrán que ejecutar el siguiente comando en sus propias computadoras para acceder directo a tu WSL:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-p</span> 2222 usuario_colaborador@IP_DE_TU_WINDOWS</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Desde su terminal (Linux/Mac o Git Bash/PowerShell en Windows), solo tienen que ejecutar el siguiente comando en sus propias computadoras para acceder directo al WSL:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-p</span> 2222 usuario_colaborador@IP_DE_TU_WINDOWS</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="limpiar-y-regenerar-las-llaves-del-servidor" class="level3">
 <h3 class="anchored" data-anchor-id="limpiar-y-regenerar-las-llaves-del-servidor"><strong>Limpiar y regenerar las llaves del servidor</strong></h3>
-<p>A veces, al instalar o reinstalar OpenSSH, las llaves criptográficas del servidor no se generan correctamente o se quedan corruptas. Forcemos su creación:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm <span class="at">-f</span> /etc/ssh/ssh_host_<span class="pp">*</span>  </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure openssh-server</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Ahora, ajusta el archivo sshd_config. OpenSSH por defecto es muy estricto con quién lo intenta contactar. Vamos a asegurarnos de que no esté bloqueando las conexiones externas. Abre el archivo:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A veces, al instalar o reinstalar <code>OpenSSH</code>, las llaves criptográficas del servidor no se generan correctamente o se quedan corruptas. Forcemos su creación:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm <span class="at">-f</span> /etc/ssh/ssh_host_<span class="pp">*</span>  </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dpkg-reconfigure openssh-server</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ahora, ajusta el archivo <code>sshd_config</code>. OpenSSH por defecto es muy estricto con quién lo intenta contactar. Vamos a asegurarnos de que no esté bloqueando las conexiones externas. Abre el archivo:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> nano /etc/ssh/sshd_config</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Busca las siguientes líneas y asegúrate de que queden configuradas exactamente así (si no existen, agrégalas al final del archivo):</p>
 <pre class="text"><code>LoginGraceTime 120  
 PermitRootLogin no  
 StrictModes no</code></pre>
-<p>StrictModes no: Es vital en WSL. Si está en yes, SSH rechazará las conexiones si nota alguna discrepancia menor en los permisos de las carpetas de los usuarios en Linux.<br>
-Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X).</p>
+<p>Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X).</p>
+<p><code>StrictModes no</code> es una configuración vital en WSL. Si está en yes, SSH rechazará las conexiones si nota alguna discrepancia menor en los permisos de las carpetas de los usuarios en Linux.</p>
 </section>
 <section id="verificar-los-archivos-de-control-de-acceso" class="level3">
 <h3 class="anchored" data-anchor-id="verificar-los-archivos-de-control-de-acceso"><strong>Verificar los archivos de control de acceso</strong></h3>
-<p>Linux tiene dos archivos “cadeneros” que deciden quién entra y quién no por red. Vamos a garantizar que estén vacíos o que permitan el acceso. Ejecuta estos dos comandos para asegurarte de que no haya IPs bloqueadas:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> truncate <span class="at">-s</span> 0 /etc/hosts.allow  </span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> truncate <span class="at">-s</span> 0 /etc/hosts.deny</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Linux tiene dos archivos “cadeneros” que deciden quién entra y quién no por la red. Vamos a garantizar que estén vacíos o que permitan el acceso. Ejecuta estos dos comandos para asegurar que no haya IPs bloqueadas:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> truncate <span class="at">-s</span> 0 /etc/hosts.allow  </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> truncate <span class="at">-s</span> 0 /etc/hosts.deny</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Para terminar todo esto hay que reiniciar el servicio. Se hace así:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> service ssh restart</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> service ssh restart</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
 <section id="compartir-la-misma-instancia-de-wsl-entre-usuarios-de-windows" class="level2">
@@ -4305,9 +4317,9 @@ Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X).</p>
 <section id="paso-a-exportar-tu-wsl-actual-desde-tu-usuario-de-windows" class="level3">
 <h3 class="anchored" data-anchor-id="paso-a-exportar-tu-wsl-actual-desde-tu-usuario-de-windows"><strong>Paso A: Exportar tu WSL actual (Desde tu usuario de Windows)</strong></h3>
 <p>Cierra WSL y abre PowerShell como Administrador. Hay que apagar WSL por completo:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>shutdown</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>shutdown</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Ahora, exporta el entorno a un archivo de respaldo (puedes guardarlo en la Unidad D: para tener espacio):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>export Ubuntu D<span class="op">:</span>wsl_compartido_iie<span class="op">.</span><span class="fu">tar</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>export Ubuntu D<span class="op">:</span>wsl_compartido_iie<span class="op">.</span><span class="fu">tar</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="paso-b-importar-la-instancia-en-la-cuenta-de-windows-de-tu-colega" class="level3">
 <h3 class="anchored" data-anchor-id="paso-b-importar-la-instancia-en-la-cuenta-de-windows-de-tu-colega"><strong>Paso B: Importar la instancia en la cuenta de Windows de tu colega</strong></h3>
@@ -4320,13 +4332,12 @@ Guarda los cambios (Ctrl + O, Enter) y sal (Ctrl + X).</p>
 </li>
 <li>Importa la máquina virtual compartida en su perfil de WSL:</li>
 </ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>import Ubuntu_IIE D<span class="op">:</span>WSL_IIE D<span class="op">:</span>wsl_compartido_iie<span class="op">.</span><span class="fu">tar</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">--</span>import Ubuntu_IIE D<span class="op">:</span>WSL_IIE D<span class="op">:</span>wsl_compartido_iie<span class="op">.</span><span class="fu">tar</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Para asegurarse de que al abrir la terminal entre directamente con su usuario de Linux y no como root, ejecuta este comando en su PowerShell:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu_IIE <span class="op">--</span>set-default-user nombre_colaborador</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu_IIE <span class="op">--</span>set-default-user nombre_colaborador</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A partir de ese momento, cuando la otra persona escriba wsl -d Ubuntu_IIE en su cuenta, entrará exactamente al mismo sistema de archivos, con las mismas carpetas, Git, configuraciones y entornos de micromamba que tú preparaste.</p>
 
 
-</section>
 </section>
 </section>
 
