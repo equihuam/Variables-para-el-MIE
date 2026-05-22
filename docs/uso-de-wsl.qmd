@@ -117,7 +117,7 @@ Sigue las indicaciones y dale permiso de hacer la tarea cuando te pregunte. Para
 
 ```bash
 # Hacer que micromamba arranque al iniciar wsl
-micromamba shell init -s bash -p ~/micromamba
+micromamba shell init -s bash
 ```
 
 Baja hasta el final del archivo y añade esta línea nueva:
