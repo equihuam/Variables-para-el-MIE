@@ -1,4 +1,4 @@
----
+ ---
 title: "Snakemake · Cheat Sheet"
 subtitle: "Comandos frecuentes para Workflow-IIE"
 format:

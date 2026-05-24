@@ -1,9 +1,17 @@
-library("terra")
-library("sf")
-library("kknn")
+#library("terra")
+#library("sf")
+#library("kknn")
 
 # Load estructuras shapefile.
-struct <- vect("./data_crude/05_InventarioEstructuras/estructuras_final_unido_.shp")
+#struct <- vect("./data_crude/05_InventarioEstructuras/estructuras_final_unido_.shp")
+
+pacman::p_load(terra, dplyr, readr, kknn)
+
+# Insumos
+ref_grids <- "c:/wf-ie-data/results/reference/"
+structures_shp <- "c:/wf-ie-data/varsIni/estructuras/estructuras_final_unido_.shp"
+struct <- vect(structures_shp)
+
 
 struct$Tipo[struct$Tipo=="Escollera2"] <- "Escollera"
 struct$Tipo[struct$Tipo=="Espigób"] <- "Espigón"
@@ -15,7 +23,8 @@ struct$Tipo[struct$Tipo=="Rompeolas2"] <- "Rompeolas"
 unique_strus <- unique(struct$Tipo)
 
 # List coastal refetence grids.
-c_list <- list.files("./data/06_DunasCost250116_malla_ref_50m/",
+#c_list <- list.files("./data/06_DunasCost250116_malla_ref_50m/",
+c_list <- list.files(ref_grids,
                      pattern = "\\.tif$",
                      full.names = TRUE,
                      recursive = TRUE)
@@ -23,7 +32,6 @@ c_list <- list.files("./data/06_DunasCost250116_malla_ref_50m/",
 df_list <- list()
 counter = 0
 for (region in c_list){
-    region <- c_list[1]
     print(region)
 
     region_ <- rast(region)
@@ -56,5 +64,11 @@ for (region in c_list){
 }
 
 full_df <- dplyr::bind_rows(df_list)
+names(full_df) <- c("x","y","ref_grid","pixid","regionid","Escollera")
+
+reg_1 <- full_df %>% 
+  filter((ref_grid == "1") & !is.na(Escollera))
+
+full_df$Escollera[is.null(full_df$Escollera)]
 
 saveRDS(full_df, "./data_features/2_infraestructura.rds")

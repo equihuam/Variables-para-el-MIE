@@ -1,11 +1,8 @@
-library(terra)
-library(dplyr)
-library(readr)
-library(kknn)
+pacman::p_load(terra, dplyr, readr, kknn)
 
 # Insumos
-ref_grid <- "../../../../../../../../wf-ie-data/results/reference/region_1/ref_grid.tif"
-structures_shp <- "../../../../../../../../wf-ie-data/varsIni/estructuras/estructuras_final_unido_.shp"
+ref_grid <- "c:/wf-ie-data/results/reference/region_1/ref_grid.tif"
+structures_shp <- "c:/wf-ie-data/varsIni/estructuras/estructuras_final_unido_.shp"
 
 # Cargar estructuras
 struct <- vect(structures_shp)

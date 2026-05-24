@@ -1,0 +1,126 @@
+---
+title: "Producción del Índice de Integridad Ecosistémica"
+subtitle: "Lineamientos de Trabajo"
+---
+
+## Marco de operación:
+
+**Proyecto Institucional \| Infraestructura de Cómputo Científico
+Compartido**
+
+Este documento establece las reglas técnicas y organizativas para el
+desarrollo reproducible de los modelos de integridad ecosistémica en sus
+diversas variantes, que incluyen actualmente Sistemas Costeros y
+Ecosistemas Terrestres de México. La iniciativa concibe a través del uso
+de infraestructura de cómputo científico compartida. Se adopta el
+enfoque de procesamiento basado en
+[`snakemake`](https://snakemake.readthedocs.io/en/stable/#) para
+organizar la operación de scripts diseñados en **Python** o **R**, según
+surja la oportunidad. Un principio rector es la búsqueda continua de
+prácticas y procesos que conduzcan a la **reproducibilidad
+científica** [@Royaux2025a]
+
+------------------------------------------------------------------------
+
+### 1. Modelo de Desarrollo y Control de Cambios (Git & GitHub)
+
+El código del flujo de trabajo se gestiona bajo el principio de
+aislamiento de entornos y trazabilidad absoluta.
+
+- **Repositorio Central:** Cada participante deberá mantener un clon
+  local del repositorio institucional en su propia estación de trabajo
+  (laptop/PC).
+- **Desarrollo de Scripts y Reglas:** Las modificaciones a los scripts
+  de Python/R, así como la adición de nuevas reglas de `Snakemake`, se
+  realizarán exclusivamente en los clones locales.
+- **Conjunto de Datos de Prueba (Sandboxing):** Para el desarrollo local
+  y diseño de pruebas, se utilizará un *dataset* mínimo de prueba
+  estandarizado (un recorte temporal y espacial acotado). Se prohíbe
+  subir datos crudos o pesados (.nc, .tif, .RData) al control de
+  versiones de GitHub; estos deben estar estrictamente listados en el
+  archivo `.gitignore`.
+- **Garantía de Calidad (`pytest`):** Todo nuevo componente matemático,
+  extractor de métricas o transformador de variables deberá acompañarse
+  de pruebas unitarias básicas usando `pytest` antes de solicitar su
+  incorporación al servidor.
+
+------------------------------------------------------------------------
+
+### 2. Gestión de Producción y Despliegue en el Servidor
+
+El servidor central ejecuta el procesamiento pesado y actúa como la
+fuente de verdad de los datos procesados.
+
+- **Actualización de Código:** El entorno de producción en el servidor
+  (coordinado a través de la cuenta de `octavio`) se actualizará
+  únicamente mediante operaciones sincrónicas de Git (`git pull`)
+  provenientes de la rama principal de GitHub, previa revisión y
+  aprobación del coordinador del proyecto.
+- **Liberación de Entregables:** Los productos geoespaciales de gran
+  alcance (mapas GeoTIFF resultantes de la red bayesiana, estimadores
+  oficiales) se depositarán automáticamente, una vez validados y
+  liberados, en la ruta centralizada de almacenamiento:
+  `D:/iie/productos`
+
+------------------------------------------------------------------------
+
+### 3. Procesamiento Pesado (Snakemake & SSH)
+
+Para maximizar el rendimiento del hardware del instituto y evitar la
+degradación del almacenamiento, se implementan las siguientes reglas de
+ejecución:
+
+- **Acceso Remoto:** El equipo ejecutará el flujo de procesamiento
+  conectándose vía SSH al puerto `2200` del servidor (`100.92.147.14`).
+  Al iniciar sesión, el sistema activará automáticamente el entorno
+  científico unificado de producción: `(qgis_env)`.
+- **Zona de Procesamiento de Alto Rendimiento:** Todo el procesamiento
+  intermedio de `Snakemake` (alineación de mallas ráster, cálculo de
+  variables bioclimáticas/biofísicas y generación de matrices de
+  entrenamiento) se ejecutará dentro de la unidad de estado sólido
+  (SSD), específicamente en la ruta comunitaria: `/srv/iie/`
+- **Sincronización y Concurrencia:** Debido a que `Snakemake` bloquea el
+  directorio de trabajo para proteger la integridad de los datos, el
+  equipo deberá coordinar las ventanas de ejecución masiva. Los
+  resultados intermedios y bases de datos de entrenamiento vivirán de
+  forma interna en este espacio de procesamiento rápido.
+
+------------------------------------------------------------------------
+
+### 4. Generación de Productos Científicos (Quarto)
+
+La infraestructura separa el esfuerzo de procesamiento pesado del
+esfuerzo de análisis y redacción científica.
+
+- **Réplica de Datos de Consumo:** Los árboles de datos procesados y
+  mallas ráster congruentes listos para análisis se replicarán de forma
+  automática hacia el almacenamiento masivo en la ruta de red
+  compartida: `D:/iie/datos`
+- **Generación de Reportes Remotos:** Todo el equipo de investigación
+  podrá acceder a esta carpeta compartida desde sus estaciones de
+  trabajo locales (vía unidades de red compartidas).
+- **Flujo de Trabajo en Quarto:** La redacción de artículos, reportes
+  técnicos y documentos dinámicos basados en Quarto se alimentará
+  directamente de las matrices y GeoTIFFs disponibles en `D:/iie/datos`.
+  Esto permite compilar reportes locales con la infraestructura
+  analítica del laboratorio sin necesidad de saturar la CPU de
+  procesamiento del servidor.
+
+------------------------------------------------------------------------
+
+## Resumen del Flujo de Trabajo para el Equipo
+
+1.  **Modifico y Pruebo:** En mi laptop con Git, `pytest` y el
+    minidataset de prueba.
+2.  **Sube a GitHub:** Envío mis cambios al repositorio para revisión.
+3.  **Procesamiento Masivo:** Con código aprobado, corro `Snakemake` por
+    SSH en el SSD del servidor para procesar las mallas y entrenar la
+    Red Bayesiana.
+4.  **Entrega y Análisis:** Los GeoTIFF de integridad ecosistémica van a
+    `D:/iie/productos` y los datos base a `D:/iie/datos` para que todos
+    redactemos los reportes en Quarto.
+
+------------------------------------------------------------------------
+
+Este documento queda integrado a la bitácora de diseño del proyecto como
+base de operación del equipo.

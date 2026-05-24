@@ -2,6 +2,8 @@ project:
   type: website
   resources:
     - "recursos_externos/"
+    
+bibliography: docs/referencias.bib   
 
 website:
   title: "Workflow IIE-3T"
@@ -9,15 +11,12 @@ website:
     left:
       - href: index.qmd
         text: Inicio
-  sidebar:
-    - title: "Secciones"
-      contents:
-        - introduccion.qmd
-        - tutoriales/
+#  sidebar:
   page-navigation: true
 
 format:
   html:
+    embed-resources: true
     theme: cosmo
 #    css: styles.css
     toc: true
