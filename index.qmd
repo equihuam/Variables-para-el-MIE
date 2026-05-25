@@ -11,6 +11,8 @@ format: html
 
 [memoria de configuración](docs/guia-configura-wsl.qmd)
 
+[si se apaga el ssh](docs/arrancar-sistema-ssh-wsl.qmd)
+
 # Uso de snakemake
 [comandos snakemake](workflow/docs-snakemake/snakemake-cheatsheet.qmd)
 

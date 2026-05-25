@@ -644,95 +644,116 @@
     "text": "Para ejecutar scripts con qgis.core desde PyCharm usando el entorno C:\\QGis_env, fue necesario complementar la configuración del intérprete con variables de entorno y una ruta adicional de módulos.\n\n\nDefinir las siguientes variables:\nGDAL_DATA=C:\\QGis_env\\Library\\share\\gdal\nGDAL_DRIVER_PATH=C:\\QGis_env\\Library\\lib\\gdalplugins\nPROJ_LIB=C:\\QGis_env\\Library\\share\\proj\nEstas variables permiten que GDAL y PROJ localicen correctamente sus datos auxiliares y controladores.\n\n\n\nAgregar esta ruta:\nC:\\QGis_env\\Library\\python\nEsto permite que el intérprete encuentre el paquete qgis y resuelva correctamente importaciones como:\nfrom qgis.core import QgsApplication"
   },
   {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html",
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html",
     "title": "Snakemake · Cheat Sheet",
     "section": "",
-    "text": "Contexto típico\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
+    "text": "Suposiciones previas:\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
   },
   {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#comandos-esenciales",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#comandos-esenciales",
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#contexto-de-uso",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#contexto-de-uso",
     "title": "Snakemake · Cheat Sheet",
-    "section": "1. Comandos esenciales",
-    "text": "1. Comandos esenciales\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nSimular sin ejecutar\nsnakemake -n\n\n\nSimular un objetivo\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar todo lo definido en rule all\nsnakemake -j1\n\n\nEjecutar un objetivo concreto\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nMostrar comandos shell\nsnakemake -j1 -p\n\n\nMostrar razones de ejecución\nsnakemake -j1 --reason\n\n\nEjecutar con salida compacta\nsnakemake -j1 --quiet progress rules\n\n\nEjecutar con varios núcleos\nsnakemake -j8\n\n\nContinuar aunque falle algo\nsnakemake -j4 --keep-going\n\n\nDesbloquear workflow\nsnakemake --unlock"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#forzar-ejecución",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#forzar-ejecución",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "2. Forzar ejecución",
-    "text": "2. Forzar ejecución\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nForzar una regla específica\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar regla y ver comando shell\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar un archivo objetivo\nsnakemake -j1 -f C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar feature_zvh hacia tabla master\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/training/master_features.parquet\n\n\nUsar sólo fecha de modificación\nsnakemake -j1 --rerun-triggers mtime\n\n\nLimpiar metadata de un archivo\nsnakemake --cleanup-metadata C:/wf-ie-data/results/training/bn_input.csv"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#productos-centrales-del-workflow",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#productos-centrales-del-workflow",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "3. Productos centrales del workflow",
-    "text": "3. Productos centrales del workflow\n\n\n\n\n\n\n\nProducto\nComando\n\n\n\n\nTabla master de features\nsnakemake -j1 C:/wf-ie-data/results/training/master_features.parquet\n\n\nForzar tabla master\nsnakemake -j1 -R assemble_training_table C:/wf-ie-data/results/training/master_features.parquet\n\n\nTabla BN para Netica\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar preparación BN\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nMapas IE\nsnakemake -j1 -R create_ie_rasters\n\n\nValidación IE vs ei_qnint\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nForzar validación IE vs ei_qnint\nsnakemake -j1 -R validate_ie_base_vs_reference C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#features-regionales-frecuentes",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#features-regionales-frecuentes",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "4. Features regionales frecuentes",
-    "text": "4. Features regionales frecuentes\n\n\n\n\n\n\n\nFeature\nComando ejemplo\n\n\n\n\nErosión, region_1\nsnakemake -j1 -R feature_tasa_erosion C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet\n\n\nViento, region_1\nsnakemake -j1 -R feature_wind_speed C:/wf-ie-data/results/features/velocidad_del_viento/region_1.parquet\n\n\nZVH, region_1\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/features/zvh/region_1.parquet\n\n\nTipo de costa, region_1\nsnakemake -j1 -R feature_tipo_costa C:/wf-ie-data/results/features/tipo_costa/region_1.parquet\n\n\nCondición de dunas, region_1\nsnakemake -j1 -R feature_condicion_dunas C:/wf-ie-data/results/features/condicion_dunas/region_1.parquet"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#exportaciones-geotiff-de-features",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#exportaciones-geotiff-de-features",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "5. Exportaciones GeoTIFF de features",
-    "text": "5. Exportaciones GeoTIFF de features\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nExportar una variable\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/zvh\n\n\nForzar una exportación\nsnakemake -j1 -R export_feature_geotiff C:/wf-ie-data/results/feature_geotiffs/zvh\n\n\nExportar condición de dunas\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/condicion_dunas\n\n\nExportar tipo de costa\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/tipo_costa"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#inspección-del-workflow",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#inspección-del-workflow",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "6. Inspección del workflow",
-    "text": "6. Inspección del workflow\n\n\n\nUso\nComando\n\n\n\n\nListar reglas\nsnakemake --list-rules\n\n\nListar reglas objetivo\nsnakemake --list-target-rules\n\n\nResumen de estado\nsnakemake --summary\n\n\nResumen detallado\nsnakemake --detailed-summary\n\n\nVer DAG en texto\nsnakemake --dag\n\n\nExportar DAG a PDF\nsnakemake --dag | dot -Tpdf &gt; dag.pdf\n\n\nVer comandos y razones en dry-run\nsnakemake -n -r -p"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#diagnóstico-y-recuperación",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#diagnóstico-y-recuperación",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "7. Diagnóstico y recuperación",
-    "text": "7. Diagnóstico y recuperación\n\n\n\n\n\n\n\nSituación\nComando\n\n\n\n\nWorkflow quedó bloqueado\nsnakemake --unlock\n\n\nVer más detalle\nsnakemake -j1 --printshellcmds --reason --verbose\n\n\nBorrar outputs temporales\nsnakemake --delete-temp-output\n\n\nEjecutar hasta una regla\nsnakemake -j1 --until prepare_bn_table\n\n\nReanudar pidiendo un objetivo final\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#recordatorio-mental",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#recordatorio-mental",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "8. Recordatorio mental",
-    "text": "8. Recordatorio mental\n\n\n\nOpción\nSignificado\n\n\n\n\n-n\nDry-run: simula, no ejecuta\n\n\n-jN\nNúmero de núcleos\n\n\n-R regla\nFuerza una regla\n\n\n-f archivo\nFuerza un archivo objetivo\n\n\n-p\nImprime comandos shell\n\n\n--reason\nExplica por qué corre una regla\n\n\n--quiet progress rules\nReduce ruido\n\n\n--unlock\nLibera el lock del workflow\n\n\n--rerun-triggers mtime\nUsa sólo tiempos de modificación"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#flujo-recomendado-de-trabajo",
-    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#flujo-recomendado-de-trabajo",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "Flujo recomendado de trabajo",
-    "text": "Flujo recomendado de trabajo\n# 1. Revisar qué pasaría\nsnakemake -n -r -p C:/wf-ie-data/results/training/bn_input.csv\n\n# 2. Ejecutar el objetivo\nsnakemake -j1 -p C:/wf-ie-data/results/training/bn_input.csv\n\n# 3. Si cambió una regla específica, forzarla\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n# 4. Si algo quedó bloqueado\nsnakemake --unlock"
-  },
-  {
-    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html",
-    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html",
-    "title": "Hallazgos y propuesta canónica tentativa",
     "section": "",
-    "text": "Hallazgo principal: el análisis de scripts permitió pasar de una lista de rutas a una vista de familias operativas de archivos. Con eso ya se distinguen etapas claras del flujo: base espacial/regional, cálculo de features, tablas de entrenamiento y generación de mapas.\nSe detectó una familia claramente troncal: data/06_DunasCost250116_malla_ref_50m, que alimenta muchos scripts. También emergen como etapas posteriores data_features y data_training_tables. Además apareció una posible inconsistencia de nomenclatura entre data/7_ref_grid_50m y data/8_ref_grid_50m, que probablemente representan la misma familia operativa y conviene validar directamente.\nPropuesta canónica tentativa: reorganizar por etapas del workflow y no por herencia histórica de carpetas. En términos generales: data_raw/ para insumos fuente, data_intermediate/grids/ para moldes o grillas base regionales, data_intermediate/features/ para capas derivadas, data_intermediate/training_tables/ para tablas de modelado y outputs/maps/ para resultados cartográficos."
+    "text": "Suposiciones previas:\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
   },
   {
-    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#grafo",
-    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#grafo",
-    "title": "Hallazgos y propuesta canónica tentativa",
-    "section": "Grafo simplificado",
-    "text": "Grafo simplificado\n\n\n\n\n\n\nflowchart LR\n    F001(\"data/5_deltavp250m\")\n    F002(\"data/6_inegiSVII_dunes\")\n    F003(\"data_crude/02_cm-conabio\")\n    F004(\"data/7_dunes250116\")\n    F005(\"data/3_misc_cesia\")\n    F006(\"data_features\")\n    F007(\"data/06_DunasCost250116_malla_ref_50m\\\\n[\\\\.tif$]\")\n    F008(\"data_crude/12_Tipo_de_costa\")\n    F009(\"data/06_DunasCost250116_malla_ref_50m\")\n    F010(\"data_crude/11_dataset-sis-biodiversity-era5-global\")\n    F011(\"data_crude/05_InventarioEstructuras\")\n    F012(\"data_crude/07_zvh_mx3gw\")\n    F013(\"data_features\\\\n[\\\\.rds$]\")\n    F014(\"data_training_tables\")\n    F015(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m\\\\n[\\\\.tif$]\")\n    F016(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R\")\n    F017(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales\")\n    F018(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m\")\n    F019(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data\")\n    F020(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data\")\n    F021(\"data/7_ref_grid_50m\")\n    F022(\"data/8_ref_grid_50m\")\n    F023(\"data_crude/04_Erosion_acresion\")\n    F024(\"data_crude/15_plantas_snib\")\n    F025(\"data_crude/08_coral-global\")\n    F026(\"data_crude/03_seagrasses-pol-simar\")\n    F027(\"data_crude/13_Batimetría\")\n    F028(\"data_crude/16_madmex\")\n    S10[\"10_movimiento_dunas.R\"]\n    S11[\"11_tipo_costa.R\"]\n    S12[\"12_wind_speed.R\"]\n    S13[\"13_z_v_holdridge.R\"]\n    S14[\"14_create_data_table.R\"]\n    S15[\"15_one_class_ei.R\"]\n    S16[\"16_final_training_data_v1.R\"]\n    S17[\"17_naive_bayes_ei.R\"]\n    S18[\"18_create_ei_rasters.R\"]\n    S101[\"1_create_reference_grid.R\"]\n    S102[\"1_create_reference_grid2.R\"]\n    S1e[\"1_features_tasa_erosion.R\"]\n    S2e[\"2_features_estructuras.R\"]\n    S3e[\"3_sp_invasoras.R\"]\n    S4e[\"4_corales_global.R\"]\n    S5e[\"5_pasto_marino.R\"]\n    S6e[\"6_batimetria_caracteristica.R\"]\n    S7i[\"7_inegi_uso_suelo.R\"]\n    S7m[\"7_madmex_uso_suelo.R\"]\n    S7m2[\"7_madmex_uso_suelo_2.R\"]\n    S7m3[\"7_madmex_uso_suelo_3.R\"]\n    S8m[\"8_manglares.R\"]\n    S9c[\"9_condicion_dunas.R\"]\n    F001 --&gt; S10\n    F002 --&gt; S10\n    F003 --&gt; S10\n    F004 --&gt; S10\n    F005 --&gt; S10\n    S10 --&gt; F006\n    F007 --&gt; S11\n    F008 --&gt; S11\n    F009 --&gt; S11\n    S11 --&gt; F006\n    F007 --&gt; S12\n    F009 --&gt; S12\n    F010 --&gt; S12\n    F011 --&gt; S12\n    S12 --&gt; F006\n    F003 --&gt; S13\n    F007 --&gt; S13\n    F009 --&gt; S13\n    F012 --&gt; S13\n    S13 --&gt; F006\n    F006 --&gt; S14\n    F013 --&gt; S14\n    S14 --&gt; F014\n    F014 --&gt; S15\n    S15 --&gt; F014\n    F014 --&gt; S16\n    F014 --&gt; S17\n    S17 --&gt; F014\n    F015 --&gt; S18\n    F017 --&gt; S18\n    F018 --&gt; S18\n    F019 --&gt; S18\n    F020 --&gt; S18\n    S18 --&gt; F016\n    F002 --&gt; S101\n    F005 --&gt; S101\n    S101 --&gt; F021\n    F001 --&gt; S102\n    F002 --&gt; S102\n    F004 --&gt; S102\n    F005 --&gt; S102\n    S102 --&gt; F022\n    F007 --&gt; S1e\n    F009 --&gt; S1e\n    F023 --&gt; S1e\n    S1e --&gt; F006\n    F007 --&gt; S2e\n    F009 --&gt; S2e\n    F011 --&gt; S2e\n    S2e --&gt; F006\n    F007 --&gt; S3e\n    F009 --&gt; S3e\n    F024 --&gt; S3e\n    S3e --&gt; F006\n    F007 --&gt; S4e\n    F009 --&gt; S4e\n    F025 --&gt; S4e\n    S4e --&gt; F006\n    F007 --&gt; S5e\n    F009 --&gt; S5e\n    F026 --&gt; S5e\n    S5e --&gt; F006\n    F007 --&gt; S6e\n    F009 --&gt; S6e\n    F027 --&gt; S6e\n    S6e --&gt; F006\n    F007 --&gt; S7i\n    F009 --&gt; S7i\n    F028 --&gt; S7i\n    F003 --&gt; S7i\n    S7i --&gt; F006\n    F007 --&gt; S7m\n    F009 --&gt; S7m\n    F028 --&gt; S7m\n    S7m --&gt; F006\n    F007 --&gt; S7m2\n    F009 --&gt; S7m2\n    F028 --&gt; S7m2\n    S7m2 --&gt; F006\n    F007 --&gt; S7m3\n    F009 --&gt; S7m3\n    F028 --&gt; S7m3\n    S7m3 --&gt; F006\n    F007 --&gt; S8m\n    F009 --&gt; S8m\n    F003 --&gt; S8m\n    S8m --&gt; F006\n    F001 --&gt; S9c\n    F002 --&gt; S9c\n    F003 --&gt; S9c\n    F004 --&gt; S9c\n    F005 --&gt; S9c\n    S9c --&gt; F006\n\n\n\n\n\n\n\n\nDescargas: Mermaid fuente, grafo JSON."
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#tabla-rápida-uso-y-comando",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#tabla-rápida-uso-y-comando",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Tabla rápida: uso y comando",
+    "text": "Tabla rápida: uso y comando\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nVer qué se ejecutaría, sin correr nada\nsnakemake -n\n\n\nVer qué se ejecutaría para un archivo objetivo\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nCorrer todo el workflow definido en rule all\nsnakemake -j1\n\n\nCorrer un objetivo específico\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nCorrer una regla forzándola\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar una regla y ver comandos en pantalla\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nMostrar también el motivo de ejecución\nsnakemake -j1 -p --reason C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar con varios núcleos\nsnakemake -j8\n\n\nSeguir aunque una regla falle\nsnakemake -j4 --keep-going\n\n\nMostrar menos ruido en pantalla\nsnakemake -j1 --quiet progress rules\n\n\nMostrar resumen de archivos y estado\nsnakemake --summary\n\n\nMostrar resumen detallado\nsnakemake --detailed-summary\n\n\nListar reglas disponibles\nsnakemake --list-rules\n\n\nListar sólo las reglas objetivo\nsnakemake --list-target-rules\n\n\nForzar recreación de un archivo ya existente\nsnakemake -j1 -f C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar toda una regla, aunque los archivos existan\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/training/master_features.parquet\n\n\nBorrar outputs temporales innecesarios\nsnakemake --delete-temp-output\n\n\nLimpiar metadatos de un archivo\nsnakemake --cleanup-metadata C:/wf-ie-data/results/training/bn_input.csv\n\n\nIgnorar provenance y usar sólo fechas de modificación\nsnakemake -j1 --rerun-triggers mtime\n\n\nDesbloquear el workflow si quedó “locked”\nsnakemake --unlock\n\n\nVer el DAG en texto\nsnakemake --dag\n\n\nExportar el DAG para Graphviz\nsnakemake --dag \\| dot -Tpdf &gt; dag.pdf\n\n\nVer por qué se quiere ejecutar algo (dry-run + razones)\nsnakemake -n -r C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar hasta una regla, sin pasar de ahí\nsnakemake -j1 --until prepare_bn_table\n\n\nVer comandos de shell ejecutados\nsnakemake -j1 -p\n\n\nVer logs más completos para diagnóstico\nsnakemake -j1 --printshellcmds --reason --verbose"
   },
   {
-    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#arbol",
-    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#arbol",
-    "title": "Hallazgos y propuesta canónica tentativa",
-    "section": "Árbol canónico tentativo",
-    "text": "Árbol canónico tentativo\n\nproyecto/\n├── data_raw/\n│   ├── vectores_base/\n│   ├── rasters_base/\n│   ├── tablas_base/\n│   └── externos_modelado/\n├── data_intermediate/\n│   ├── grids/\n│   │   └── ref_grid_50m_regional/\n│   ├── features/\n│   │   ├── por_script/\n│   │   └── consolidadas/\n│   ├── training_tables/\n│   └── model_inputs/\n├── outputs/\n│   ├── maps/\n│   │   └── ei/\n│   ├── tables/\n│   └── reports/\n├── scripts/\n│   ├── prep/\n│   ├── features/\n│   ├── training/\n│   ├── inference/\n│   └── utils/\n└── metadata/\n    ├── manifests/\n    ├── dictionaries/\n    └── workflow/\n\n\nDescargas: árbol Markdown, familias globales, manifest v0.6."
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#comandos-especialmente-útiles-en-este-workflow",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#comandos-especialmente-útiles-en-este-workflow",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Comandos especialmente útiles en este workflow",
+    "text": "Comandos especialmente útiles en este workflow\n\n1. Regenerar la tabla maestra de features\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run de la tabla maestra\nsnakemake -n C:/wf-ie-data/results/training/master_features.parquet\n\n\nConstruir la tabla maestra\nsnakemake -j1 C:/wf-ie-data/results/training/master_features.parquet\n\n\nForzar reconstrucción de master_features\nsnakemake -j1 -R assemble_training_table C:/wf-ie-data/results/training/master_features.parquet\n\n\n\n\n\n2. Regenerar bn_input.csv\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run de bn_input.csv\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nConstruir bn_input.csv\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar sólo la regla correspondiente\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\n\n\n\n3. Regenerar un feature regional\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nForzar erosión en region_1\nsnakemake -j1 -R feature_tasa_erosion C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet\n\n\nForzar viento en region_1\nsnakemake -j1 -R feature_wind_speed C:/wf-ie-data/results/features/velocidad_del_viento/region_1.parquet\n\n\nForzar ZVH en region_1\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/features/zvh/region_1.parquet\n\n\n\n\n\n4. Regenerar mapas de IE\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nConstruir mapas IE\nsnakemake -j1 -R create_ie_rasters\n\n\nForzar mapas IE y ver comandos\nsnakemake -j1 -p -R create_ie_rasters\n\n\n\n\n\n5. Validar mapas IE contra ei_qnint\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nEjecutar validación base vs referencia\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nForzar validación base vs referencia\nsnakemake -j1 -R validate_ie_base_vs_reference C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nEjecutar validación base vs alterna vs referencia\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_alterna_vs_ei_qnint_summary.csv"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#combinaciones-muy-prácticas",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#combinaciones-muy-prácticas",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Combinaciones muy prácticas",
+    "text": "Combinaciones muy prácticas\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run con razones y comandos\nsnakemake -n -r -p\n\n\nEjecutar mostrando comandos y razones\nsnakemake -j1 -p --reason\n\n\nEjecutar compacto pero informativo\nsnakemake -j1 --quiet progress rules\n\n\nRehacer algo usando sólo mtime\nsnakemake -j1 --rerun-triggers mtime\n\n\nSi algo quedó “atascado”\nsnakemake --unlock"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#mis-comandos-favoritos-para-uso-diario",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#mis-comandos-favoritos-para-uso-diario",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Mis comandos favoritos para uso diario",
+    "text": "Mis comandos favoritos para uso diario\n\nRevisar qué haría\nsnakemake -n -r -p C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar un producto puntual\nsnakemake -j1 -p C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar una regla concreta\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nSalida más compacta\nsnakemake -j1 --quiet progress rules\n\n\nDesbloquear el workflow\nsnakemake --unlock"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#regla-práctica-de-interpretación",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#regla-práctica-de-interpretación",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Regla práctica de interpretación",
+    "text": "Regla práctica de interpretación\n\n-n = no ejecuta, sólo simula\n-jN = número de cores\n-R regla = fuerza una regla\n-p = imprime comandos shell\n--reason = explica por qué corre algo\n--quiet progress rules = menos ruido\n--unlock = quita locks\n--summary = estado general del workflow"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#nota-final",
+    "href": "antecedentes/workflow/docs/uso-del-workflow.html#nota-final",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Nota final",
+    "text": "Nota final\nEn este proyecto, los usos más frecuentes son:\n\nprobar en dry-run\nforzar una regla específica\npedir un objetivo concreto\nusar salida compacta\ndesbloquear cuando un proceso anterior se interrumpió\n\nUna combinación muy útil como valor por defecto es:\nsnakemake -j1 -p --reason\ny, para revisión previa:\nsnakemake -n -r -p"
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "",
+    "text": "Se consolidaron las rutas reconocibles extraídas de los scripts R compartidos para apoyar la revisión de consistencia, la identificación de familias operativas y la futura definición de una estructura canónica de datos y resultados. La tabla adjunta reúne rutas concretas, plantillas dinámicas y orígenes de colección detectados por el manifest analítico."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#llamado-breve",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#llamado-breve",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "",
+    "text": "Se consolidaron las rutas reconocibles extraídas de los scripts R compartidos para apoyar la revisión de consistencia, la identificación de familias operativas y la futura definición de una estructura canónica de datos y resultados. La tabla adjunta reúne rutas concretas, plantillas dinámicas y orígenes de colección detectados por el manifest analítico."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#resumen",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#resumen",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "Resumen",
+    "text": "Resumen\n\nTotal de registros: 57\nRutas concretas: 48\nPlantillas dinámicas: 6\nOrígenes de colección: 3"
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#archivo-csv",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#archivo-csv",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "Archivo CSV",
+    "text": "Archivo CSV\n\nDescargar CSV"
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#tabla-de-rutas",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#tabla-de-rutas",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "Tabla de rutas",
+    "text": "Tabla de rutas\n\n  El navegador no pudo incrustar el CSV. Usa el enlace de descarga."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#nota",
+    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#nota",
+    "title": "Rutas reconocibles en scripts R",
+    "section": "Nota",
+    "text": "Nota\nLa categoría ruta_concreta corresponde a archivos o directorios reconocibles tal como aparecen o pueden ensamblarse de forma estable. plantilla_dinamica corresponde a salidas o entradas parametrizadas. origen_coleccion identifica directorios desde los cuales el script llama una colección seleccionada de archivos."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html",
+    "title": "Árbol canónico tentativo",
+    "section": "",
+    "text": "proyecto/\n├── data_raw/\n│   ├── vectores_base/\n│   ├── rasters_base/\n│   ├── tablas_base/\n│   └── externos_modelado/\n├── data_intermediate/\n│   ├── grids/\n│   │   └── ref_grid_50m_regional/\n│   ├── features/\n│   │   ├── por_script/\n│   │   └── consolidadas/\n│   ├── training_tables/\n│   └── model_inputs/\n├── outputs/\n│   ├── maps/\n│   │   ├── ei/\n│   │   └── otras_salidas_raster/\n│   ├── tables/\n│   └── reports/\n├── scripts/\n│   ├── prep/\n│   ├── features/\n│   ├── training/\n│   ├── inference/\n│   └── utils/\n└── metadata/\n    ├── manifests/\n    ├── dictionaries/\n    └── workflow/\n\n\n\ndata/06_DunasCost250116_malla_ref_50m → familia troncal de grillas/regiones.\ndata/7_ref_grid_50m y data/8_ref_grid_50m → probable misma familia operativa con inconsistencia de nombre.\ndata_features → features derivadas consumidas por etapas posteriores.\ndata_training_tables → tablas de entrenamiento/modelado.\nBN_maps/.../R → salidas raster/mapas."
+  },
+  {
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html#alias-actuales-que-conviene-validar",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html#alias-actuales-que-conviene-validar",
+    "title": "Árbol canónico tentativo",
+    "section": "",
+    "text": "data/06_DunasCost250116_malla_ref_50m → familia troncal de grillas/regiones.\ndata/7_ref_grid_50m y data/8_ref_grid_50m → probable misma familia operativa con inconsistencia de nombre.\ndata_features → features derivadas consumidas por etapas posteriores.\ndata_training_tables → tablas de entrenamiento/modelado.\nBN_maps/.../R → salidas raster/mapas."
   },
   {
     "objectID": "antecedentes/README-headless.html",
@@ -812,163 +833,149 @@
     "text": "datos muy grandes\nsupuestos de CRS\ncampos esperados en vectores\nmejoras futuras"
   },
   {
-    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html",
-    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html",
-    "title": "Árbol canónico tentativo",
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html",
+    "title": "Hallazgos y propuesta canónica tentativa",
     "section": "",
-    "text": "proyecto/\n├── data_raw/\n│   ├── vectores_base/\n│   ├── rasters_base/\n│   ├── tablas_base/\n│   └── externos_modelado/\n├── data_intermediate/\n│   ├── grids/\n│   │   └── ref_grid_50m_regional/\n│   ├── features/\n│   │   ├── por_script/\n│   │   └── consolidadas/\n│   ├── training_tables/\n│   └── model_inputs/\n├── outputs/\n│   ├── maps/\n│   │   ├── ei/\n│   │   └── otras_salidas_raster/\n│   ├── tables/\n│   └── reports/\n├── scripts/\n│   ├── prep/\n│   ├── features/\n│   ├── training/\n│   ├── inference/\n│   └── utils/\n└── metadata/\n    ├── manifests/\n    ├── dictionaries/\n    └── workflow/\n\n\n\ndata/06_DunasCost250116_malla_ref_50m → familia troncal de grillas/regiones.\ndata/7_ref_grid_50m y data/8_ref_grid_50m → probable misma familia operativa con inconsistencia de nombre.\ndata_features → features derivadas consumidas por etapas posteriores.\ndata_training_tables → tablas de entrenamiento/modelado.\nBN_maps/.../R → salidas raster/mapas."
+    "text": "Hallazgo principal: el análisis de scripts permitió pasar de una lista de rutas a una vista de familias operativas de archivos. Con eso ya se distinguen etapas claras del flujo: base espacial/regional, cálculo de features, tablas de entrenamiento y generación de mapas.\nSe detectó una familia claramente troncal: data/06_DunasCost250116_malla_ref_50m, que alimenta muchos scripts. También emergen como etapas posteriores data_features y data_training_tables. Además apareció una posible inconsistencia de nomenclatura entre data/7_ref_grid_50m y data/8_ref_grid_50m, que probablemente representan la misma familia operativa y conviene validar directamente.\nPropuesta canónica tentativa: reorganizar por etapas del workflow y no por herencia histórica de carpetas. En términos generales: data_raw/ para insumos fuente, data_intermediate/grids/ para moldes o grillas base regionales, data_intermediate/features/ para capas derivadas, data_intermediate/training_tables/ para tablas de modelado y outputs/maps/ para resultados cartográficos."
   },
   {
-    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html#alias-actuales-que-conviene-validar",
-    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/arbol_canonico_tentativo_v1.html#alias-actuales-que-conviene-validar",
-    "title": "Árbol canónico tentativo",
-    "section": "",
-    "text": "data/06_DunasCost250116_malla_ref_50m → familia troncal de grillas/regiones.\ndata/7_ref_grid_50m y data/8_ref_grid_50m → probable misma familia operativa con inconsistencia de nombre.\ndata_features → features derivadas consumidas por etapas posteriores.\ndata_training_tables → tablas de entrenamiento/modelado.\nBN_maps/.../R → salidas raster/mapas."
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#grafo",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#grafo",
+    "title": "Hallazgos y propuesta canónica tentativa",
+    "section": "Grafo simplificado",
+    "text": "Grafo simplificado\n\n\n\n\n\n\nflowchart LR\n    F001(\"data/5_deltavp250m\")\n    F002(\"data/6_inegiSVII_dunes\")\n    F003(\"data_crude/02_cm-conabio\")\n    F004(\"data/7_dunes250116\")\n    F005(\"data/3_misc_cesia\")\n    F006(\"data_features\")\n    F007(\"data/06_DunasCost250116_malla_ref_50m\\\\n[\\\\.tif$]\")\n    F008(\"data_crude/12_Tipo_de_costa\")\n    F009(\"data/06_DunasCost250116_malla_ref_50m\")\n    F010(\"data_crude/11_dataset-sis-biodiversity-era5-global\")\n    F011(\"data_crude/05_InventarioEstructuras\")\n    F012(\"data_crude/07_zvh_mx3gw\")\n    F013(\"data_features\\\\n[\\\\.rds$]\")\n    F014(\"data_training_tables\")\n    F015(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m\\\\n[\\\\.tif$]\")\n    F016(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/BN_maps/cei_final_ie_expected_port_5_equal_2026/R\")\n    F017(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/08_Corales\")\n    F018(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data/data_crude/DunasCost250116_malla_ref_50m\")\n    F019(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/data\")\n    F020(\"C:/Users/equih/1 Nubes/Dropbox/ei-coastal/BN-results/EII-data\")\n    F021(\"data/7_ref_grid_50m\")\n    F022(\"data/8_ref_grid_50m\")\n    F023(\"data_crude/04_Erosion_acresion\")\n    F024(\"data_crude/15_plantas_snib\")\n    F025(\"data_crude/08_coral-global\")\n    F026(\"data_crude/03_seagrasses-pol-simar\")\n    F027(\"data_crude/13_Batimetría\")\n    F028(\"data_crude/16_madmex\")\n    S10[\"10_movimiento_dunas.R\"]\n    S11[\"11_tipo_costa.R\"]\n    S12[\"12_wind_speed.R\"]\n    S13[\"13_z_v_holdridge.R\"]\n    S14[\"14_create_data_table.R\"]\n    S15[\"15_one_class_ei.R\"]\n    S16[\"16_final_training_data_v1.R\"]\n    S17[\"17_naive_bayes_ei.R\"]\n    S18[\"18_create_ei_rasters.R\"]\n    S101[\"1_create_reference_grid.R\"]\n    S102[\"1_create_reference_grid2.R\"]\n    S1e[\"1_features_tasa_erosion.R\"]\n    S2e[\"2_features_estructuras.R\"]\n    S3e[\"3_sp_invasoras.R\"]\n    S4e[\"4_corales_global.R\"]\n    S5e[\"5_pasto_marino.R\"]\n    S6e[\"6_batimetria_caracteristica.R\"]\n    S7i[\"7_inegi_uso_suelo.R\"]\n    S7m[\"7_madmex_uso_suelo.R\"]\n    S7m2[\"7_madmex_uso_suelo_2.R\"]\n    S7m3[\"7_madmex_uso_suelo_3.R\"]\n    S8m[\"8_manglares.R\"]\n    S9c[\"9_condicion_dunas.R\"]\n    F001 --&gt; S10\n    F002 --&gt; S10\n    F003 --&gt; S10\n    F004 --&gt; S10\n    F005 --&gt; S10\n    S10 --&gt; F006\n    F007 --&gt; S11\n    F008 --&gt; S11\n    F009 --&gt; S11\n    S11 --&gt; F006\n    F007 --&gt; S12\n    F009 --&gt; S12\n    F010 --&gt; S12\n    F011 --&gt; S12\n    S12 --&gt; F006\n    F003 --&gt; S13\n    F007 --&gt; S13\n    F009 --&gt; S13\n    F012 --&gt; S13\n    S13 --&gt; F006\n    F006 --&gt; S14\n    F013 --&gt; S14\n    S14 --&gt; F014\n    F014 --&gt; S15\n    S15 --&gt; F014\n    F014 --&gt; S16\n    F014 --&gt; S17\n    S17 --&gt; F014\n    F015 --&gt; S18\n    F017 --&gt; S18\n    F018 --&gt; S18\n    F019 --&gt; S18\n    F020 --&gt; S18\n    S18 --&gt; F016\n    F002 --&gt; S101\n    F005 --&gt; S101\n    S101 --&gt; F021\n    F001 --&gt; S102\n    F002 --&gt; S102\n    F004 --&gt; S102\n    F005 --&gt; S102\n    S102 --&gt; F022\n    F007 --&gt; S1e\n    F009 --&gt; S1e\n    F023 --&gt; S1e\n    S1e --&gt; F006\n    F007 --&gt; S2e\n    F009 --&gt; S2e\n    F011 --&gt; S2e\n    S2e --&gt; F006\n    F007 --&gt; S3e\n    F009 --&gt; S3e\n    F024 --&gt; S3e\n    S3e --&gt; F006\n    F007 --&gt; S4e\n    F009 --&gt; S4e\n    F025 --&gt; S4e\n    S4e --&gt; F006\n    F007 --&gt; S5e\n    F009 --&gt; S5e\n    F026 --&gt; S5e\n    S5e --&gt; F006\n    F007 --&gt; S6e\n    F009 --&gt; S6e\n    F027 --&gt; S6e\n    S6e --&gt; F006\n    F007 --&gt; S7i\n    F009 --&gt; S7i\n    F028 --&gt; S7i\n    F003 --&gt; S7i\n    S7i --&gt; F006\n    F007 --&gt; S7m\n    F009 --&gt; S7m\n    F028 --&gt; S7m\n    S7m --&gt; F006\n    F007 --&gt; S7m2\n    F009 --&gt; S7m2\n    F028 --&gt; S7m2\n    S7m2 --&gt; F006\n    F007 --&gt; S7m3\n    F009 --&gt; S7m3\n    F028 --&gt; S7m3\n    S7m3 --&gt; F006\n    F007 --&gt; S8m\n    F009 --&gt; S8m\n    F003 --&gt; S8m\n    S8m --&gt; F006\n    F001 --&gt; S9c\n    F002 --&gt; S9c\n    F003 --&gt; S9c\n    F004 --&gt; S9c\n    F005 --&gt; S9c\n    S9c --&gt; F006\n\n\n\n\n\n\n\n\nDescargas: Mermaid fuente, grafo JSON."
   },
   {
-    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html",
-    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html",
-    "title": "Rutas reconocibles en scripts R",
-    "section": "",
-    "text": "Se consolidaron las rutas reconocibles extraídas de los scripts R compartidos para apoyar la revisión de consistencia, la identificación de familias operativas y la futura definición de una estructura canónica de datos y resultados. La tabla adjunta reúne rutas concretas, plantillas dinámicas y orígenes de colección detectados por el manifest analítico."
+    "objectID": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#arbol",
+    "href": "antecedentes/scripts-r/R_Julian/Reporte-datos/resumen_workflow_canonico_v1.html#arbol",
+    "title": "Hallazgos y propuesta canónica tentativa",
+    "section": "Árbol canónico tentativo",
+    "text": "Árbol canónico tentativo\n\nproyecto/\n├── data_raw/\n│   ├── vectores_base/\n│   ├── rasters_base/\n│   ├── tablas_base/\n│   └── externos_modelado/\n├── data_intermediate/\n│   ├── grids/\n│   │   └── ref_grid_50m_regional/\n│   ├── features/\n│   │   ├── por_script/\n│   │   └── consolidadas/\n│   ├── training_tables/\n│   └── model_inputs/\n├── outputs/\n│   ├── maps/\n│   │   └── ei/\n│   ├── tables/\n│   └── reports/\n├── scripts/\n│   ├── prep/\n│   ├── features/\n│   ├── training/\n│   ├── inference/\n│   └── utils/\n└── metadata/\n    ├── manifests/\n    ├── dictionaries/\n    └── workflow/\n\n\nDescargas: árbol Markdown, familias globales, manifest v0.6."
   },
   {
-    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#llamado-breve",
-    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#llamado-breve",
-    "title": "Rutas reconocibles en scripts R",
-    "section": "",
-    "text": "Se consolidaron las rutas reconocibles extraídas de los scripts R compartidos para apoyar la revisión de consistencia, la identificación de familias operativas y la futura definición de una estructura canónica de datos y resultados. La tabla adjunta reúne rutas concretas, plantillas dinámicas y orígenes de colección detectados por el manifest analítico."
-  },
-  {
-    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#resumen",
-    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#resumen",
-    "title": "Rutas reconocibles en scripts R",
-    "section": "Resumen",
-    "text": "Resumen\n\nTotal de registros: 57\nRutas concretas: 48\nPlantillas dinámicas: 6\nOrígenes de colección: 3"
-  },
-  {
-    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#archivo-csv",
-    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#archivo-csv",
-    "title": "Rutas reconocibles en scripts R",
-    "section": "Archivo CSV",
-    "text": "Archivo CSV\n\nDescargar CSV"
-  },
-  {
-    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#tabla-de-rutas",
-    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#tabla-de-rutas",
-    "title": "Rutas reconocibles en scripts R",
-    "section": "Tabla de rutas",
-    "text": "Tabla de rutas\n\n  El navegador no pudo incrustar el CSV. Usa el enlace de descarga."
-  },
-  {
-    "objectID": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#nota",
-    "href": "antecedentes/scripts-r/R_Julian/rutas_reconocibles_scripts.html#nota",
-    "title": "Rutas reconocibles en scripts R",
-    "section": "Nota",
-    "text": "Nota\nLa categoría ruta_concreta corresponde a archivos o directorios reconocibles tal como aparecen o pueden ensamblarse de forma estable. plantilla_dinamica corresponde a salidas o entradas parametrizadas. origen_coleccion identifica directorios desde los cuales el script llama una colección seleccionada de archivos."
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html",
-    "href": "antecedentes/workflow/docs/uso-del-workflow.html",
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html",
     "title": "Snakemake · Cheat Sheet",
     "section": "",
-    "text": "Suposiciones previas:\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
+    "text": "Contexto típico\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
   },
   {
-    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#contexto-de-uso",
-    "href": "antecedentes/workflow/docs/uso-del-workflow.html#contexto-de-uso",
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#comandos-esenciales",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#comandos-esenciales",
     "title": "Snakemake · Cheat Sheet",
+    "section": "1. Comandos esenciales",
+    "text": "1. Comandos esenciales\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nSimular sin ejecutar\nsnakemake -n\n\n\nSimular un objetivo\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar todo lo definido en rule all\nsnakemake -j1\n\n\nEjecutar un objetivo concreto\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nMostrar comandos shell\nsnakemake -j1 -p\n\n\nMostrar razones de ejecución\nsnakemake -j1 --reason\n\n\nEjecutar con salida compacta\nsnakemake -j1 --quiet progress rules\n\n\nEjecutar con varios núcleos\nsnakemake -j8\n\n\nContinuar aunque falle algo\nsnakemake -j4 --keep-going\n\n\nDesbloquear workflow\nsnakemake --unlock"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#forzar-ejecución",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#forzar-ejecución",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "2. Forzar ejecución",
+    "text": "2. Forzar ejecución\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nForzar una regla específica\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar regla y ver comando shell\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar un archivo objetivo\nsnakemake -j1 -f C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar feature_zvh hacia tabla master\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/training/master_features.parquet\n\n\nUsar sólo fecha de modificación\nsnakemake -j1 --rerun-triggers mtime\n\n\nLimpiar metadata de un archivo\nsnakemake --cleanup-metadata C:/wf-ie-data/results/training/bn_input.csv"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#productos-centrales-del-workflow",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#productos-centrales-del-workflow",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "3. Productos centrales del workflow",
+    "text": "3. Productos centrales del workflow\n\n\n\n\n\n\n\nProducto\nComando\n\n\n\n\nTabla master de features\nsnakemake -j1 C:/wf-ie-data/results/training/master_features.parquet\n\n\nForzar tabla master\nsnakemake -j1 -R assemble_training_table C:/wf-ie-data/results/training/master_features.parquet\n\n\nTabla BN para Netica\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar preparación BN\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nMapas IE\nsnakemake -j1 -R create_ie_rasters\n\n\nValidación IE vs ei_qnint\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nForzar validación IE vs ei_qnint\nsnakemake -j1 -R validate_ie_base_vs_reference C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#features-regionales-frecuentes",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#features-regionales-frecuentes",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "4. Features regionales frecuentes",
+    "text": "4. Features regionales frecuentes\n\n\n\n\n\n\n\nFeature\nComando ejemplo\n\n\n\n\nErosión, region_1\nsnakemake -j1 -R feature_tasa_erosion C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet\n\n\nViento, region_1\nsnakemake -j1 -R feature_wind_speed C:/wf-ie-data/results/features/velocidad_del_viento/region_1.parquet\n\n\nZVH, region_1\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/features/zvh/region_1.parquet\n\n\nTipo de costa, region_1\nsnakemake -j1 -R feature_tipo_costa C:/wf-ie-data/results/features/tipo_costa/region_1.parquet\n\n\nCondición de dunas, region_1\nsnakemake -j1 -R feature_condicion_dunas C:/wf-ie-data/results/features/condicion_dunas/region_1.parquet"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#exportaciones-geotiff-de-features",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#exportaciones-geotiff-de-features",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "5. Exportaciones GeoTIFF de features",
+    "text": "5. Exportaciones GeoTIFF de features\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nExportar una variable\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/zvh\n\n\nForzar una exportación\nsnakemake -j1 -R export_feature_geotiff C:/wf-ie-data/results/feature_geotiffs/zvh\n\n\nExportar condición de dunas\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/condicion_dunas\n\n\nExportar tipo de costa\nsnakemake -j1 C:/wf-ie-data/results/feature_geotiffs/tipo_costa"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#inspección-del-workflow",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#inspección-del-workflow",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "6. Inspección del workflow",
+    "text": "6. Inspección del workflow\n\n\n\nUso\nComando\n\n\n\n\nListar reglas\nsnakemake --list-rules\n\n\nListar reglas objetivo\nsnakemake --list-target-rules\n\n\nResumen de estado\nsnakemake --summary\n\n\nResumen detallado\nsnakemake --detailed-summary\n\n\nVer DAG en texto\nsnakemake --dag\n\n\nExportar DAG a PDF\nsnakemake --dag | dot -Tpdf &gt; dag.pdf\n\n\nVer comandos y razones en dry-run\nsnakemake -n -r -p"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#diagnóstico-y-recuperación",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#diagnóstico-y-recuperación",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "7. Diagnóstico y recuperación",
+    "text": "7. Diagnóstico y recuperación\n\n\n\n\n\n\n\nSituación\nComando\n\n\n\n\nWorkflow quedó bloqueado\nsnakemake --unlock\n\n\nVer más detalle\nsnakemake -j1 --printshellcmds --reason --verbose\n\n\nBorrar outputs temporales\nsnakemake --delete-temp-output\n\n\nEjecutar hasta una regla\nsnakemake -j1 --until prepare_bn_table\n\n\nReanudar pidiendo un objetivo final\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#recordatorio-mental",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#recordatorio-mental",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "8. Recordatorio mental",
+    "text": "8. Recordatorio mental\n\n\n\nOpción\nSignificado\n\n\n\n\n-n\nDry-run: simula, no ejecuta\n\n\n-jN\nNúmero de núcleos\n\n\n-R regla\nFuerza una regla\n\n\n-f archivo\nFuerza un archivo objetivo\n\n\n-p\nImprime comandos shell\n\n\n--reason\nExplica por qué corre una regla\n\n\n--quiet progress rules\nReduce ruido\n\n\n--unlock\nLibera el lock del workflow\n\n\n--rerun-triggers mtime\nUsa sólo tiempos de modificación"
+  },
+  {
+    "objectID": "antecedentes/workflow/docs/snakemake-cheatsheet.html#flujo-recomendado-de-trabajo",
+    "href": "antecedentes/workflow/docs/snakemake-cheatsheet.html#flujo-recomendado-de-trabajo",
+    "title": "Snakemake · Cheat Sheet",
+    "section": "Flujo recomendado de trabajo",
+    "text": "Flujo recomendado de trabajo\n# 1. Revisar qué pasaría\nsnakemake -n -r -p C:/wf-ie-data/results/training/bn_input.csv\n\n# 2. Ejecutar el objetivo\nsnakemake -j1 -p C:/wf-ie-data/results/training/bn_input.csv\n\n# 3. Si cambió una regla específica, forzarla\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n# 4. Si algo quedó bloqueado\nsnakemake --unlock"
+  },
+  {
+    "objectID": "docs/arrancar-sistema-ssh-wsl.html",
+    "href": "docs/arrancar-sistema-ssh-wsl.html",
+    "title": "Arrancar el sistema ssh/WSL",
     "section": "",
-    "text": "Suposiciones previas:\nconda activate qgis_env\ncd \"C:\\Users\\equih\\0 Versiones\\Workflow-iie\\propuesta-workflow-iie\\workflow\""
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#tabla-rápida-uso-y-comando",
-    "href": "antecedentes/workflow/docs/uso-del-workflow.html#tabla-rápida-uso-y-comando",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "Tabla rápida: uso y comando",
-    "text": "Tabla rápida: uso y comando\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nVer qué se ejecutaría, sin correr nada\nsnakemake -n\n\n\nVer qué se ejecutaría para un archivo objetivo\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nCorrer todo el workflow definido en rule all\nsnakemake -j1\n\n\nCorrer un objetivo específico\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nCorrer una regla forzándola\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar una regla y ver comandos en pantalla\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nMostrar también el motivo de ejecución\nsnakemake -j1 -p --reason C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar con varios núcleos\nsnakemake -j8\n\n\nSeguir aunque una regla falle\nsnakemake -j4 --keep-going\n\n\nMostrar menos ruido en pantalla\nsnakemake -j1 --quiet progress rules\n\n\nMostrar resumen de archivos y estado\nsnakemake --summary\n\n\nMostrar resumen detallado\nsnakemake --detailed-summary\n\n\nListar reglas disponibles\nsnakemake --list-rules\n\n\nListar sólo las reglas objetivo\nsnakemake --list-target-rules\n\n\nForzar recreación de un archivo ya existente\nsnakemake -j1 -f C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar toda una regla, aunque los archivos existan\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/training/master_features.parquet\n\n\nBorrar outputs temporales innecesarios\nsnakemake --delete-temp-output\n\n\nLimpiar metadatos de un archivo\nsnakemake --cleanup-metadata C:/wf-ie-data/results/training/bn_input.csv\n\n\nIgnorar provenance y usar sólo fechas de modificación\nsnakemake -j1 --rerun-triggers mtime\n\n\nDesbloquear el workflow si quedó “locked”\nsnakemake --unlock\n\n\nVer el DAG en texto\nsnakemake --dag\n\n\nExportar el DAG para Graphviz\nsnakemake --dag \\| dot -Tpdf &gt; dag.pdf\n\n\nVer por qué se quiere ejecutar algo (dry-run + razones)\nsnakemake -n -r C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar hasta una regla, sin pasar de ahí\nsnakemake -j1 --until prepare_bn_table\n\n\nVer comandos de shell ejecutados\nsnakemake -j1 -p\n\n\nVer logs más completos para diagnóstico\nsnakemake -j1 --printshellcmds --reason --verbose"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#comandos-especialmente-útiles-en-este-workflow",
-    "href": "antecedentes/workflow/docs/uso-del-workflow.html#comandos-especialmente-útiles-en-este-workflow",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "Comandos especialmente útiles en este workflow",
-    "text": "Comandos especialmente útiles en este workflow\n\n1. Regenerar la tabla maestra de features\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run de la tabla maestra\nsnakemake -n C:/wf-ie-data/results/training/master_features.parquet\n\n\nConstruir la tabla maestra\nsnakemake -j1 C:/wf-ie-data/results/training/master_features.parquet\n\n\nForzar reconstrucción de master_features\nsnakemake -j1 -R assemble_training_table C:/wf-ie-data/results/training/master_features.parquet\n\n\n\n\n\n2. Regenerar bn_input.csv\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run de bn_input.csv\nsnakemake -n C:/wf-ie-data/results/training/bn_input.csv\n\n\nConstruir bn_input.csv\nsnakemake -j1 C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar sólo la regla correspondiente\nsnakemake -j1 -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\n\n\n\n3. Regenerar un feature regional\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nForzar erosión en region_1\nsnakemake -j1 -R feature_tasa_erosion C:/wf-ie-data/results/features/tasa_erosion/region_1.parquet\n\n\nForzar viento en region_1\nsnakemake -j1 -R feature_wind_speed C:/wf-ie-data/results/features/velocidad_del_viento/region_1.parquet\n\n\nForzar ZVH en region_1\nsnakemake -j1 -R feature_zvh C:/wf-ie-data/results/features/zvh/region_1.parquet\n\n\n\n\n\n4. Regenerar mapas de IE\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nConstruir mapas IE\nsnakemake -j1 -R create_ie_rasters\n\n\nForzar mapas IE y ver comandos\nsnakemake -j1 -p -R create_ie_rasters\n\n\n\n\n\n5. Validar mapas IE contra ei_qnint\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nEjecutar validación base vs referencia\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nForzar validación base vs referencia\nsnakemake -j1 -R validate_ie_base_vs_reference C:/wf-ie-data/validar/ie_maps/ie_base_vs_ei_qnint_summary.csv\n\n\nEjecutar validación base vs alterna vs referencia\nsnakemake -j1 C:/wf-ie-data/validar/ie_maps/ie_base_alterna_vs_ei_qnint_summary.csv"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#combinaciones-muy-prácticas",
-    "href": "antecedentes/workflow/docs/uso-del-workflow.html#combinaciones-muy-prácticas",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "Combinaciones muy prácticas",
-    "text": "Combinaciones muy prácticas\n\n\n\n\n\n\n\nUso\nComando\n\n\n\n\nDry-run con razones y comandos\nsnakemake -n -r -p\n\n\nEjecutar mostrando comandos y razones\nsnakemake -j1 -p --reason\n\n\nEjecutar compacto pero informativo\nsnakemake -j1 --quiet progress rules\n\n\nRehacer algo usando sólo mtime\nsnakemake -j1 --rerun-triggers mtime\n\n\nSi algo quedó “atascado”\nsnakemake --unlock"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#mis-comandos-favoritos-para-uso-diario",
-    "href": "antecedentes/workflow/docs/uso-del-workflow.html#mis-comandos-favoritos-para-uso-diario",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "Mis comandos favoritos para uso diario",
-    "text": "Mis comandos favoritos para uso diario\n\nRevisar qué haría\nsnakemake -n -r -p C:/wf-ie-data/results/training/bn_input.csv\n\n\nEjecutar un producto puntual\nsnakemake -j1 -p C:/wf-ie-data/results/training/bn_input.csv\n\n\nForzar una regla concreta\nsnakemake -j1 -p -R prepare_bn_table C:/wf-ie-data/results/training/bn_input.csv\n\n\nSalida más compacta\nsnakemake -j1 --quiet progress rules\n\n\nDesbloquear el workflow\nsnakemake --unlock"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#regla-práctica-de-interpretación",
-    "href": "antecedentes/workflow/docs/uso-del-workflow.html#regla-práctica-de-interpretación",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "Regla práctica de interpretación",
-    "text": "Regla práctica de interpretación\n\n-n = no ejecuta, sólo simula\n-jN = número de cores\n-R regla = fuerza una regla\n-p = imprime comandos shell\n--reason = explica por qué corre algo\n--quiet progress rules = menos ruido\n--unlock = quita locks\n--summary = estado general del workflow"
-  },
-  {
-    "objectID": "antecedentes/workflow/docs/uso-del-workflow.html#nota-final",
-    "href": "antecedentes/workflow/docs/uso-del-workflow.html#nota-final",
-    "title": "Snakemake · Cheat Sheet",
-    "section": "Nota final",
-    "text": "Nota final\nEn este proyecto, los usos más frecuentes son:\n\nprobar en dry-run\nforzar una regla específica\npedir un objetivo concreto\nusar salida compacta\ndesbloquear cuando un proceso anterior se interrumpió\n\nUna combinación muy útil como valor por defecto es:\nsnakemake -j1 -p --reason\ny, para revisión previa:\nsnakemake -n -r -p"
+    "text": "Paso 1: Revivir el servicio SSH dentro de Ubuntu\nPor defecto, WSL2 no arranca sus servicios automáticamente cuando Windows enciende. Vamos a darle la patada inicial a SSH:\nwsl -d Ubuntu -u root -- service ssh start\n\n\nPaso 2: Verificar si la IP interna de WSL cambió\nAl apagarse la máquina a la fuerza, es casi seguro que Windows le asignó una IP interna nueva a Ubuntu. Ejecuta esto para ver cuál tiene en este instante:\nwsl -d Ubuntu -u root -- ip addr show eth0\nAnota la IP que aparece junto a inet (será algo como 172.24.X.X).\n\n\nPaso 3: Reajustar el puente de red (Portproxy)\nSi la IP del paso anterior es diferente a la que teníamos configurada el sábado, el puente se rompió. Actualízalo rápido corriendo estas líneas (cambiando LA_NUEVA_IP_DE_WSL por la que acabas de ver):\n# 1. Borrar el proxy desalineado\nnetsh interface portproxy delete v4tov4 listenaddress=100.92.147.14 listenport=2200\n\n# 2. Apuntar al nuevo objetivo interno\nnetsh interface portproxy add v4tov4 listenaddress=100.92.147.14 listenport=2200 connectaddress=LA_NUEVA_IP_DE_WSL connectport=22\nUna vez que apliques esto frente a la máquina o desde LogMeIn, el acceso ssh debe estar disponible de nuevo, pruébalo.\nssh -p 2200 equihuam@100.92.147.14"
   },
   {
     "objectID": "docs/guia-configura-wsl.html",
     "href": "docs/guia-configura-wsl.html",
-    "title": "guia-configura-wsl",
+    "title": "Guía de configuración de WSL para el workflow",
     "section": "",
     "text": "Este documento constituye la memoria técnica y guía de reproducción paso a paso para la configuración del servidor de procesamiento científico compartido del Instituto, operado sobre Ubuntu 26.04 LTS dentro de Windows Subsystem for Linux (WSL2).\nLa arquitectura está diseñada específicamente para soportar el workflow automatizado del proyecto “Gestión de la Integridad Ecosistémica” en sus tres variantes:\n\nIntegridad Ecosistémica Urbana.\nIntegridad de Sistemas Costeros.\nIntegridad de Ecosistemas Terrestres de México.\n\nEl objetivo fundamental de esta configuración es proporcionar un entorno multiusuario homogéneo, transparente y de alto rendimiento, donde investigadores (Miguel, Octavio, Martha, Maricruz) puedan interactuar simultáneamente a través de SSH de forma aislada, pero compartiendo de manera óptima las librerías geoespaciales avanzadas (QGIS, Python, GDAL) y el espacio de almacenamiento físico, sin necesidad de configuraciones individuales por cuenta de usuario."
   },
   {
     "objectID": "docs/guia-configura-wsl.html#introducción-y-contexto",
     "href": "docs/guia-configura-wsl.html#introducción-y-contexto",
-    "title": "guia-configura-wsl",
+    "title": "Guía de configuración de WSL para el workflow",
     "section": "",
     "text": "Este documento constituye la memoria técnica y guía de reproducción paso a paso para la configuración del servidor de procesamiento científico compartido del Instituto, operado sobre Ubuntu 26.04 LTS dentro de Windows Subsystem for Linux (WSL2).\nLa arquitectura está diseñada específicamente para soportar el workflow automatizado del proyecto “Gestión de la Integridad Ecosistémica” en sus tres variantes:\n\nIntegridad Ecosistémica Urbana.\nIntegridad de Sistemas Costeros.\nIntegridad de Ecosistemas Terrestres de México.\n\nEl objetivo fundamental de esta configuración es proporcionar un entorno multiusuario homogéneo, transparente y de alto rendimiento, donde investigadores (Miguel, Octavio, Martha, Maricruz) puedan interactuar simultáneamente a través de SSH de forma aislada, pero compartiendo de manera óptima las librerías geoespaciales avanzadas (QGIS, Python, GDAL) y el espacio de almacenamiento físico, sin necesidad de configuraciones individuales por cuenta de usuario."
   },
   {
     "objectID": "docs/guia-configura-wsl.html#arquitectura-general-de-la-infraestructura",
     "href": "docs/guia-configura-wsl.html#arquitectura-general-de-la-infraestructura",
-    "title": "guia-configura-wsl",
+    "title": "Guía de configuración de WSL para el workflow",
     "section": "2. Arquitectura General de la Infraestructura",
     "text": "2. Arquitectura General de la Infraestructura\nPara maximizar la tasa de transferencia de datos y asegurar el aislamiento correcto de los componentes de software, el sistema se estructuró dividiendo las responsabilidades del hardware de la siguiente manera:\n\nInstalación Base del Motor (/usr/bin/micromamba): El binario ejecutable se aloja de forma nativa en las rutas del sistema para que esté disponible globalmente.\nRaíz Compartida de Configuración (/srv/iie/micromamba): Alberga los índices de paquetes, configuraciones del sistema y metadatos del motor de ambientes, fuera de los directorios personales (~).\nAlmacén Centralizado de Ambientes (/srv/iie/envs/): Todos los entornos virtuales (como qgis_env y profiling_env) viven aquí. Las cuentas de usuario leen y ejecutan estas librerías, evitando la duplicación de espacio en el disco duro.\nZona de Procesamiento Rápido (SSD - Unidad C: pero dentro del sistema de archivos WSL): Las operaciones de alineación de mallas ráster congruentes y la generación de matrices de entrenamiento de las redes bayesianas se ejecutan estrictamente en el SSD para evitar cuellos de botella de entrada/salida (I/O). Aunque posible, se para el cómputo evitará mezclar el uso de datos fuera del entorno Linux/WSL.\nUnidad de Datos y Productos (Unidad D:): - D:/iie/datos: Contiene las réplicas de datos estables y procesados para ser consumidos por reportes dinámicos de Quarto.\n\nD:/iie/productos: Almacenamiento final de los mapas GeoTIFF oficiales producidos por la red bayesiana."
   },
   {
     "objectID": "docs/guia-configura-wsl.html#guía-de-configuración-paso-a-paso-reproducción-de-la-infraestructura",
     "href": "docs/guia-configura-wsl.html#guía-de-configuración-paso-a-paso-reproducción-de-la-infraestructura",
-    "title": "guia-configura-wsl",
+    "title": "Guía de configuración de WSL para el workflow",
     "section": "3. Guía de Configuración Paso a Paso (Reproducción de la Infraestructura)",
     "text": "3. Guía de Configuración Paso a Paso (Reproducción de la Infraestructura)\nEn caso de reinstalación del servidor o migración a una nueva máquina, ejecute los siguientes bloques de comandos de manera secuencial.\n\nPaso 1: Limpieza de Instalaciones Previas o Híbridas\nAntes de comenzar la instalación limpia, asegure el estado del sistema ingresando como superusuario (root) y eliminando cualquier rastro o enlace simbólico corrupto de configuraciones previas en la zona común:\nsudo -i\nrm -rf /srv/iie/micromamba\nrm -f /usr/bin/micromamba\nrm -f /etc/profile.d/micromamba_init.sh\n\n\nPaso 2: Instalación del Descompresor Base\nUbuntu en sus versiones minimalistas para WSL no incluye soporte nativo para compresión .tar.bz2. Instale la herramienta esencial:\napt-get update && apt-get install -y bzip2\n\n\nPaso 3: Descarga y Posicionamiento de Micromamba\nDescargue el binario oficial compilado para arquitectura Linux x86_64 directamente hacia el directorio de ejecutables del sistema operativo:\ncurl -Ls [https://micro.mamba.pm/api/micromamba/linux-64/latest](https://micro.mamba.pm/api/micromamba/linux-64/latest) | tar -xvj -C /usr/bin/ bin/micromamba\nNota Crítica: El comando de extracción por defecto creará un subdirectorio residual (/usr/bin/bin/micromamba). Es indispensable moverlo un nivel hacia arriba y limpiar el directorio vacío:\nmv /usr/bin/bin/micromamba /usr/bin/micromamba\nrmdir /usr/bin/bin\nValide la correcta instalación ejecutando de forma directa:\nmicromamba --version\n(Debe retornar la versión instalada, por ejemplo, 2.6.2).\n\n\nPaso 4: Declaración de una Ruta Unificada del Sistema\nPara garantizar que el motor de micromamba no intente buscar o crear directorios dentro del home de cada usuario, inyecte de manera permanente la ruta común en la configuración global de micromamba:\nexport MAMBA_ROOT_PREFIX=\"/srv/iie/micromamba\"\nmicromamba config append envs_dirs /srv/iie/envs --system\n\n\nPaso 5: Automatización del Arranque Global y el Prompt (PROMPT_COMMAND)\nPara lograr que cualquier usuario que ingrese por SSH caiga directamente dentro del entorno científico qgis_env con las librerías precargadas, y que la terminal redibuje visualmente la etiqueta del entorno de forma obligatoria (saltándose las restricciones de las login shells de Bash), cree el script de inicialización global:\ncat &lt;&lt; \"EOF\" &gt; /etc/profile.d/micromamba_init.sh\n# 1. Variables de la infraestructura comunitaria del instituto\nexport MAMBA_ROOT_PREFIX=\"/srv/iie/micromamba\"\nexport MAMBA_ENVS_DIRS=\"/srv/iie/envs\"\n\n# 2. Cargar el gancho de la shell de forma dinámica para el usuario actual\neval \"$(micromamba shell hook --shell bash --root-prefix \"$MAMBA_ROOT_PREFIX\" 2&gt; /dev/null)\"\n\n# 3. Activar el entorno científico por defecto\nif [ -d \"/srv/iie/envs/qgis_env\" ]; then\n    micromamba activate /srv/iie/envs/qgis_env\n    export CONDA_DEFAULT_ENV=\"qgis_env\"\nelse\n    micromamba activate base\nfi\n\n# 4. Inyección de prompt multiusuario mediante PROMPT_COMMAND\n# Asegura que el entorno activo se dibuje visualmente antes de ceder el control al usuario\najustar_prompt_mamba() {\n    if [[ \"$PS1\" != *\"(${CONDA_DEFAULT_ENV:-base})\"* ]]; then\n        PS1=\"(${CONDA_DEFAULT_ENV:-base}) $PS1\"\n    fi\n}\n\nif [[ -n \"$BASH_VERSION\" && \"$PROMPT_COMMAND\" != *\"ajustar_prompt_mamba\"* ]]; then\n    PROMPT_COMMAND=\"ajustar_prompt_mamba; $PROMPT_COMMAND\"\nfi\nEOF\nAsigne los permisos de ejecución del script y los permisos de acceso de lectura a la raíz compartida:\nchmod +x /etc/profile.d/micromamba_init.sh\nmkdir -p /srv/iie/micromamba\nchmod -R 755 /srv/iie/micromamba\nchmod -R 755 /srv/iie/envs\nSalga del modo administrador:\nexit"
   },
   {
     "objectID": "docs/guia-configura-wsl.html#limpieza-de-archivos-de-configuración-individuales",
     "href": "docs/guia-configura-wsl.html#limpieza-de-archivos-de-configuración-individuales",
-    "title": "guia-configura-wsl",
+    "title": "Guía de configuración de WSL para el workflow",
     "section": "4. Limpieza de Archivos de Configuración Individuales",
     "text": "4. Limpieza de Archivos de Configuración Individuales\nPara aquellos usuarios que hayan operado previamente en el servidor de forma local (como la cuenta equihuam), es necesario limpiar los residuos viejos de inicialización en sus carpetas personales para evitar colisiones de variables.\n\nAbra el archivo de configuración personal de la cuenta:\n\nnano ~/.bashrc\n\nNavegue al final del archivo y, si existe, elimine por completo el bloque delimitado por:\n\n# &gt;&gt;&gt; mamba initialize &gt;&gt;&gt;\n...\n# &lt;&lt;&lt; mamba initialize &lt;&lt;&lt;\n\n\nElimine también cualquier línea manual de exportación de prompt que se haya introducido con anterioridad, tal como:\n\nexport PS1=\"(${CONDA_DEFAULT_ENV:-base}) ${PS1}\"\n\nGuarde (Ctrl+O, Enter) y salga (Ctrl+X).\n\nAl volver a conectarse por SSH, el script global tomará precedencia absoluta, entregando un prompt limpio: (qgis_env) usuario@DESKTOP-QLC4OUO:~$."
   },
   {
     "objectID": "docs/guia-configura-wsl.html#resolución-de-contingencias-de-red-el-secuestro-de-puerto-por-ides-pycharm",
     "href": "docs/guia-configura-wsl.html#resolución-de-contingencias-de-red-el-secuestro-de-puerto-por-ides-pycharm",
-    "title": "guia-configura-wsl",
+    "title": "Guía de configuración de WSL para el workflow",
     "section": "5. Resolución de Contingencias de Red: El Secuestro de Puerto por IDEs (PyCharm)",
     "text": "5. Resolución de Contingencias de Red: El Secuestro de Puerto por IDEs (PyCharm)\n\nEl Fenómeno del Bloqueo\nCuando un investigador vincula un entorno de desarrollo integrado (IDE) como PyCharm mediante un intérprete remoto SSH a través del puerto proxy 2200, el IDE abre sockets de comunicación persistente (multiplexación SSH) de fondo para la sincronización de archivos e indexación de variables en tiempo real.\nSi el IDE se cierra de forma abrupta o no corta la terminal remota de manera ordenada, estos hilos de fondo quedan colgados en la laptop local en estado TIME_WAIT, bloqueando el puerto 2200 y provocando errores de tipo Connection timed out o Connection reset en los siguientes intentos de conexión por consola.\n\n\nProtocolo de Desbloqueo Rápido (En la Laptop del Usuario)\nPara liberar el puerto inmediatamente sin necesidad de reiniciar la computadora, abra una consola de PowerShell en su laptop local y ejecute la siguiente instrucción para identificar y terminar por la fuerza el proceso colgado:\n# Matar el proceso que tiene secuestrado el puerto local 2200\nGet-NetTCPConnection -LocalPort 2200 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Stop-Process -Id $_ -Force -Verbose }\n\n# Limpiar procesos huérfanos de PyCharm y llaves SSH colgadas en memoria\nStop-Process -Name \"pycharm\" -Force -ErrorAction SilentlyContinue\nStop-Process -Name \"fsnotifier\" -Force -ErrorAction SilentlyContinue\nssh-add -D 2&gt;$null\n\n\nProtocolo de Limpieza en el Servidor (Vía LogMeIn / Consola Directa)\nSi el candado de la sesión persistente quedó atorado del lado del servidor WSL2, ingrese a la consola de Windows del instituto y desde PowerShell ejecute el exterminio de los procesos de sincronización remota:\nwsl -d Ubuntu -u root -- pkill -f pycharm"
   },
   {
     "objectID": "docs/guia-configura-wsl.html#buenas-prácticas-para-el-mantenimiento-del-entorno-científico",
     "href": "docs/guia-configura-wsl.html#buenas-prácticas-para-el-mantenimiento-del-entorno-científico",
-    "title": "guia-configura-wsl",
+    "title": "Guía de configuración de WSL para el workflow",
     "section": "6. Buenas Prácticas para el Mantenimiento del Entorno Científico",
     "text": "6. Buenas Prácticas para el Mantenimiento del Entorno Científico\nPara salvaguardar la estabilidad a largo plazo del servidor, el equipo del Instituto se regirá por las siguientes directrices operativas:\n\nGestión de Despliegue Exclusiva por GitHub: Está estrictamente prohibido modificar el código fuente de los flujos de trabajo directo en el servidor. Las reglas de Snakemake y scripts de Python se prueban localmente con micro-datasets y pruebas de pytest. El servidor centralizado solo actualiza su código mediante operaciones controladas de git pull en la cuenta de producción (octavio).\nControl de Despliegue en PyCharm: Para evitar que el IDE descargue o cargue masivamente datos pesados (como archivos binarios .RData o imágenes satelitales grandes), se debe configurar explícitamente el menú Tools -&gt; Deployment -&gt; Configuration -&gt; Excluded Paths en cada laptop local, agregando las extensiones de volumen de datos a las reglas de exclusión.\nConcurrencia de Snakemake: Debido a que Snakemake bloquea los directorios de trabajo para impedir escrituras corruptas, las ejecuciones a gran escala para las variantes Costera o Terrestre Nacional deben ser coordinadas en el calendario del laboratorio para evitar colisiones de procesos."
   },
@@ -1222,14 +1229,14 @@
     "href": "index.html",
     "title": "Inicio",
     "section": "",
-    "text": "operación\n\n\nmemoria de configuración"
+    "text": "operación\n\n\nmemoria de configuración\nsi se apaga el ssh"
   },
   {
     "objectID": "index.html#preparación",
     "href": "index.html#preparación",
     "title": "Inicio",
     "section": "",
-    "text": "memoria de configuración"
+    "text": "memoria de configuración\nsi se apaga el ssh"
   },
   {
     "objectID": "workflow/docs-snakemake/uso-del-workflow.html",

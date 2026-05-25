@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Guía de configuración de WSL para el workflow – Workflow IIE-3T</title>
+<title>Arrancar el sistema ssh/WSL – Workflow IIE-3T</title>
 <style>
 
 code{white-space: pre-wrap;}
@@ -4069,24 +4069,9 @@ vertical-align: -.125em;
     <h2 id="toc-title">En esta página</h2>
    
   <ul>
-  <li><a href="#introducción-y-contexto" id="toc-introducción-y-contexto" class="nav-link active" data-scroll-target="#introducción-y-contexto">Introducción y Contexto</a></li>
-  <li><a href="#arquitectura-general-de-la-infraestructura" id="toc-arquitectura-general-de-la-infraestructura" class="nav-link" data-scroll-target="#arquitectura-general-de-la-infraestructura">2. Arquitectura General de la Infraestructura</a></li>
-  <li><a href="#guía-de-configuración-paso-a-paso-reproducción-de-la-infraestructura" id="toc-guía-de-configuración-paso-a-paso-reproducción-de-la-infraestructura" class="nav-link" data-scroll-target="#guía-de-configuración-paso-a-paso-reproducción-de-la-infraestructura">3. Guía de Configuración Paso a Paso (Reproducción de la Infraestructura)</a>
-  <ul class="collapse">
-  <li><a href="#paso-1-limpieza-de-instalaciones-previas-o-híbridas" id="toc-paso-1-limpieza-de-instalaciones-previas-o-híbridas" class="nav-link" data-scroll-target="#paso-1-limpieza-de-instalaciones-previas-o-híbridas">Paso 1: Limpieza de Instalaciones Previas o Híbridas</a></li>
-  <li><a href="#paso-2-instalación-del-descompresor-base" id="toc-paso-2-instalación-del-descompresor-base" class="nav-link" data-scroll-target="#paso-2-instalación-del-descompresor-base">Paso 2: Instalación del Descompresor Base</a></li>
-  <li><a href="#paso-3-descarga-y-posicionamiento-de-micromamba" id="toc-paso-3-descarga-y-posicionamiento-de-micromamba" class="nav-link" data-scroll-target="#paso-3-descarga-y-posicionamiento-de-micromamba">Paso 3: Descarga y Posicionamiento de Micromamba</a></li>
-  <li><a href="#paso-4-declaración-de-una-ruta-unificada-del-sistema" id="toc-paso-4-declaración-de-una-ruta-unificada-del-sistema" class="nav-link" data-scroll-target="#paso-4-declaración-de-una-ruta-unificada-del-sistema">Paso 4: Declaración de una Ruta Unificada del Sistema</a></li>
-  <li><a href="#paso-5-automatización-del-arranque-global-y-el-prompt-prompt_command" id="toc-paso-5-automatización-del-arranque-global-y-el-prompt-prompt_command" class="nav-link" data-scroll-target="#paso-5-automatización-del-arranque-global-y-el-prompt-prompt_command">Paso 5: Automatización del Arranque Global y el Prompt (<code>PROMPT_COMMAND</code>)</a></li>
-  </ul></li>
-  <li><a href="#limpieza-de-archivos-de-configuración-individuales" id="toc-limpieza-de-archivos-de-configuración-individuales" class="nav-link" data-scroll-target="#limpieza-de-archivos-de-configuración-individuales">4. Limpieza de Archivos de Configuración Individuales</a></li>
-  <li><a href="#resolución-de-contingencias-de-red-el-secuestro-de-puerto-por-ides-pycharm" id="toc-resolución-de-contingencias-de-red-el-secuestro-de-puerto-por-ides-pycharm" class="nav-link" data-scroll-target="#resolución-de-contingencias-de-red-el-secuestro-de-puerto-por-ides-pycharm">5. Resolución de Contingencias de Red: El Secuestro de Puerto por IDEs (PyCharm)</a>
-  <ul class="collapse">
-  <li><a href="#el-fenómeno-del-bloqueo" id="toc-el-fenómeno-del-bloqueo" class="nav-link" data-scroll-target="#el-fenómeno-del-bloqueo">El Fenómeno del Bloqueo</a></li>
-  <li><a href="#protocolo-de-desbloqueo-rápido-en-la-laptop-del-usuario" id="toc-protocolo-de-desbloqueo-rápido-en-la-laptop-del-usuario" class="nav-link" data-scroll-target="#protocolo-de-desbloqueo-rápido-en-la-laptop-del-usuario">Protocolo de Desbloqueo Rápido (En la Laptop del Usuario)</a></li>
-  <li><a href="#protocolo-de-limpieza-en-el-servidor-vía-logmein-consola-directa" id="toc-protocolo-de-limpieza-en-el-servidor-vía-logmein-consola-directa" class="nav-link" data-scroll-target="#protocolo-de-limpieza-en-el-servidor-vía-logmein-consola-directa">Protocolo de Limpieza en el Servidor (Vía LogMeIn / Consola Directa)</a></li>
-  </ul></li>
-  <li><a href="#buenas-prácticas-para-el-mantenimiento-del-entorno-científico" id="toc-buenas-prácticas-para-el-mantenimiento-del-entorno-científico" class="nav-link" data-scroll-target="#buenas-prácticas-para-el-mantenimiento-del-entorno-científico">6. Buenas Prácticas para el Mantenimiento del Entorno Científico</a></li>
+  <li><a href="#paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu" id="toc-paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu" class="nav-link active" data-scroll-target="#paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu">Paso 1: Revivir el servicio SSH dentro de Ubuntu</a></li>
+  <li><a href="#paso-2-verificar-si-la-ip-interna-de-wsl-cambió" id="toc-paso-2-verificar-si-la-ip-interna-de-wsl-cambió" class="nav-link" data-scroll-target="#paso-2-verificar-si-la-ip-interna-de-wsl-cambió">Paso 2: Verificar si la IP interna de WSL cambió</a></li>
+  <li><a href="#paso-3-reajustar-el-puente-de-red-portproxy" id="toc-paso-3-reajustar-el-puente-de-red-portproxy" class="nav-link" data-scroll-target="#paso-3-reajustar-el-puente-de-red-portproxy">Paso 3: Reajustar el puente de red (Portproxy)</a></li>
   </ul>
 </nav>
     </div>
@@ -4095,7 +4080,7 @@ vertical-align: -.125em;
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Guía de configuración de WSL para el workflow</h1>
+<h1 class="title">Arrancar el sistema ssh/WSL</h1>
 </div>
 
 
@@ -4112,163 +4097,27 @@ vertical-align: -.125em;
 </header>
 
 
-<section id="introducción-y-contexto" class="level2">
-<h2 class="anchored" data-anchor-id="introducción-y-contexto">Introducción y Contexto</h2>
-<p>Este documento constituye la memoria técnica y guía de reproducción paso a paso para la configuración del servidor de procesamiento científico compartido del Instituto, operado sobre <strong>Ubuntu 26.04 LTS dentro de Windows Subsystem for Linux (WSL2)</strong>.</p>
-<p>La arquitectura está diseñada específicamente para soportar el <em>workflow</em> automatizado del proyecto <strong>“Gestión de la Integridad Ecosistémica”</strong> en sus tres variantes:</p>
-<ol type="1">
-<li>Integridad Ecosistémica Urbana.</li>
-<li>Integridad de Sistemas Costeros.</li>
-<li>Integridad de Ecosistemas Terrestres de México.</li>
-</ol>
-<p>El objetivo fundamental de esta configuración es proporcionar un entorno <strong>multiusuario homogéneo, transparente y de alto rendimiento</strong>, donde investigadores (Miguel, Octavio, Martha, Maricruz) puedan interactuar simultáneamente a través de SSH de forma aislada, pero compartiendo de manera óptima las librerías geoespaciales avanzadas (QGIS, Python, GDAL) y el espacio de almacenamiento físico, sin necesidad de configuraciones individuales por cuenta de usuario.</p>
+<section id="paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu" class="level3">
+<h3 class="anchored" data-anchor-id="paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu">Paso 1: Revivir el servicio SSH dentro de Ubuntu</h3>
+<p>Por defecto, WSL2 no arranca sus servicios automáticamente cuando Windows enciende. Vamos a darle la patada inicial a SSH:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu <span class="op">-</span>u root <span class="op">--</span> service ssh <span class="fu">start</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="arquitectura-general-de-la-infraestructura" class="level2">
-<h2 class="anchored" data-anchor-id="arquitectura-general-de-la-infraestructura">2. Arquitectura General de la Infraestructura</h2>
-<p>Para maximizar la tasa de transferencia de datos y asegurar el aislamiento correcto de los componentes de software, el sistema se estructuró dividiendo las responsabilidades del hardware de la siguiente manera:</p>
-<ul>
-<li><strong>Instalación Base del Motor (<code>/usr/bin/micromamba</code>):</strong> El binario ejecutable se aloja de forma nativa en las rutas del sistema para que esté disponible globalmente.</li>
-<li><strong>Raíz Compartida de Configuración (<code>/srv/iie/micromamba</code>):</strong> Alberga los índices de paquetes, configuraciones del sistema y metadatos del motor de ambientes, fuera de los directorios personales (<code>~</code>).</li>
-<li><strong>Almacén Centralizado de Ambientes (<code>/srv/iie/envs/</code>):</strong> Todos los entornos virtuales (como <code>qgis_env</code> y <code>profiling_env</code>) viven aquí. Las cuentas de usuario leen y ejecutan estas librerías, evitando la duplicación de espacio en el disco duro.</li>
-<li><strong>Zona de Procesamiento Rápido (SSD - Unidad <code>C:</code> pero dentro del sistema de archivos WSL):</strong> Las operaciones de alineación de mallas ráster congruentes y la generación de matrices de entrenamiento de las redes bayesianas se ejecutan estrictamente en el SSD para evitar cuellos de botella de entrada/salida (I/O). Aunque posible, se para el cómputo evitará mezclar el uso de datos fuera del entorno Linux/WSL.</li>
-<li><strong>Unidad de Datos y Productos (Unidad <code>D:</code>):</strong> - <code>D:/iie/datos</code>: Contiene las réplicas de datos estables y procesados para ser consumidos por reportes dinámicos de Quarto.
-<ul>
-<li><code>D:/iie/productos</code>: Almacenamiento final de los mapas GeoTIFF oficiales producidos por la red bayesiana.</li>
-</ul></li>
-</ul>
-<hr>
+<section id="paso-2-verificar-si-la-ip-interna-de-wsl-cambió" class="level3">
+<h3 class="anchored" data-anchor-id="paso-2-verificar-si-la-ip-interna-de-wsl-cambió">Paso 2: Verificar si la IP interna de WSL cambió</h3>
+<p>Al apagarse la máquina a la fuerza, es casi seguro que Windows le asignó una IP interna nueva a Ubuntu. Ejecuta esto para ver cuál tiene en este instante:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu <span class="op">-</span>u root <span class="op">--</span> ip addr show eth0</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Anota la IP que aparece junto a <code>inet</code> (será algo como 172.24.X.X).</p>
 </section>
-<section id="guía-de-configuración-paso-a-paso-reproducción-de-la-infraestructura" class="level2">
-<h2 class="anchored" data-anchor-id="guía-de-configuración-paso-a-paso-reproducción-de-la-infraestructura">3. Guía de Configuración Paso a Paso (Reproducción de la Infraestructura)</h2>
-<p>En caso de reinstalación del servidor o migración a una nueva máquina, ejecute los siguientes bloques de comandos de manera secuencial.</p>
-<section id="paso-1-limpieza-de-instalaciones-previas-o-híbridas" class="level3">
-<h3 class="anchored" data-anchor-id="paso-1-limpieza-de-instalaciones-previas-o-híbridas">Paso 1: Limpieza de Instalaciones Previas o Híbridas</h3>
-<p>Antes de comenzar la instalación limpia, asegure el estado del sistema ingresando como superusuario (<code>root</code>) y eliminando cualquier rastro o enlace simbólico corrupto de configuraciones previas en la zona común:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-i</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> /srv/iie/micromamba</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-f</span> /usr/bin/micromamba</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-f</span> /etc/profile.d/micromamba_init.sh</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="paso-2-instalación-del-descompresor-base" class="level3">
-<h3 class="anchored" data-anchor-id="paso-2-instalación-del-descompresor-base">Paso 2: Instalación del Descompresor Base</h3>
-<p>Ubuntu en sus versiones minimalistas para WSL no incluye soporte nativo para compresión <code>.tar.bz2</code>. Instale la herramienta esencial:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="ex">apt-get</span> install <span class="at">-y</span> bzip2</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="paso-3-descarga-y-posicionamiento-de-micromamba" class="level3">
-<h3 class="anchored" data-anchor-id="paso-3-descarga-y-posicionamiento-de-micromamba">Paso 3: Descarga y Posicionamiento de Micromamba</h3>
-<p>Descargue el binario oficial compilado para arquitectura Linux x86_64 directamente hacia el directorio de ejecutables del sistema operativo:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-Ls</span> <span class="pp">[</span><span class="ss">https://micro.mamba.pm/api/micromamba/linux</span><span class="pp">-</span><span class="ss">64/latest</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://micro.mamba.pm/api/micromamba/linux-64/latest</span><span class="kw">)</span> <span class="kw">|</span> <span class="fu">tar</span> <span class="at">-xvj</span> <span class="at">-C</span> /usr/bin/ bin/micromamba</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p><em>Nota Crítica:</em> El comando de extracción por defecto creará un subdirectorio residual (<code>/usr/bin/bin/micromamba</code>). Es indispensable moverlo un nivel hacia arriba y limpiar el directorio vacío:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> /usr/bin/bin/micromamba /usr/bin/micromamba</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rmdir</span> /usr/bin/bin</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Valide la correcta instalación ejecutando de forma directa:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> <span class="at">--version</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p><em>(Debe retornar la versión instalada, por ejemplo, <code>2.6.2</code>).</em></p>
-</section>
-<section id="paso-4-declaración-de-una-ruta-unificada-del-sistema" class="level3">
-<h3 class="anchored" data-anchor-id="paso-4-declaración-de-una-ruta-unificada-del-sistema">Paso 4: Declaración de una Ruta Unificada del Sistema</h3>
-<p>Para garantizar que el motor de micromamba no intente buscar o crear directorios dentro del <code>home</code> de cada usuario, inyecte de manera permanente la ruta común en la configuración global de micromamba:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">MAMBA_ROOT_PREFIX</span><span class="op">=</span><span class="st">&quot;/srv/iie/micromamba&quot;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">micromamba</span> config append envs_dirs /srv/iie/envs <span class="at">--system</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="paso-5-automatización-del-arranque-global-y-el-prompt-prompt_command" class="level3">
-<h3 class="anchored" data-anchor-id="paso-5-automatización-del-arranque-global-y-el-prompt-prompt_command">Paso 5: Automatización del Arranque Global y el Prompt (<code>PROMPT_COMMAND</code>)</h3>
-<p>Para lograr que cualquier usuario que ingrese por SSH caiga directamente dentro del entorno científico <code>qgis_env</code> con las librerías precargadas, y que la terminal redibuje visualmente la etiqueta del entorno de forma obligatoria (saltándose las restricciones de las <em>login shells</em> de Bash), cree el script de inicialización global:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&lt;&lt; &quot;EOF&quot;</span> <span class="op">&gt;</span> /etc/profile.d/micromamba_init.sh</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st"># 1. Variables de la infraestructura comunitaria del instituto</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">export MAMBA_ROOT_PREFIX=&quot;/srv/iie/micromamba&quot;</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">export MAMBA_ENVS_DIRS=&quot;/srv/iie/envs&quot;</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st"># 2. Cargar el gancho de la shell de forma dinámica para el usuario actual</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="st">eval &quot;$(micromamba shell hook --shell bash --root-prefix &quot;$MAMBA_ROOT_PREFIX&quot; 2&gt; /dev/null)&quot;</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="st"># 3. Activar el entorno científico por defecto</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="st">if [ -d &quot;/srv/iie/envs/qgis_env&quot; ]; then</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="st">    micromamba activate /srv/iie/envs/qgis_env</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="st">    export CONDA_DEFAULT_ENV=&quot;qgis_env&quot;</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="st">else</span></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="st">    micromamba activate base</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="st">fi</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="st"># 4. Inyección de prompt multiusuario mediante PROMPT_COMMAND</span></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="st"># Asegura que el entorno activo se dibuje visualmente antes de ceder el control al usuario</span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="st">ajustar_prompt_mamba() {</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="st">    if [[ &quot;$PS1&quot; != *&quot;(${CONDA_DEFAULT_ENV:-base})&quot;* ]]; then</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="st">        PS1=&quot;(${CONDA_DEFAULT_ENV:-base}) $PS1&quot;</span></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="st">    fi</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="st">if [[ -n &quot;$BASH_VERSION&quot; &amp;&amp; &quot;$PROMPT_COMMAND&quot; != *&quot;ajustar_prompt_mamba&quot;* ]]; then</span></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="st">    PROMPT_COMMAND=&quot;ajustar_prompt_mamba; $PROMPT_COMMAND&quot;</span></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="st">fi</span></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Asigne los permisos de ejecución del script y los permisos de acceso de lectura a la raíz compartida:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x /etc/profile.d/micromamba_init.sh</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /srv/iie/micromamba</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> <span class="at">-R</span> 755 /srv/iie/micromamba</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> <span class="at">-R</span> 755 /srv/iie/envs</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Salga del modo administrador:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-</section>
-<section id="limpieza-de-archivos-de-configuración-individuales" class="level2">
-<h2 class="anchored" data-anchor-id="limpieza-de-archivos-de-configuración-individuales">4. Limpieza de Archivos de Configuración Individuales</h2>
-<p>Para aquellos usuarios que hayan operado previamente en el servidor de forma local (como la cuenta <code>equihuam</code>), es necesario limpiar los residuos viejos de inicialización en sus carpetas personales para evitar colisiones de variables.</p>
-<ol type="1">
-<li>Abra el archivo de configuración personal de la cuenta:</li>
-</ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.bashrc</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<ol start="2" type="1">
-<li>Navegue al final del archivo y, si existe, <strong>elimine por completo</strong> el bloque delimitado por:</li>
-</ol>
-<pre class="text"><code># &gt;&gt;&gt; mamba initialize &gt;&gt;&gt;
-...
-# &lt;&lt;&lt; mamba initialize &lt;&lt;&lt;
-</code></pre>
-<ol start="3" type="1">
-<li>Elimine también cualquier línea manual de exportación de prompt que se haya introducido con anterioridad, tal como:</li>
-</ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PS1</span><span class="op">=</span><span class="st">&quot;(</span><span class="va">${CONDA_DEFAULT_ENV</span><span class="op">:-</span>base<span class="va">}</span><span class="st">) </span><span class="va">${PS1}</span><span class="st">&quot;</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<ol start="4" type="1">
-<li>Guarde (<code>Ctrl+O</code>, <code>Enter</code>) y salga (<code>Ctrl+X</code>).</li>
-</ol>
-<p>Al volver a conectarse por SSH, el script global tomará precedencia absoluta, entregando un prompt limpio: <code>(qgis_env) usuario@DESKTOP-QLC4OUO:~$</code>.</p>
-<hr>
-</section>
-<section id="resolución-de-contingencias-de-red-el-secuestro-de-puerto-por-ides-pycharm" class="level2">
-<h2 class="anchored" data-anchor-id="resolución-de-contingencias-de-red-el-secuestro-de-puerto-por-ides-pycharm">5. Resolución de Contingencias de Red: El Secuestro de Puerto por IDEs (PyCharm)</h2>
-<section id="el-fenómeno-del-bloqueo" class="level3">
-<h3 class="anchored" data-anchor-id="el-fenómeno-del-bloqueo">El Fenómeno del Bloqueo</h3>
-<p>Cuando un investigador vincula un entorno de desarrollo integrado (IDE) como <strong>PyCharm</strong> mediante un intérprete remoto SSH a través del puerto proxy <code>2200</code>, el IDE abre sockets de comunicación persistente (multiplexación SSH) de fondo para la sincronización de archivos e indexación de variables en tiempo real.</p>
-<p>Si el IDE se cierra de forma abrupta o no corta la terminal remota de manera ordenada, estos hilos de fondo quedan colgados en la <strong>laptop local</strong> en estado <code>TIME_WAIT</code>, bloqueando el puerto <code>2200</code> y provocando errores de tipo <code>Connection timed out</code> o <code>Connection reset</code> en los siguientes intentos de conexión por consola.</p>
-</section>
-<section id="protocolo-de-desbloqueo-rápido-en-la-laptop-del-usuario" class="level3">
-<h3 class="anchored" data-anchor-id="protocolo-de-desbloqueo-rápido-en-la-laptop-del-usuario">Protocolo de Desbloqueo Rápido (En la Laptop del Usuario)</h3>
-<p>Para liberar el puerto inmediatamente sin necesidad de reiniciar la computadora, abra una consola de <strong>PowerShell</strong> en su laptop local y ejecute la siguiente instrucción para identificar y terminar por la fuerza el proceso colgado:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Matar el proceso que tiene secuestrado el puerto local 2200</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>Get-NetTCPConnection <span class="op">-</span>LocalPort <span class="dv">2200</span> <span class="op">-</span>ErrorAction SilentlyContinue <span class="op">|</span> <span class="fu">Select-Object</span> <span class="op">-</span>ExpandProperty OwningProcess <span class="op">|</span> <span class="fu">ForEach-Object</span> <span class="op">{</span> <span class="fu">Stop-Process</span> <span class="op">-</span>Id <span class="va">$_</span> <span class="op">-</span>Force <span class="op">-</span>Verbose <span class="op">}</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Limpiar procesos huérfanos de PyCharm y llaves SSH colgadas en memoria</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">Stop-Process</span> <span class="op">-</span>Name <span class="st">&quot;pycharm&quot;</span> <span class="op">-</span>Force <span class="op">-</span>ErrorAction SilentlyContinue</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">Stop-Process</span> <span class="op">-</span>Name <span class="st">&quot;fsnotifier&quot;</span> <span class="op">-</span>Force <span class="op">-</span>ErrorAction SilentlyContinue</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>ssh-add <span class="op">-</span>D <span class="dv">2</span><span class="op">&gt;</span><span class="va">$null</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="protocolo-de-limpieza-en-el-servidor-vía-logmein-consola-directa" class="level3">
-<h3 class="anchored" data-anchor-id="protocolo-de-limpieza-en-el-servidor-vía-logmein-consola-directa">Protocolo de Limpieza en el Servidor (Vía LogMeIn / Consola Directa)</h3>
-<p>Si el candado de la sesión persistente quedó atorado del lado del servidor WSL2, ingrese a la consola de Windows del instituto y desde PowerShell ejecute el exterminio de los procesos de sincronización remota:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu <span class="op">-</span>u root <span class="op">--</span> pkill <span class="op">-</span>f pycharm</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<hr>
-</section>
-</section>
-<section id="buenas-prácticas-para-el-mantenimiento-del-entorno-científico" class="level2">
-<h2 class="anchored" data-anchor-id="buenas-prácticas-para-el-mantenimiento-del-entorno-científico">6. Buenas Prácticas para el Mantenimiento del Entorno Científico</h2>
-<p>Para salvaguardar la estabilidad a largo plazo del servidor, el equipo del Instituto se regirá por las siguientes directrices operativas:</p>
-<ol type="1">
-<li><strong>Gestión de Despliegue Exclusiva por GitHub:</strong> Está estrictamente prohibido modificar el código fuente de los flujos de trabajo directo en el servidor. Las reglas de <code>Snakemake</code> y scripts de Python se prueban localmente con micro-datasets y pruebas de <code>pytest</code>. El servidor centralizado solo actualiza su código mediante operaciones controladas de <code>git pull</code> en la cuenta de producción (<code>octavio</code>).</li>
-<li><strong>Control de Despliegue en PyCharm:</strong> Para evitar que el IDE descargue o cargue masivamente datos pesados (como archivos binarios <code>.RData</code> o imágenes satelitales grandes), se debe configurar explícitamente el menú <code>Tools -&gt; Deployment -&gt; Configuration -&gt; Excluded Paths</code> en cada laptop local, agregando las extensiones de volumen de datos a las reglas de exclusión.</li>
-<li><strong>Concurrencia de Snakemake:</strong> Debido a que Snakemake bloquea los directorios de trabajo para impedir escrituras corruptas, las ejecuciones a gran escala para las variantes Costera o Terrestre Nacional deben ser coordinadas en el calendario del laboratorio para evitar colisiones de procesos.</li>
-</ol>
+<section id="paso-3-reajustar-el-puente-de-red-portproxy" class="level3">
+<h3 class="anchored" data-anchor-id="paso-3-reajustar-el-puente-de-red-portproxy">Paso 3: Reajustar el puente de red (Portproxy)</h3>
+<p>Si la IP del paso anterior es diferente a la que teníamos configurada el sábado, el puente se rompió. Actualízalo rápido corriendo estas líneas (cambiando LA_NUEVA_IP_DE_WSL por la que acabas de ver):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Borrar el proxy desalineado</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>netsh interface portproxy delete v4tov4 listenaddress<span class="op">=</span><span class="dv">100.92</span><span class="op">.</span><span class="dv">147.14</span> listenport<span class="op">=</span><span class="dv">2200</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Apuntar al nuevo objetivo interno</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>netsh interface portproxy add v4tov4 listenaddress<span class="op">=</span><span class="dv">100.92</span><span class="op">.</span><span class="dv">147.14</span> listenport<span class="op">=</span><span class="dv">2200</span> connectaddress<span class="op">=</span>LA_NUEVA_IP_DE_WSL connectport<span class="op">=</span><span class="dv">22</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Una vez que apliques esto frente a la máquina o desde LogMeIn, el acceso ssh debe estar disponible de nuevo, pruébalo.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-p</span> 2200 equihuam@100.92.147.14</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section>

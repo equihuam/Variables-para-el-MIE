@@ -1,5 +1,5 @@
 ---
-title: "guia-configura-wsl"
+title: "Guía de configuración de WSL para el workflow"
 format: html
 ---
 
