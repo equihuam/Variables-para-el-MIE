@@ -4238,6 +4238,7 @@ vertical-align: -.125em;
 </section>
 <section id="resolución-de-contingencias-de-red-el-secuestro-de-puerto-por-ides-pycharm" class="level2">
 <h2 class="anchored" data-anchor-id="resolución-de-contingencias-de-red-el-secuestro-de-puerto-por-ides-pycharm">5. Resolución de Contingencias de Red: El Secuestro de Puerto por IDEs (PyCharm)</h2>
+<p>Si la laptop del usuario experimenta un error de socket 10060 (Connection timed out) a pesar de que el puerto proxy esté declarado en Windows, verifique la directiva perimetral del Firewall del servidor. Windows tiende a bloquear conexiones de red entrantes desde adaptadores virtuales externos si la regla no autoriza explícitamente el cruce de fronteras. Se soluciona forzando la directiva de la regla global en el PowerShell del servidor: Set-NetFirewallRule -DisplayName “WSL Multiuser Global” -EdgeTraversalPolicy Allow o creando una regla permisiva dedicada al puerto de entrada.</p>
 <section id="el-fenómeno-del-bloqueo" class="level3">
 <h3 class="anchored" data-anchor-id="el-fenómeno-del-bloqueo">El Fenómeno del Bloqueo</h3>
 <p>Cuando un investigador vincula un entorno de desarrollo integrado (IDE) como <strong>PyCharm</strong> mediante un intérprete remoto SSH a través del puerto proxy <code>2200</code>, el IDE abre sockets de comunicación persistente (multiplexación SSH) de fondo para la sincronización de archivos e indexación de variables en tiempo real.</p>

@@ -4069,9 +4069,7 @@ vertical-align: -.125em;
     <h2 id="toc-title">En esta página</h2>
    
   <ul>
-  <li><a href="#paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu" id="toc-paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu" class="nav-link active" data-scroll-target="#paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu">Paso 1: Revivir el servicio SSH dentro de Ubuntu</a></li>
-  <li><a href="#paso-2-verificar-si-la-ip-interna-de-wsl-cambió" id="toc-paso-2-verificar-si-la-ip-interna-de-wsl-cambió" class="nav-link" data-scroll-target="#paso-2-verificar-si-la-ip-interna-de-wsl-cambió">Paso 2: Verificar si la IP interna de WSL cambió</a></li>
-  <li><a href="#paso-3-reajustar-el-puente-de-red-portproxy" id="toc-paso-3-reajustar-el-puente-de-red-portproxy" class="nav-link" data-scroll-target="#paso-3-reajustar-el-puente-de-red-portproxy">Paso 3: Reajustar el puente de red (Portproxy)</a></li>
+  <li><a href="#protocolo-de-re-conexión-automática" id="toc-protocolo-de-re-conexión-automática" class="nav-link active" data-scroll-target="#protocolo-de-re-conexión-automática">Protocolo de Re-conexión Automática</a></li>
   </ul>
 </nav>
     </div>
@@ -4097,27 +4095,12 @@ vertical-align: -.125em;
 </header>
 
 
-<section id="paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu" class="level3">
-<h3 class="anchored" data-anchor-id="paso-1-revivir-el-servicio-ssh-dentro-de-ubuntu">Paso 1: Revivir el servicio SSH dentro de Ubuntu</h3>
-<p>Por defecto, WSL2 no arranca sus servicios automáticamente cuando Windows enciende. Vamos a darle la patada inicial a SSH:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu <span class="op">-</span>u root <span class="op">--</span> service ssh <span class="fu">start</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="paso-2-verificar-si-la-ip-interna-de-wsl-cambió" class="level3">
-<h3 class="anchored" data-anchor-id="paso-2-verificar-si-la-ip-interna-de-wsl-cambió">Paso 2: Verificar si la IP interna de WSL cambió</h3>
-<p>Al apagarse la máquina a la fuerza, es casi seguro que Windows le asignó una IP interna nueva a Ubuntu. Ejecuta esto para ver cuál tiene en este instante:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu <span class="op">-</span>u root <span class="op">--</span> ip addr show eth0</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Anota la IP que aparece junto a <code>inet</code> (será algo como 172.24.X.X).</p>
-</section>
-<section id="paso-3-reajustar-el-puente-de-red-portproxy" class="level3">
-<h3 class="anchored" data-anchor-id="paso-3-reajustar-el-puente-de-red-portproxy">Paso 3: Reajustar el puente de red (Portproxy)</h3>
-<p>Si la IP del paso anterior es diferente a la que teníamos configurada el sábado, el puente se rompió. Actualízalo rápido corriendo estas líneas (cambiando LA_NUEVA_IP_DE_WSL por la que acabas de ver):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Borrar el proxy desalineado</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>netsh interface portproxy delete v4tov4 listenaddress<span class="op">=</span><span class="dv">100.92</span><span class="op">.</span><span class="dv">147.14</span> listenport<span class="op">=</span><span class="dv">2200</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Apuntar al nuevo objetivo interno</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>netsh interface portproxy add v4tov4 listenaddress<span class="op">=</span><span class="dv">100.92</span><span class="op">.</span><span class="dv">147.14</span> listenport<span class="op">=</span><span class="dv">2200</span> connectaddress<span class="op">=</span>LA_NUEVA_IP_DE_WSL connectport<span class="op">=</span><span class="dv">22</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Una vez que apliques esto frente a la máquina o desde LogMeIn, el acceso ssh debe estar disponible de nuevo, pruébalo.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-p</span> 2200 equihuam@100.92.147.14</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="protocolo-de-re-conexión-automática" class="level3">
+<h3 class="anchored" data-anchor-id="protocolo-de-re-conexión-automática">Protocolo de Re-conexión Automática</h3>
+<p>El sistema está configurado para levantar el motor de Tailscale y el servidor SSH internamente en el arranque de WSL. Si el servidor físico se reinicia y pierdes acceso, solo se requiere despertar la instancia de Ubuntu desde Windows (frente a la máquina o por LogMeIn) abriendo una consola de PowerShell y ejecutando:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>wsl <span class="op">-</span>d Ubuntu <span class="op">-</span>u equihuam <span class="fu">echo</span> <span class="st">&quot;WSL Despierto&quot;</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Una vez que la distribución da señales de vida, el demonio se engancha a la malla global con su IP fija asignada. Conéctate directo desde tu equipo y usuario usando el comando:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> {usuario}@100.89.212.76</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section>

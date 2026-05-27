@@ -3,38 +3,40 @@ title: "Arrancar el sistema ssh/WSL"
 format: html
 ---
 
-### Paso 1: Revivir el servicio SSH dentro de Ubuntu
+### Contingencia: Error de Acceso Denegado al Disco (.vhdx)
 
-Por defecto, WSL2 no arranca sus servicios automáticamente cuando Windows enciende. Vamos a darle la patada inicial a SSH:
+Si al reiniciar el servidor e intentar arrancar WSL2 aparece el error:
+`Código de error: Wsl/Service/CreateInstance/MountDisk/HCS/E_ACCESSDENIED`
 
-```powershell
-wsl -d Ubuntu -u root -- service ssh start
-```
+Significa que Windows bloqueó los permisos del archivo del disco virtual debido al cambio de sesiones de usuario. Para solucionarlo de inmediato:
 
-### Paso 2: Verificar si la IP interna de WSL cambió
-
-Al apagarse la máquina a la fuerza, es casi seguro que Windows le asignó una IP interna nueva a Ubuntu. Ejecuta esto para ver cuál tiene en este instante:
+1. Abre **PowerShell como Administrador** en el servidor (clic derecho -> Ejecutar como Administrador).
+2. Ejecuta el siguiente bloque para forzar la liberación del disco y restaurar el servicio moderno (`WslService`):
 
 ```powershell
-wsl -d Ubuntu -u root -- ip addr show eth0
+# Detener el servicio zombi de WSL
+Stop-Service -Name "WslService" -Force -ErrorAction SilentlyContinue
+taskkill /f /im wslhost.exe 2>$null
+taskkill /f /im wslservice.exe 2>$null
+
+# Devolver el control total del disco a todos los usuarios del laboratorio
+icacls "C:\WSL_Distros\Ubuntu\ext4.vhdx" /grant "Todos:(F)" /c
+
+# Levantar el servicio limpio
+Start-Service -Name "WslService"
 ```
 
-Anota la IP que aparece junto a `inet` (será algo como 172.24.X.X).
+### Protocolo de Re-conexión Automática
 
-### Paso 3: Reajustar el puente de red (Portproxy)
-
-Si la IP del paso anterior es diferente a la que teníamos configurada el sábado, el puente se rompió. Actualízalo rápido corriendo estas líneas (cambiando LA_NUEVA_IP_DE_WSL por la que acabas de ver):
+El sistema está configurado para levantar el motor de Tailscale y el servidor SSH internamente en el arranque de WSL. Si el servidor físico se reinicia y pierdes acceso, solo se requiere despertar la instancia de Ubuntu desde Windows (frente a la máquina o por LogMeIn) abriendo una consola de PowerShell y ejecutando:
 
 ```powershell
-# 1. Borrar el proxy desalineado
-netsh interface portproxy delete v4tov4 listenaddress=100.92.147.14 listenport=2200
-
-# 2. Apuntar al nuevo objetivo interno
-netsh interface portproxy add v4tov4 listenaddress=100.92.147.14 listenport=2200 connectaddress=LA_NUEVA_IP_DE_WSL connectport=22
+wsl -d Ubuntu -u equihuam echo "WSL Despierto"
 ```
 
-Una vez que apliques esto frente a la máquina o desde LogMeIn, el acceso ssh debe estar disponible de nuevo, pruébalo.
+Una vez que la distribución da señales de vida, el demonio se engancha a la malla global con su IP fija asignada. Conéctate directo desde tu equipo y usuario usando el comando:
 
 ```bash
-ssh -p 2200 equihuam@100.92.147.14
+ssh {usuario}@100.89.212.76
 ```
+
