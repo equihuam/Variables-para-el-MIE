@@ -1,11 +1,12 @@
 ---
 title: "Inicio"
-format: html
 ---
 
 # Reglas de trabajo
 
 [operación](docs/operaccion.qmd)
+
+[tutorial](tutorial/tutorial-snakemake.qmd)
 
 ## Preparación
 

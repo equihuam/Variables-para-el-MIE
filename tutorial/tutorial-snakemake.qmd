@@ -1,0 +1,473 @@
+---
+title: "Tutorial de Automatización con Snakemake y RStudio"
+subtitle: "Modelado Geoespacial para la Gestión de la Integridad Ecosistémica"
+author: "Laboratorio de Integridad Ecosistémica"
+date: "2026-05-29"
+---
+
+## 1. Introducción y Contexto del Proyecto
+
+Este tutorial establece las pautas de trabajo para homogeneizar variables básicas y expresarlas en formatos ráster congruentes. El flujo está diseñado para operar nativamente en el almacenamiento SSD del servidor centralizado de WSL (`/srv/iie/`) , garantizando que todo el equipo trabaje con las mismas dependencias bajo el entorno compartido `qgis_env`.
+
+
+### Requisitos Previos en RStudio
+
+Para ejecutar Snakemake desde RStudio en este servidor, nos debemos asegurar de tener el proyecto abierto sobre la ruta de red de WSL y que la terminal local esté usando el intérprete correcto del sistema:
+
+* **Intérprete Python:** `/srv/iie/envs/qgis_env/bin/python3.11` 
+* **Librerías principales:** `snakemake`, `sf`, `terra`, `quarto` 
+
+::: {.callout-caution collapse="true"}
+### Preparación
+
+Crear el directorio general, asignar acceso al grupo y definir permisos:
+>2 → activa setgid, así todos los archivos heredan el grupo iie
+>775 → lectura/escritura para dueño y grupo
+
+```bash
+# espacio común para el ejericio
+sudo mkdir -p /srv/iie-tutor/
+
+# permisos
+# asignación a grupo analistas
+sudo chown root:analistas /srv/iie-tutor   
+
+# permisos para copartir
+sudo chmod 2775 /srv/iie-tutor
+
+# veamos como quedó
+ls -ld /srv/iie-tutor
+
+# finalizar agregando "umask 002" al final en profile general
+sudo nano /etc/bash.bashrc
+```
+
+Shell de verificación de que todo está preparado (`nano check_iie_env.sh`)
+
+```bash
+#!/usr/bin/env bash
+
+echo "🔍 Verificando entorno IIE..."
+
+# 1. Usuario
+echo "👤 Usuario actual: $USER"
+
+# 2. Grupos
+echo "👥 Grupos:"
+groups
+
+if groups | grep -q analistas; then
+    echo "✅ Usuario pertenece al grupo 'analistas'"
+else
+    echo "❌ Usuario NO pertenece al grupo 'analistas'"
+    echo "   ➜ Ejecuta: sudo usermod -aG analistas $USER"
+    echo "   ➜ Luego: exit y vuelve a entrar (o usa newgrp analistas)"
+fi
+
+# 3. Directorio
+DIR="/srv/iie-tutor"
+
+if [ -d "$DIR" ]; then
+    echo "📁 $DIR existe"
+else
+    echo "❌ $DIR no existe"
+fi
+
+# 4. Permisos
+echo "🔐 Permisos de $DIR:"
+ls -ld $DIR
+
+# 5. Test de escritura
+TEST_DIR="$DIR/test-$USER"
+
+echo "🧪 Probando escritura..."
+
+if mkdir "$TEST_DIR" 2>/dev/null; then
+    echo "✅ Puedes crear directorios"
+    rmdir "$TEST_DIR"
+else
+    echo "❌ NO puedes escribir en $DIR"
+    echo "   Posibles causas:"
+    echo "   - No estás en el grupo analistas"
+    echo "   - No se ha recargado la sesión"
+    echo "   - Permisos incorrectos (usar chmod 2775)"
+fi
+
+# 6. Umask
+echo "⚙️ Umask actual:"
+umask
+
+echo "✅ Verificación terminada"
+```
+
+Con permisos:
+
+```bash
+chmod +x check_iie_env.sh 
+
+# ahora se puede ejecutar
+./check_iie_env.sh
+```
+
+####  Instalar Quarto en WSL
+
+```bash
+# 1. Descargar el instalador oficial de Quarto (versión estable 1.4)
+wget https://github.com/quarto-dev/quarto-cli/releases/download/v1.4.555/quarto-1.4.555-linux-amd64.deb
+
+# 2. Instalarlo en el sistema Linux usando privilegios de administrador
+sudo dpkg -i quarto-1.4.555-linux-amd64.deb
+
+# 3. Limpiar el instalador para no ocupar espacio en el SSD
+rm quarto-1.4.555-linux-amd64.deb
+
+# 4. Verificar que funciona perfectamente
+quarto --version
+```
+
+### Habilitar **R** el entorno compartido qgis_env
+
+Hay que preparar todo lo necesario para que el renderizado con **Quarto** pueda operar los bloques {{{r}}} localmente en **WSL**. Para evitar conflictos, montamos una versión apropiada de **R** y aseguramos que los componentes necesarios de *Markdown* y demás bibliotecas estén disponibles directamente dentro del ambiente micromamba geoespacial:
+
+
+```bash
+# 1. Activar el entorno científico compartido
+micromamba activate qgis_env
+
+# 2. Instalar R-Base, dependencias de renderizado (Knitr/RMarkdown) y paquetes del tutorial
+micromamba install -c conda-forge r-base r-codetools r-knitr r-rmarkdown r-sf r-ggplot2 r-dplyr r-readr -y
+```
+
+::: 
+
+
+## 2. Estructura de Archivos del Proyecto
+
+Para que Snakemake funcione de forma automática y ordenada, el repositorio debe mantener la siguiente estructura en (usa tus iniciales para personalizar tu ejemplo) `/srv/iie-tutor/$USER-iie/`:
+
+```text
+/srv/iie-tutor/$USER-iie/
+├── Snakefile
+├── config/
+│   └── config.yaml
+├── scripts/
+│   ├── 1_leer_datos.R
+│   ├── 2_construir_tabla.R
+│   └── 3_crear_reticula.py
+├── reportes/
+│   └── resumen_atributos.qmd
+├── datos/
+│   └── registros_base.csv       <-- Coloca aquí tu archivo inicial de datos
+├── procesados/                  <-- Destino automático de la Tarea 1
+└── resultados/                  <-- Destino automático de las Tareas 2, 3 y 4
+
+```
+
+
+## 3. Preparación del Área de Trabajo y Permisos
+
+Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
+
+Al usar `$USER` los comandos substituiran esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz` o `equihuam`). Lo hará en cualquier comando en el que aparecza.
+
+
+### Opción A: crear directorios desde terminal.
+
+Dado que trabajamos en un servidor centralizado sobre WSL, es fundamental que cada usuario mantenga la propiedad y los permisos correctos sobre sus archivos para evitar errores de denegación de acceso (`Permission denied`) al ejecutar las tareas automatizadas.
+
+Por seguridad: Nunca utilices chmod 777 en directorios compartidos del servidor. El estándar 755 para carpetas y 644 para archivos garantiza la estabilidad de los flujos de trabajo sin comprometer la seguridad del almacenamiento SSD compartido.
+
+Abre la pestaña **Terminal** en RStudio y ejecuta el siguiente bloque de comandos para construir la estructura base del proyecto:
+
+```bash
+
+#-------------------------------------------------------------------------
+# 0. Si les parece cómodo contar con una vaiable de ayuda aí la hacen:
+
+BASE=/srv/iie-tutor/$USER-iie
+
+# Así la usaxrías:
+#    mkdir -p $BASE/{config,scripts,reportes,datos,procesados,resultados}
+#    cd $BASE
+#-------------------------------------------------------------------------
+
+# 1. Crear la carpeta raíz y subdirectorios necesarios
+mkdir -p /srv/iie-tutor/$USER-iie/{config,scripts,reportes,datos,procesados,resultados}
+
+# 2. Verificar la estructura creada
+tree /srv/iie-tutor/$USER-iie/
+
+```
+
+### Opción B: Crear directorios con el Explorador de Windows
+
+Si prefieres interactuar de forma gráfica, puedes usar el explorador de archivos de Windows, aunque no acaba siendo enteramente práctico:
+
+1. Abre el **Explorador de Archivos** de Windows.
+2. En la barra de direcciones superior, escribe `\\wsl$` y presiona Enter.
+3. Navega a la ruta: `Ubuntu` $\rightarrow$ `srv` $\rightarrow$ `iie-tutor`.
+4. Entra a tu carpeta `$USER-iie` (creala si no existe) y genera dentro las carpetas: `config`, `scripts`, `reportes`, `datos`, `procesados` y `resultados`.
+
+
+### Asignación de Permisos en Linux
+
+La razón por la que el uso del explorador no es tan práctico es porque la asignación de permisos no está accesible ahí. Por esta razón, puede ocurrir que las carpetas nieguen el acceso (`Permission denied`) a Snakemake cuando intente escribir los mapas o procesar tablas. Para evitar este problema deberás ejecutar los siguientes comandos de control en la Terminal:
+
+```bash
+# 1. Declararte dueña absoluta de tu espacio de trabajo
+sudo chown -R $USER:$USER /srv/iie-tutor/$USER-iie/
+
+# 2. Asignar permisos estándar de lectura, escritura y ejecución a las carpetas
+find /srv/iie-tutor/$USER-iie/ -type d -exec chmod 755 {} \;
+
+# 3. Asignar permisos de lectura y escritura a los archivos
+find /srv/iie-tutor/$USER-iie/ -type f -exec chmod 644 {} \;
+
+```
+
+### Crear un proyecto RStudio
+
+Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory.Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, pega la ruta: \\wsl.localhost\Ubuntu\srv\iie-tutor\ (o la carpeta de usuario correspondiente). Dale click a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural.
+
+## 4. Configuración del `snakemake`
+
+El archivo `config/config.yaml` se usa para especificar los parámetros del modelo sin tener que tocar una sola línea del código de los scripts. Al usar **rutas relativas**, el flujo funcionará perfectamente sin importar qué usuario lo esté corriendo.
+
+```yaml
+
+# Parámetros dinámicos del análisis
+resolucion_pixel: 1000  # Tamaño del píxel de la retícula en metros
+
+# Insumos y salidas del flujo usando rutas relativas al Snakefile
+datos_entrada: "datos/registros_base.csv"
+
+salidas:
+  tabla_limpia: "resultados/tabla_atributos.csv"
+  gpkg_reticula: "resultados/reticula_variable.gpkg"
+  reporte_final: "resultados/reporte_resumen.html"
+
+```
+
+
+## 5. Orquestación del Flujo: El `Snakefile`
+
+Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este archivo le indica a `Snakemake`  cómo conectar las entradas y salidas de las 4 tareas del ejercicio de capacitación.
+
+```python
+# Cargar el archivo de configuración local
+configfile: "config/config.yaml"
+
+# Regla objetivo (lo que queremos obtener al final)
+rule target:
+    input:
+        config["salidas"]["reporte_final"]
+
+# Tarea 1: Leer datos y filtrar campos obligatorios
+rule leer_datos:
+    input:
+        csv = config["datos_entrada"]
+    output:
+        csv_filtrado = "procesados/datos_filtrados.csv"
+    script:
+        "scripts/1_leer_datos.R"
+
+# Tarea 2: Construir tabla agregada de atributos
+rule construir_tabla:
+    input:
+        csv_filtrado = "procesados/datos_filtrados.csv"
+    output:
+        tabla_resumen = config["salidas"]["tabla_limpia"]
+    script:
+        "scripts/2_construir_tabla.R"
+
+# Tarea 3: Construir Geopackage vectorial con la retícula variable
+rule construir_geopackage:
+    input:
+        tabla_resumen = config["salidas"]["tabla_limpia"]
+    output:
+        gpkg = config["salidas"]["gpkg_reticula"]
+    params:
+        res = config["resolucion_pixel"]
+    script:
+        "scripts/3_crear_reticula.py"
+
+# Tarea 4: Generar reporte dinámico de Quarto
+rule generar_reporte:
+    input:
+        gpkg = config["salidas"]["gpkg_reticula"],
+        qmd = "reportes/resumen_atributos.qmd"
+    output:
+        html = config["salidas"]["reporte_final"]
+    shell:
+        "quarto render {input.qmd} --to html --output {output.html}"
+
+```
+
+
+## 6. Scripts de las Tareas (`scripts/`)
+
+### Tarea 1: `scripts/1_leer_datos.R`
+
+```R
+library(readr)
+library(dplyr)
+
+# Snakemake expone las variables directo en el entorno de R
+datos <- read_csv(snakemake@input[["csv"]])
+
+# Limpieza básica de coordenadas
+datos_filtrados <- datos %>%
+  filter(!is.na(longitud) & !is.na(latitud))
+
+write_csv(datos_filtrados, snakemake@output[["csv_filtrado"]])
+
+```
+
+### Tarea 2: `scripts/2_construir_tabla.R`
+
+```R
+library(readr)
+library(dplyr)
+
+datos_f <- read_csv(snakemake@input[["csv_filtrado"]])
+
+# Resumen estadístico agrupado
+tabla_atributos <- datos_f %>%
+  group_by(id_region, tipo_ecosistema) %>%
+  summarise(
+    media_integridad = mean(valor_indice, na.rm = TRUE),
+    conteo_registros = n(),
+    .groups = 'drop'
+  )
+
+write_csv(tabla_atributos, snakemake@output[["tabla_resumen"]])
+
+```
+
+### Tarea 3: `scripts/3_crear_reticula.py`
+
+```python
+import geopandas as gpd
+import pandas as pd
+from shapely.geometry import box
+import numpy as np
+
+# Snakemake expone un objeto nativo en Python para capturar entradas y parámetros
+input_csv = snakemake.input["tabla_resumen"]
+output_gpkg = snakemake.output["gpkg"]
+pixel_size = snakemake.params["res"]
+
+# Generar malla espacial ficticia basada en el tamaño de pixel parametrizado
+xmin, ymin, xmax, ymax = -118.0, 14.0, -86.0, 33.0
+cols = np.arange(xmin, xmax, pixel_size / 111000)
+rows = np.arange(ymin, ymax, pixel_size / 111000)
+
+polygons = [box(x, y, x + (pixel_size/111000), y + (pixel_size/111000)) for x in cols for y in rows]
+grid = gpd.GeoDataFrame({'geometry': polygons}, crs="EPSG:4326")
+grid['integridad_simulada'] = np.random.uniform(0, 1, len(grid))
+
+# Exportar el Geopackage
+grid.to_file(output_gpkg, driver="GPKG", layer="reticula_integridad")
+
+```
+
+
+## 7. Documento Quarto para Reporte (`reportes/resumen_atributos.qmd`)
+
+Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final.
+
+```markdown 
+---
+title: "Análisis de Atributos del Mapa Geoespacial"
+format: html
+---
+
+
+## Resultados de la Simulación
+
+Este reporte ha sido renderizado automáticamente por Snakemake tras actualizar las reglas del flujo.
+
+```{{{r}}}
+#| echo: false
+#| message: false
+library(sf)
+library(ggplot2)
+
+# Lectura relativa remontando un nivel hacia la raíz
+mapa_reticula <- st_read("../resultados/reticula_variable.gpkg", layer = "reticula_integridad", quiet = TRUE)
+
+```
+
+### Estadísticas descriptivas del Índice
+
+```{{{r}}}
+#| echo: false
+summary(mapa_reticula$integridad_simulada)
+
+```
+
+### Histograma de Distribución Espacial
+
+```{{{r}}}
+#| echo: false
+ggplot(mapa_reticula) +
+  geom_histogram(aes(x = integridad_simulada), bins = 25, fill = "steelblue", color = "white") +
+  theme_minimal()
+
+```
+
+``` 
+
+---
+
+## 8. Ejecución desde RStudio
+
+Para poner en marcha el flujo, abre tu pestaña **Terminal** dentro de RStudio (asegúrate de estar posicionada en `/srv/iie-tutor/$USER-iie/`) y ejecuta:
+
+```bash
+# Paso 1: Simulación (Dry-run) para verificar qué tareas faltan o cambiaron
+snakemake -n
+
+# Paso 2: Ejecución real utilizando dos núcleos del CPU del servidor
+snakemake --cores 2
+
+```
+
+Si posteriormente deseas cambiar el tamaño de celda, modifica el valor numérico en tu `config/config.yaml`, vuelve a lanzar `snakemake --cores 2` y observa cómo el motor recalcula exclusivamente la retícula y el documento Quarto de forma limpia y precisa.
+
+
+## 9. ¿Cuántos núcleos tenemos disponibles?
+
+El procesador del equipo de Octavio (**Intel Core i7-14700KF**) tiene una arquitectura híbrida moderna. Físicamente cuenta con **20 núcleos** (8 de alto rendimiento y 12 de eficiencia). Sin embargo, gracias a la tecnología Hyper-Threading en los núcleos de rendimiento, el sistema operativo (y por lo tanto WSL y Snakemake) detectan un total de **28 hilos lógicos**.
+
+Para efectos de Snakemake, **tienes hasta 28 núcleos disponibles** (potencial `--cores 28`).
+
+
+### 1. El Cuello de Botella Oculto: La Memoria RAM
+
+Aquí es donde entra la experiencia técnica. Aunque tienes 28 "cerebros" para procesar, **tu límite real son tus 32 GB de RAM**.
+
+En flujos de trabajo geoespaciales con R (usando librerías como `sf`, `terra` o procesando Geopackages), cada vez que Snakemake lanza una tarea en un núcleo nuevo, **R abre una sesión independiente en la memoria**.
+
+* Si una sola tarea de leer mapas y cruzar polígonos consume 2 GB de RAM, y le dices a Snakemake que use `--cores 20`, R intentará consumir 40 GB de RAM de golpe.
+* El sistema se quedará sin memoria, WSL entrará en pánico y matará el proceso de Snakemake abruptamente.
+
+
+### 2. ¿Cuántos núcleos conviene utilizar? 
+
+Dado el hardware disponible (28 hilos de CPU y 32 GB de RAM), las recomendaciones para este servidor son:
+
+* **Para capacitación y pruebas del equipo:** `snakemake --cores 2` o `snakemake --cores 4`.
+Es perfecto porque los procesos terminarán rápido sin que los usuarios noten ninguna lentitud si están trabajando al mismo tiempo en el servidor.
+* **El "Punto Dulce" para el trabajo diario:** `snakemake --cores 8` a `snakemake --cores 10`.
+Esto te da un paralelismo masivo (procesarás 10 mapas al mismo tiempo). Asumiendo que cada proceso consuma ~2 GB de RAM, utilizarás unos 20 GB en total. Te sobrarán 12 GB para que Windows y otras aplicaciones funcionen con total fluidez.
+* **Modo "Máxima Potencia" (Dejarlo corriendo de noche):** `snakemake --cores 14`.
+Utilizar la mitad exacta de tus hilos lógicos es una regla de oro en el modelado geoespacial. Aprovecharás muchísimo el CPU y mantendrás el uso de RAM al borde seguro (cerca de los 28 GB).
+
+**Lo que nunca debes hacer:**
+Evita usar `--cores 24` o `--cores 28` a menos que estés corriendo scripts sumamente sencillos (como limpiar texto o mover archivos) que sepas que consumen menos de 500 MB de RAM por proceso.
+
+### Un truco extra
+
+Si quieres monitorear en tiempo real cómo se están comportando los núcleos del equipo y la RAM mientras los usuarios corren el tutorial de Snakemake, abre una terminal de WSL y ejecuta el comando `htop`. Verás una gráfica espectacular con las 28 barras del i7 trabajando como una orquesta, y una barra indicando cuánta de tus 32GB de RAM se está llenando.
+
