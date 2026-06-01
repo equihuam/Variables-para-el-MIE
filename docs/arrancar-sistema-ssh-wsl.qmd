@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 
+=======
+---
+title: "Arrancar el sistema ssh/WSL"
+format: html
+---
+>>>>>>> 1a11dec293b966266603fe56d2bf433111a48d74
 
 ### Contingencia: Error de Acceso Denegado al Disco (.vhdx)
 
@@ -20,4 +27,24 @@ taskkill /f /im wslservice.exe 2>$null
 icacls "C:\WSL_Distros\Ubuntu\ext4.vhdx" /grant "Todos:(F)" /c
 
 # Levantar el servicio limpio
+<<<<<<< HEAD
 Start-Service -Name "WslService"
+=======
+Start-Service -Name "WslService"
+```
+
+### Protocolo de Re-conexión Automática
+
+El sistema está configurado para levantar el motor de Tailscale y el servidor SSH internamente en el arranque de WSL. Si el servidor físico se reinicia y pierdes acceso, solo se requiere despertar la instancia de Ubuntu desde Windows (frente a la máquina o por LogMeIn) abriendo una consola de PowerShell y ejecutando:
+
+```powershell
+wsl -d Ubuntu -u equihuam echo "WSL Despierto"
+```
+
+Una vez que la distribución da señales de vida, el demonio se engancha a la malla global con su IP fija asignada. Conéctate directo desde tu equipo y usuario usando el comando:
+
+```bash
+ssh {usuario}@100.89.212.76
+```
+
+>>>>>>> 1a11dec293b966266603fe56d2bf433111a48d74

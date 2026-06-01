@@ -1,5 +1,5 @@
 ---
-title: "guia-configura-wsl"
+title: "Guía de configuración de WSL para el workflow"
 format: html
 ---
 
@@ -181,6 +181,9 @@ Al volver a conectarse por SSH, el script global tomará precedencia absoluta, e
 ---
 
 ## 5. Resolución de Contingencias de Red: El Secuestro de Puerto por IDEs (PyCharm)
+
+Si la laptop del usuario experimenta un error de socket 10060 (Connection timed out) a pesar de que el puerto proxy esté declarado en Windows, verifique la directiva perimetral del Firewall del servidor. Windows tiende a bloquear conexiones de red entrantes desde adaptadores virtuales externos si la regla no autoriza explícitamente el cruce de fronteras. Se soluciona forzando la directiva de la regla global en el PowerShell del servidor:
+Set-NetFirewallRule -DisplayName "WSL Multiuser Global" -EdgeTraversalPolicy Allow o creando una regla permisiva dedicada al puerto de entrada.
 
 ### El Fenómeno del Bloqueo
 
