@@ -1,0 +1,23 @@
+
+
+### Contingencia: Error de Acceso Denegado al Disco (.vhdx)
+
+Si al reiniciar el servidor e intentar arrancar WSL2 aparece el error:
+`Código de error: Wsl/Service/CreateInstance/MountDisk/HCS/E_ACCESSDENIED`
+
+Significa que Windows bloqueó los permisos del archivo del disco virtual debido al cambio de sesiones de usuario. Para solucionarlo de inmediato:
+
+1. Abre **PowerShell como Administrador** en el servidor (clic derecho -> Ejecutar como Administrador).
+2. Ejecuta el siguiente bloque para forzar la liberación del disco y restaurar el servicio moderno (`WslService`):
+
+```powershell
+# Detener el servicio zombi de WSL
+Stop-Service -Name "WslService" -Force -ErrorAction SilentlyContinue
+taskkill /f /im wslhost.exe 2>$null
+taskkill /f /im wslservice.exe 2>$null
+
+# Devolver el control total del disco a todos los usuarios del laboratorio
+icacls "C:\WSL_Distros\Ubuntu\ext4.vhdx" /grant "Todos:(F)" /c
+
+# Levantar el servicio limpio
+Start-Service -Name "WslService"
