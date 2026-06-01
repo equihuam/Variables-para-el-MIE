@@ -179,6 +179,10 @@ Para que Snakemake funcione de forma automática y ordenada, el repositorio debe
 
 ## 3. Preparación del Área de Trabajo y Permisos
 
+Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para hacerlo es [RaiDrive](https://www.raidrive.com/). Conviene por ser muy facil de usar, aunque en la versión sin cargo tiene anuncios, pero pienso que no son demasiado invasivos. Una vez que la tengas lista en tu equipo, deberás crear un acceso virtual como se ilustra en la captura de pantalla. La **IP** local de Octavio es **`10.0.90.182`**, aunque no es fija, podría cambiar de tiempo en tiempo. Una vez que tengas el disco virtual habilitado, lo verás en tu máquina como si tuvieras un disco más. En él haras las operaciones relacionadas con el proyecro IIE-Workflow.
+
+![Disco virtual en el equipo de Octavio](../img/RaiDrive.png)
+
 Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
 
 Al usar `$USER` los comandos substituiran esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz` o `equihuam`). Lo hará en cualquier comando en el que aparecza.
@@ -186,7 +190,13 @@ Al usar `$USER` los comandos substituiran esa variable automáticamente por el d
 
 ### Crear directorios desde la terminal.
 
-Abre la pestaña **Terminal** en RStudio y ejecuta el siguiente bloque de comandos para construir la estructura base del proyecto:
+Abre la pestaña **Terminal** en RStudio y entra a la máquina de Octavio con el protocolo ssh:
+
+```bash
+ssh -p 2222 <<tu-user>>@10.0.90.182
+```
+
+Quizpas te diga, ¡cuidado te estas conectando a un equipo que no conoces!, o algo parecido. Si le dices que adelante te pedirá entonces tu clave y si todo va bien, estarás enlazada al equipo de Octavio. Cuando ya estes ahí, ejecuta el siguiente bloque de comandos para construir la estructura base del proyecto:
 
 ```bash
 
@@ -209,9 +219,9 @@ tree /srv/iie-tutor/$USER-iie/
 ```
 
 
-### Operar desde un proyecto RStudio 
+### Operar desde un proyecto RStudio  
 
-Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory.Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, pega la ruta: \\wsl.localhost\Ubuntu\srv\iie-tutor\ (o la carpeta de usuario correspondiente). Dale click a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural.
+Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory. Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, elige tu nuevo disco virtual, verás la letra que elegiste para identificarlo. Considera que, si seguiste las indicaciones en la figura, ya estarás dwntro de la carpeta /srv/, así que probablemente no la verás indicada, pero busca ahí tu nueva carpeta con tu nombre y entra (esa será la rapiz del proyecto **R**. Dale click a Create Project y listo. A partir de ahora, **RStudio** abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural.
 
 ## 4. Configuración del `snakemake`
 
