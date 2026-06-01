@@ -181,7 +181,7 @@ Para que Snakemake funcione de forma automática y ordenada, el repositorio debe
 
 Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
 
-Al usar `$USER` los comandos substituiran esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz` o `equihuam`). Lo hará en cualquier comando en el que aparecza.
+Al usar `$USER` los comandos substituirán esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz` o `equihuam`). Lo hará en cualquier comando en el que aparecza.
 
 
 ### Crear directorios desde la terminal.
@@ -210,6 +210,10 @@ tree /srv/iie-tutor/$USER-iie/
 
 
 ### Operar desde un proyecto RStudio 
+
+En preparación para hacer esto será necesario instalar [RaiDrive](https://www.raidrive.com/es/). Con esta herramienta montaremos un acceso al disco del equipo de Octavio, para que desde sus equipos se vea como un disco más. Una vez que lo tengan instalado verán una pantalla de instalación. Elijan la opción NAS/SFTP y apunten a la ip: 10.0.90.182 (aunque esta ip puede cambiar de vez en cuando al apagar el equipo).  El disco virtual que elijan será su punto de interconexión para todo lo que sigue.
+
+![Configurar RaiDrive](../img/RaiDrive.png)
 
 Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory.Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, pega la ruta: \\wsl.localhost\Ubuntu\srv\iie-tutor\ (o la carpeta de usuario correspondiente). Dale click a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural.
 
