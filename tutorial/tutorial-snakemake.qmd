@@ -3,6 +3,7 @@ title: "Tutorial de Automatización con Snakemake y RStudio"
 subtitle: "Modelado Geoespacial para la Gestión de la Integridad Ecosistémica"
 author: "Laboratorio de Integridad Ecosistémica"
 date: "2026-05-29"
+engine: knitr
 ---
 
 ## 1. Introducción y Contexto del Proyecto
@@ -18,6 +19,7 @@ Para ejecutar Snakemake desde RStudio en este servidor, nos debemos asegurar de 
 * **Librerías principales:** `snakemake`, `sf`, `terra`, `quarto` 
 
 ::: {.callout-caution collapse="true"}
+
 ### Preparación
 
 Crear el directorio general, asignar acceso al grupo y definir permisos:
@@ -42,7 +44,18 @@ ls -ld /srv/iie-tutor
 sudo nano /etc/bash.bashrc
 ```
 
-Shell de verificación de que todo está preparado (`nano check_iie_env.sh`)
+Dado que trabajaremos en un servidor centralizado sobre WSL, es fundamental que cada usuario mantenga la propiedad y los permisos correctos sobre sus archivos para evitar errores de denegación de acceso (`Permission denied`) al ejecutar las tareas automatizadas.
+
+Para evitar la vulnerabilidad de usar chmod 777 (que permite a cualquier usuario de la red borrar nuestros archivos), hemos configurado el espacio de trabajo `/srv/iie-tutor` utilizando el estándar `POSIX` avanzado para colaboración. La configuración se basa en un trípode de seguridad:
+
+1. **El Grupo Propietario (`chown root:analistas`)**. Al hacer que root sea el dueño, evitamos que un usuario por error borre la carpeta principal. Al asignar el grupo *analistas*, le damos las llaves del reino a nuestro equipo.
+2. **La Magia del SetGID (chmod 2775)**. Ese número 2 al principio es el secreto mejor guardado de Linux. Se llama Set Group ID (SGID). Normalmente, si el *Usuario A* crea un archivo, hereda el grupo personal de *Usuario A*. Con el bit `SGID` activado, la carpeta se vuelve un "molde forzado": Cualquier archivo o carpeta que se cree dentro de `/srv/iie-tutor` heredará automáticamente el *grupo analistas* y sus permisos, sin importar quién lo haya creado.
+3. **La Máscara de Red (umask 002)**. Por defecto, Linux usa la máscara **022**, lo que significa que los archivos nuevos nacen como lectura/escritura para el creador, pero solo lectura para el resto (**644**).
+Al **agregar `umask 002` a `/etc/bash.bashrc`**, obligamos a que todo archivo nuevo nazca con permisos **664** (*Lectura y Escritura para todo el grupo analistas*).Resultado Final: Octavio puede crear un script de R, Martha puede editarlo, y Maricruz puede ejecutarlo, sin que nadie tenga que pedir permisos ni usar `sudo` o **777** jamás.
+
+#### Shell de verificación 
+
+Para simplificarnis la vida y checar que todo está preparado, conviene preparar un script auxiliar (`nano check_iie_env.sh`), con el siguiente contenido. 
 
 ```bash
 #!/usr/bin/env bash
@@ -100,7 +113,7 @@ umask
 echo "✅ Verificación terminada"
 ```
 
-Con permisos:
+Con permisos de ejecución:
 
 ```bash
 chmod +x check_iie_env.sh 
@@ -125,7 +138,7 @@ rm quarto-1.4.555-linux-amd64.deb
 quarto --version
 ```
 
-### Habilitar **R** el entorno compartido qgis_env
+#### Habilitar **R** ene el entorno compartido qgis_env
 
 Hay que preparar todo lo necesario para que el renderizado con **Quarto** pueda operar los bloques {{{r}}} localmente en **WSL**. Para evitar conflictos, montamos una versión apropiada de **R** y aseguramos que los componentes necesarios de *Markdown* y demás bibliotecas estén disponibles directamente dentro del ambiente micromamba geoespacial:
 
@@ -135,7 +148,7 @@ Hay que preparar todo lo necesario para que el renderizado con **Quarto** pueda 
 micromamba activate qgis_env
 
 # 2. Instalar R-Base, dependencias de renderizado (Knitr/RMarkdown) y paquetes del tutorial
-micromamba install -c conda-forge r-base r-codetools r-knitr r-rmarkdown r-sf r-ggplot2 r-dplyr r-readr -y
+micromamba install -c conda-forge r-base r-codetools r-knitr r-rmarkdown r-sf r-ggplot2 r-dplyr r-readr r-pacman r-terra -y
 ```
 
 ::: 
@@ -171,11 +184,7 @@ Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz) trabajar�
 Al usar `$USER` los comandos substituiran esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz` o `equihuam`). Lo hará en cualquier comando en el que aparecza.
 
 
-### Opción A: crear directorios desde terminal.
-
-Dado que trabajamos en un servidor centralizado sobre WSL, es fundamental que cada usuario mantenga la propiedad y los permisos correctos sobre sus archivos para evitar errores de denegación de acceso (`Permission denied`) al ejecutar las tareas automatizadas.
-
-Por seguridad: Nunca utilices chmod 777 en directorios compartidos del servidor. El estándar 755 para carpetas y 644 para archivos garantiza la estabilidad de los flujos de trabajo sin comprometer la seguridad del almacenamiento SSD compartido.
+### Crear directorios desde la terminal.
 
 Abre la pestaña **Terminal** en RStudio y ejecuta el siguiente bloque de comandos para construir la estructura base del proyecto:
 
@@ -199,33 +208,8 @@ tree /srv/iie-tutor/$USER-iie/
 
 ```
 
-### Opción B: Crear directorios con el Explorador de Windows
 
-Si prefieres interactuar de forma gráfica, puedes usar el explorador de archivos de Windows, aunque no acaba siendo enteramente práctico:
-
-1. Abre el **Explorador de Archivos** de Windows.
-2. En la barra de direcciones superior, escribe `\\wsl$` y presiona Enter.
-3. Navega a la ruta: `Ubuntu` $\rightarrow$ `srv` $\rightarrow$ `iie-tutor`.
-4. Entra a tu carpeta `$USER-iie` (creala si no existe) y genera dentro las carpetas: `config`, `scripts`, `reportes`, `datos`, `procesados` y `resultados`.
-
-
-### Asignación de Permisos en Linux
-
-La razón por la que el uso del explorador no es tan práctico es porque la asignación de permisos no está accesible ahí. Por esta razón, puede ocurrir que las carpetas nieguen el acceso (`Permission denied`) a Snakemake cuando intente escribir los mapas o procesar tablas. Para evitar este problema deberás ejecutar los siguientes comandos de control en la Terminal:
-
-```bash
-# 1. Declararte dueña absoluta de tu espacio de trabajo
-sudo chown -R $USER:$USER /srv/iie-tutor/$USER-iie/
-
-# 2. Asignar permisos estándar de lectura, escritura y ejecución a las carpetas
-find /srv/iie-tutor/$USER-iie/ -type d -exec chmod 755 {} \;
-
-# 3. Asignar permisos de lectura y escritura a los archivos
-find /srv/iie-tutor/$USER-iie/ -type f -exec chmod 644 {} \;
-
-```
-
-### Crear un proyecto RStudio
+### Operar desde un proyecto RStudio 
 
 Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory.Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, pega la ruta: \\wsl.localhost\Ubuntu\srv\iie-tutor\ (o la carpeta de usuario correspondiente). Dale click a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural.
 
@@ -235,8 +219,10 @@ El archivo `config/config.yaml` se usa para especificar los parámetros del mode
 
 ```yaml
 
-# Parámetros dinámicos del análisis
-resolucion_pixel: 1000  # Tamaño del píxel de la retícula en metros
+# Parámetros de Resolución Espacial
+resolucion_vectorial: 50000    # Metros (Para la Rama 1: Piloto local)
+resolucion_raster: 50000     # Metros (Para la Rama 2: Nacional Big Data - 100km para la prueba)
+fondo_oscuro: true
 
 # Insumos y salidas del flujo usando rutas relativas al Snakefile
 datos_entrada: "datos/registros_base.csv"
@@ -254,61 +240,63 @@ salidas:
 Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este archivo le indica a `Snakemake`  cómo conectar las entradas y salidas de las 4 tareas del ejercicio de capacitación.
 
 ```python
-# Cargar el archivo de configuración local
+
+
+# Cargar la configuración
 configfile: "config/config.yaml"
 
-# Regla objetivo (lo que queremos obtener al final)
-rule target:
+# =====================================================================
+# REGLA MAESTRA
+# =====================================================================
+rule all:
     input:
-        config["salidas"]["reporte_final"]
-
-# Tarea 1: Leer datos y filtrar campos obligatorios
+        "resultados/reporte_resumen.html"
+        
+# =====================================================================
+# RAMA 1: EL ENFOQUE BÁSICO (Vectorial - Geopackage) {etapa 1}
+# =====================================================================
 rule leer_datos:
-    input:
-        csv = config["datos_entrada"]
-    output:
-        csv_filtrado = "procesados/datos_filtrados.csv"
-    script:
-        "scripts/1_leer_datos.R"
+    input: csv = config["datos_entrada"]
+    output: csv_filtrado = "procesados/datos_filtrados.csv"
+    script: "scripts/1_leer_datos.R"
 
-# Tarea 2: Construir tabla agregada de atributos
 rule construir_tabla:
-    input:
-        csv_filtrado = "procesados/datos_filtrados.csv"
-    output:
-        tabla_resumen = config["salidas"]["tabla_limpia"]
-    script:
-        "scripts/2_construir_tabla.R"
+    input: csv_filtrado = "procesados/datos_filtrados.csv"
+    output: tabla_resumen = config["salidas"]["tabla_limpia"]
+    script: "scripts/2_construir_tabla.R"
 
-# Tarea 3: Construir Geopackage vectorial con la retícula variable
 rule construir_geopackage:
-    input:
-        tabla_resumen = config["salidas"]["tabla_limpia"]
-    output:
-        gpkg = config["salidas"]["gpkg_reticula"]
-    params:
-        res = config["resolucion_pixel"]
-    script:
-        "scripts/3_crear_reticula.py"
+    input: csv_puntos = "procesados/datos_filtrados.csv"
+    output: gpkg = config["salidas"]["gpkg_reticula"]
+    params: res = config["resolucion_vectorial"]
+    script: "scripts/3_crear_reticula.py"
 
-# Tarea 4: Generar reporte dinámico de Quarto
-rule generar_reporte:
+rule generar_reporte_vectorial:
     input:
         gpkg = config["salidas"]["gpkg_reticula"],
         qmd = "reportes/resumen_atributos.qmd"
     output:
-        html = config["salidas"]["reporte_final"]
+        # PREPARACIÓN PARA REPORTE: Envolver lo que quieras con report()
+        html = "resultados/reporte_resumen.html"
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        oscuro_flag = "true" if config.get("fondo_oscuro", False) else "false",
+        res = config["resolucion_vectorial"]
     shell:
-        "quarto render {input.qmd} --to html --output {output.html}"
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P oscuro_reporte:{params.oscuro_flag} -P resolucion:{params.res}
+        mv reportes/resumen_atributos.html {output.html}
+        """
 
 ```
 
 
-## 6. Scripts de las Tareas (`scripts/`)
+## 6. Scripts de las Tareas 
 
 ### Tarea 1: `scripts/1_leer_datos.R`
 
-```R
+```{.r}
+
 library(readr)
 library(dplyr)
 
@@ -323,9 +311,11 @@ write_csv(datos_filtrados, snakemake@output[["csv_filtrado"]])
 
 ```
 
+
+
 ### Tarea 2: `scripts/2_construir_tabla.R`
 
-```R
+```{.r}
 library(readr)
 library(dplyr)
 
@@ -342,32 +332,63 @@ tabla_atributos <- datos_f %>%
 
 write_csv(tabla_atributos, snakemake@output[["tabla_resumen"]])
 
+
 ```
 
 ### Tarea 3: `scripts/3_crear_reticula.py`
 
 ```python
-import geopandas as gpd
+
 import pandas as pd
-from shapely.geometry import box
+import geopandas as gpd
+from shapely.geometry import Point, box
 import numpy as np
+import shapely.wkt
 
-# Snakemake expone un objeto nativo en Python para capturar entradas y parámetros
-input_csv = snakemake.input["tabla_resumen"]
+# 1. Capturar parámetros de Snakemake
+input_csv = snakemake.input["csv_puntos"]
 output_gpkg = snakemake.output["gpkg"]
-pixel_size = snakemake.params["res"]
+pixel_size_metros = snakemake.params["res"]
 
-# Generar malla espacial ficticia basada en el tamaño de pixel parametrizado
-xmin, ymin, xmax, ymax = -118.0, 14.0, -86.0, 33.0
-cols = np.arange(xmin, xmax, pixel_size / 111000)
-rows = np.arange(ymin, ymax, pixel_size / 111000)
+res_grados = pixel_size_metros / 111000.0
 
-polygons = [box(x, y, x + (pixel_size/111000), y + (pixel_size/111000)) for x in cols for y in rows]
-grid = gpd.GeoDataFrame({'geometry': polygons}, crs="EPSG:4326")
-grid['integridad_simulada'] = np.random.uniform(0, 1, len(grid))
+# 2. Leer los datos reales
+df = pd.read_csv(input_csv)
 
-# Exportar el Geopackage
+# Detectar el nombre correcto de la columna automáticamente
+col_valor = 'valor_iie' if 'valor_iie' in df.columns else 'valor_indice'
+
+# Convertir a geometrías espaciales
+geometrias = [Point(xy) for xy in zip(df['longitud'], df['latitud'])]
+gdf = gpd.GeoDataFrame(df, geometry=geometrias, crs="EPSG:4326")
+
+# 3. Función matemática para encajar el punto en una cuadrícula exacta
+def create_pixel_box(point, res):
+    # Redondea la coordenada hacia abajo para "anclar" el píxel en una malla global
+    x_snap = np.floor(point.x / res) * res
+    y_snap = np.floor(point.y / res) * res
+    return box(x_snap, y_snap, x_snap + res, y_snap + res)
+
+# Transformar cada punto en un polígono cuadrado
+gdf['geometry'] = gdf.geometry.apply(lambda p: create_pixel_box(p, res_grados))
+
+# 4. Disolver (Agrupar) píxeles superpuestos
+# Si dos registros caen dentro del mismo cuadrado, promediamos su valor
+gdf['geom_wkt'] = gdf.geometry.apply(lambda g: g.wkt) # Convertir a texto para poder agrupar
+grid = gdf.groupby('geom_wkt').agg({col_valor: 'mean'}).reset_index()
+
+# Reconstruir el GeoDataFrame
+grid['geometry'] = grid['geom_wkt'].apply(shapely.wkt.loads)
+grid = gpd.GeoDataFrame(grid, geometry='geometry', crs="EPSG:4326")
+grid.drop(columns=['geom_wkt'], inplace=True)
+
+# Renombrar para que el reporte Quarto lo encuentre con el mismo nombre
+grid.rename(columns={col_valor: 'integridad_simulada'}, inplace=True)
+
+# 5. Exportar el Geopackage
 grid.to_file(output_gpkg, driver="GPKG", layer="reticula_integridad")
+print(f"Reticula vectorial creada con {len(grid)} polígonos reales.")
+
 
 ```
 
@@ -376,49 +397,129 @@ grid.to_file(output_gpkg, driver="GPKG", layer="reticula_integridad")
 
 Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final.
 
-```markdown 
+````{markdown} 
 ---
 title: "Análisis de Atributos del Mapa Geoespacial"
-format: html
+
+format:
+  html:
+    embed-resources: true
+
+knitr:
+  opts_chunk:
+    dev: "ragg_png"
+    
+params:
+  oscuro_reporte: false
+  resolucion: "No definida"
 ---
 
-
-## Resultados de la Simulación
+### Resultados de la Simulación Local (Vectorial)
 
 Este reporte ha sido renderizado automáticamente por Snakemake tras actualizar las reglas del flujo.
 
-```{{{r}}}
+```{.r}
+#| label: lee-datos
 #| echo: false
 #| message: false
-library(sf)
-library(ggplot2)
+
+pacman::p_load(sf, ggplot2, dplyr)
 
 # Lectura relativa remontando un nivel hacia la raíz
-mapa_reticula <- st_read("../resultados/reticula_variable.gpkg", layer = "reticula_integridad", quiet = TRUE)
+ruta_gpkg <- "../resultados/reticula_variable.gpkg"
+mapa_reticula <- st_read(ruta_gpkg, layer = "reticula_integridad", quiet = TRUE)
 
+# Capturar los parámetros inyectados por Snakemake
+es_oscuro <- as.logical(params$oscuro_reporte)
+res_metros <- params$resolucion
+
+```
+
+### 🗄️ Metadatos del Procesamiento
+
+```{.r}
+#| label: metadatos
+#| echo: false
+#| results: asis
+
+# Extraer propiedades físicas del archivo
+info_archivo <- file.info(ruta_gpkg)
+tamano_mb <- round(info_archivo$size / (1024), 2)
+fecha_creacion <- info_archivo$mtime
+
+cat("- **Archivo Principal:** `", basename(ruta_gpkg), "`\n")
+cat("- **Formato de Almacenamiento:** Geopackage (Polígonos Vectoriales)\n")
+cat("- **Tamaño en Disco:**", tamano_mb, "kB\n")
+cat("- **Resolución (Tamaño de polígono):**", res_metros, "metros\n")
+cat("- **Generado el:**", format(fecha_creacion, "%Y-%m-%d %H:%M:%S"), "\n")
 ```
 
 ### Estadísticas descriptivas del Índice
 
-```{{{r}}}
+```{.r}
+#| label: resumen
 #| echo: false
-summary(mapa_reticula$integridad_simulada)
+
+mapa_reticula %>% 
+  select(integridad_simulada) %>% 
+  summary()
 
 ```
+
+
+### Mapa de Integridad Ecosistémica
+
+A continuación se observa la proyección espacial de la retícula generada por el motor de Python.
+
+```{.r}
+#| label: mapa
+#| echo: false
+#| fig-cap: "Distribución espacial del índice simulado (Sin bordes para evitar superposición)."
+
+p_mapa <- ggplot(mapa_reticula) +
+  geom_sf(aes(fill = integridad_simulada), color = NA) +
+  scale_fill_viridis_c(option = "viridis", name = "Índice de\nIntegridad")
+
+if (es_oscuro) {
+  p_mapa <- p_mapa + theme_void() + 
+       theme(
+         plot.background = element_rect(fill = "#1e1e1e", color = NA),
+         legend.text = element_text(color = "white"),
+         legend.title = element_text(color = "white")
+       )
+} else {
+  p_mapa <- p_mapa + theme_void()
+}
+
+p_mapa
+```
+
 
 ### Histograma de Distribución Espacial
 
-```{{{r}}}
+```{.r}
+#| label: histograma
 #| echo: false
-ggplot(mapa_reticula) +
+p_hist <- ggplot(mapa_reticula) +
   geom_histogram(aes(x = integridad_simulada), bins = 25, fill = "steelblue", color = "white") +
-  theme_minimal()
+  labs(x = "Integridad Simulada", y = "Frecuencia")
 
-```
+if (es_oscuro) {
+  p_hist <- p_hist + theme_dark() + 
+       theme(
+         plot.background = element_rect(fill = "#1e1e1e", color = NA),
+         text = element_text(color = "white"),
+         panel.background = element_rect(fill = "#2d2d2d")
+       )
+} else {
+  p_hist <- p_hist + theme_minimal()
+}
 
+p_hist
 ``` 
 
----
+````   
+
 
 ## 8. Ejecución desde RStudio
 
@@ -443,7 +544,7 @@ El procesador del equipo de Octavio (**Intel Core i7-14700KF**) tiene una arquit
 Para efectos de Snakemake, **tienes hasta 28 núcleos disponibles** (potencial `--cores 28`).
 
 
-### 1. El Cuello de Botella Oculto: La Memoria RAM
+### a) El Cuello de Botella Oculto: La Memoria RAM
 
 Aquí es donde entra la experiencia técnica. Aunque tienes 28 "cerebros" para procesar, **tu límite real son tus 32 GB de RAM**.
 
@@ -453,7 +554,7 @@ En flujos de trabajo geoespaciales con R (usando librerías como `sf`, `terra` o
 * El sistema se quedará sin memoria, WSL entrará en pánico y matará el proceso de Snakemake abruptamente.
 
 
-### 2. ¿Cuántos núcleos conviene utilizar? 
+### b) ¿Cuántos núcleos conviene utilizar? 
 
 Dado el hardware disponible (28 hilos de CPU y 32 GB de RAM), las recomendaciones para este servidor son:
 
@@ -467,7 +568,490 @@ Utilizar la mitad exacta de tus hilos lógicos es una regla de oro en el modelad
 **Lo que nunca debes hacer:**
 Evita usar `--cores 24` o `--cores 28` a menos que estés corriendo scripts sumamente sencillos (como limpiar texto o mover archivos) que sepas que consumen menos de 500 MB de RAM por proceso.
 
-### Un truco extra
+### c) Un truco extra
 
 Si quieres monitorear en tiempo real cómo se están comportando los núcleos del equipo y la RAM mientras los usuarios corren el tutorial de Snakemake, abre una terminal de WSL y ejecuta el comando `htop`. Verás una gráfica espectacular con las 28 barras del i7 trabajando como una orquesta, y una barra indicando cuánta de tus 32GB de RAM se está llenando.
+
+
+
+## 10. Procesar tareas más complejas
+
+### Cambiar el enfoque: Ráster vs Vectorial
+
+Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (grandes esoacios y/o alta resolución). Es un error común sefuir la intuición de usar un Geopackage vectorial para guardar una colección de datos referidos a una cuadrícula regular. Una colección vectorial de cuadrados regulares guarda 4 coordenadas completas para cada entidad, además de los datos de topología y  metadatos variados. La cobertura de México completa  a una resolución de 250m tendría un peso estimado de ~15 a 30 GB cinstituida por unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice del pixel. La posición espacial se infiere por cálculo simple, referido a la matriz que forma la colección de pixeles. Hagamos un script (`4_crear_raster_regional.py`) que aborde la tarea que ya hicimos en vectores, pero que ahora volveremos a hacer en formato ráster.
+  
+
+```python
+
+import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Point
+import rasterio
+from rasterio.transform import from_bounds
+from rasterio.features import rasterize
+import numpy as np
+
+# =====================================================================
+# 1. Capturar parámetros dinámicos orquestados por Snakemake
+# =====================================================================
+input_csv = snakemake.input["csv_region"]
+output_tif = snakemake.output["tif_region"]
+pixel_size_metros = snakemake.params["res"] # Ej: 50000 o 250
+
+# Conversión aproximada a grados (solo para EPSG:4326)
+res_grados = pixel_size_metros / 111000.0
+
+# =====================================================================
+# 2. Leer datos y convertirlos a Geometría Espacial
+# =====================================================================
+# Leemos SOLO la fracción regional que nos mandó Snakemake
+df = pd.read_csv(input_csv)
+
+# Convertir las coordenadas en objetos geométricos reales (Puntos)
+geometrias = [Point(xy) for xy in zip(df['longitud'], df['latitud'])]
+gdf = gpd.GeoDataFrame(df, geometry=geometrias, crs="EPSG:4326")
+
+# =====================================================================
+# 3. Definir la "Caja Espacial" (Bounding Box) y la Matriz
+# =====================================================================
+# Obtener los límites extremos de estos puntos específicos
+xmin, ymin, xmax, ymax = gdf.total_bounds
+
+# Expandir un margen de seguridad para que ningún punto quede fuera
+xmin, ymin = xmin - res_grados, ymin - res_grados
+xmax, ymax = xmax + res_grados, ymax + res_grados
+
+# Calcular las dimensiones del "lienzo" fotográfico (filas y columnas)
+width = int(np.ceil((xmax - xmin) / res_grados))
+height = int(np.ceil((ymax - ymin) / res_grados))
+
+# Crear la "Transformación Afín": La brújula matemática que le dice al GeoTIFF 
+# en qué coordenada de la Tierra cae exactamente el píxel [0,0]
+transform = from_bounds(xmin, ymin, xmax, ymax, width, height)
+
+# =====================================================================
+# 4. El proceso de Rasterización (Quemar los vectores en la matriz)
+# =====================================================================
+# Extraemos pares de (geometría, valor_iie)
+shapes = ((geom, value) for geom, value in zip(gdf.geometry, gdf['valor_indice']))
+
+# rasterize() de Rasterio hace el trabajo sucio en C++. Convierte los puntos en 
+# una matriz Numpy hiper-ligera. Los píxeles vacíos tendrán valor -9999.
+matriz_raster = rasterize(
+    shapes=shapes,
+    out_shape=(height, width),
+    transform=transform,
+    fill=-9999,
+    dtype=rasterio.float32
+)
+
+# =====================================================================
+# 5. Exportar el Ráster al Disco (SSD)
+# =====================================================================
+with rasterio.open(
+    output_tif, 'w',
+    driver='GTiff',
+    height=height, width=width,
+    count=1, 
+    dtype=rasterio.float32,
+    crs='EPSG:4326',
+    transform=transform,
+    nodata=-9999,          # VITAL para que gdal_merge haga el fondo transparente
+    compress='deflate'     # VITAL en BigData: Comprime los vacíos y ahorra 80% de peso
+) as dst:
+    dst.write(matriz_raster, 1)
+
+print(f"Éxito: GeoTIFF regional creado [{width}x{height} píxeles]")
+
+
+```
+
+
+Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así:
+
+
+````{markdown}
+---
+title: "Análisis Nacional de Integridad Ecosistémica"
+format:
+  html:
+    embed-resources: true
+
+knitr:
+  opts_chunk:
+    dev: "ragg_png"
+
+params:
+  oscuro_reporte: false
+  resolucion: "No definida" 
+---
+
+### Resultados de la Simulación Nacional (Big Data)
+
+Este reporte ha sido renderizado automáticamente por Snakemake tras recolectar y fusionar los datos procesados en paralelo (Scatter-Gather).
+
+
+```{.r}
+#| label: lee-datos
+#| echo: false
+#| message: false
+#| warning: false
+
+library(terra)
+library(tidyterra)
+library(ggplot2)
+
+# 1. rast() crea el túnel de lectura directa al disco sin saturar la RAM
+ruta_tif <- "../resultados/integridad_mexico.tif"
+mapa_nacional <- rast(ruta_tif)
+
+# Asignar un nombre limpio a la capa ráster
+names(mapa_nacional) <- "integridad_simulada"
+
+# Capturar los parámetros inyectados
+es_oscuro <- as.logical(params$oscuro_reporte)
+res_metros <- params$resolucion
+```
+
+### 🗄️ Metadatos del Procesamiento
+
+```{.r}
+#| label: metadatos
+#| echo: false
+#| results: asis
+
+info_archivo <- file.info(ruta_tif)
+tamano_mb <- round(info_archivo$size / (1024), 2)
+fecha_creacion <- info_archivo$mtime
+
+cat("- **Archivo Principal:** `", basename(ruta_tif), "`\n")
+cat("- **Formato de Almacenamiento:** GeoTIFF (Ráster Matricial)\n")
+cat("- **Tamaño en Disco:**", tamano_mb, "kB (Comprimido con Deflate)\n")
+cat("- **Resolución (Tamaño de píxel):**", res_metros, "metros\n")
+cat("- **Generado el:**", format(fecha_creacion, "%Y-%m-%d %H:%M:%S"), "\n")
+```
+
+
+### El Cambio de Paradigma: Ráster vs Vectorial
+
+Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (alta resolución), es usualmente un error muy común usar un Geopackage vectorial para guardar la cuadrícula.Un polígono vectorial cuadrado guarda 4 coordenadas completas, datos de topología y metadatos. México completo a una resolución de 250m tendría un peso estimado de ~15 a 30 GB para unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice. La posición espacial se infiere por la matemática de la matriz.
+
+
+### Estadísticas descriptivas del Índice
+
+
+```{.r}
+#| label: resumen
+#| echo: false
+summary(values(mapa_nacional), na.rm = TRUE)
+```
+
+
+### Mapa de Integridad Ecosistémica (Streaming)
+
+En lugar de cargar millones de datos a la memoria, geom_spatraster extrae inteligentemente al vuelo (on-the-fly) solo los píxeles necesarios para empatar con la resolución de la pantalla.
+
+```{.r}
+#| label: mapa
+#| echo: false
+#| fig-cap: "Distribución espacial a nivel nacional (Streaming de SSD a Gráficos)."
+
+p_mapa <- ggplot() +
+  geom_spatraster(data = mapa_nacional, maxcell = 2e6) + 
+  scale_fill_viridis_c(option = "viridis", na.value = "transparent", name = "Índice de\nIntegridad")
+
+if (es_oscuro) {
+  p_mapa <- p_mapa + theme_void() + 
+       theme(
+         plot.background = element_rect(fill = "#1e1e1e", color = NA),
+         legend.text = element_text(color = "white"),
+         legend.title = element_text(color = "white")
+       )
+} else {
+  p_mapa <- p_mapa + theme_void()
+}
+
+p_mapa
+```
+
+  
+### Histograma de Distribución Espacial (Muestreo)
+
+Para crear el histograma sin desbordar la memoria, extraemos una muestra espacial sistemática del Ráster. 
+
+```{.r}
+#| label: histograma
+#| echo: false
+#| warning: false
+
+# Extraer muestra representativa y convertirla a DataFrame para ggplot
+df_muestra <- as.data.frame(spatSample(mapa_nacional, 
+                                       size = 100000, 
+                                       method = "random", 
+                                       na.rm = TRUE)) %>% 
+  filter(integridad_simulada > 0)
+
+p_hist <- ggplot(df_muestra) +
+  geom_histogram(aes(x = integridad_simulada), 
+                 bins = 25, 
+                 fill = "steelblue", 
+                 color = "white") +
+  labs(x = "Integridad Simulada", y = "Frecuencia (Muestra)")
+
+if (es_oscuro) {
+  p_hist <- p_hist + theme_dark() +
+       theme(
+         plot.background = element_rect(fill = "#1e1e1e", color = NA),
+         text = element_text(color = "white"),
+         panel.background = element_rect(fill = "#2d2d2d")
+       )
+} else {
+  p_hist <- p_hist + theme_minimal()
+}
+
+p_hist
+```
+````
+
+Ahora sólo resta ajustar `snakefile` para incorporar las nuevas capacidades.
+Con esta nueva opción de cómputo en su lugar, hay que regresar al archivo `snakefile` y actualizarlo para incorporar la nueva capacidad y aprovecharla para producir nuevos resultados. Deberá quedar así:
+
+```python
+
+# Cargar la configuración
+configfile: "config/config.yaml"
+
+# Define la lista para análisis tipo Big Data {etapa 2}
+REGIONES = ["Centro", "Occidente", "Sureste", "Noroeste", "Sur", "Noreste"]
+
+
+# =====================================================================
+# REGLA MAESTRA
+# =====================================================================
+rule all:
+    input:
+        "resultados/reporte_resumen.html",
+        "resultados/reporte_nacional.html" {etapa 2}
+
+# =====================================================================
+# RAMA 1: EL ENFOQUE BÁSICO (Vectorial - Geopackage) {etapa 1}
+# =====================================================================
+rule leer_datos:
+    input: csv = config["datos_entrada"]
+    output: csv_filtrado = "procesados/datos_filtrados.csv"
+    script: "scripts/1_leer_datos.R"
+
+rule construir_tabla:
+    input: csv_filtrado = "procesados/datos_filtrados.csv"
+    output: tabla_resumen = config["salidas"]["tabla_limpia"]
+    script: "scripts/2_construir_tabla.R"
+
+rule construir_geopackage:
+    input: csv_puntos = "procesados/datos_filtrados.csv"
+    output: gpkg = config["salidas"]["gpkg_reticula"]
+    params: res = config["resolucion_vectorial"]
+    script: "scripts/3_crear_reticula.py"
+
+rule generar_reporte_vectorial:
+    input:
+        gpkg = config["salidas"]["gpkg_reticula"],
+        qmd = "reportes/resumen_atributos.qmd"
+    output:
+        # PREPARACIÓN PARA REPORTE: Envuelve lo que quieras con report() {etapa 3}
+        html = "resultados/reporte_resumen.html" 
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        oscuro_flag = "true" if config.get("fondo_oscuro", False) else "false",
+        res = config["resolucion_vectorial"]
+    shell:
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P oscuro_reporte:{params.oscuro_flag} -P resolucion:{params.res}
+        mv reportes/resumen_atributos.html {output.html}
+        """
+
+# =====================================================================
+# RAMA 2: EL ENFOQUE BIG DATA (Ráster + Scatter-Gather) {etapa 2}
+# =====================================================================
+rule segmentar_datos:
+    input: csv = "datos/registros_base.csv"
+    output: archivos = expand("procesados/datos_{region}.csv", region=REGIONES)
+    script: "scripts/0_segmentar_csv.R"
+
+rule procesar_region_raster:
+    input: csv_region = "procesados/datos_{region}.csv"
+    output: tif_region = temp("procesados/reticula_{region}.tif")
+    params: res = config["resolucion_raster"]
+    script: "scripts/4_crear_raster_regional.py"
+
+rule fusionar_mexico:
+    input: tifs = expand("procesados/reticula_{region}.tif", region=REGIONES)
+    output: tif_nacional = "resultados/integridad_mexico.tif"
+    shell:
+        "gdal_merge.py -o {output.tif_nacional} -of GTiff -co COMPRESS=DEFLATE {input.tifs}"
+
+rule reporte_nacional_raster:
+    input:
+        tif = "resultados/integridad_mexico.tif",
+        qmd = "reportes/resumen_nacional.qmd"
+    output:
+        # OTRO SEGMENTO PARA EL REPORTE {etapa 3}
+        html = "resultados/reporte_nacional.html"
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        res = config["resolucion_raster"]
+    shell:
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P resolucion:{params.res}
+        mv reportes/resumen_nacional.html {output.html}
+        """
+
+```
+
+## 11. El Reporte Maestro de Snakemake
+
+Una vez que Snakemake ha procesado exitosamente todos nuestros datos y Quarto ha generado nuestros reportes (\*.html), existe un paso final que con Snakemake resulta muy sencillo de producir: La auto-documentación técnica.
+
+Snakemake puede generar un reporte interactivo final que encapsula:
+
+ + Las estadísticas y tiempos de ejecución. 
+ + El código exacto de cada script (\*.R y \*.py) que se usó en esta corrida. 
+ + El Grafo Acíclico Dirigido (DAG) interactivo. 
+ + Nuestros reportes de Quarto incrustados, gracias a que en nuestro Snakefile marcamos nuestras salidas usando la función report(..., category="Reportes de Integridad").
+ 
+Para *enchular* un poco este reporte se puede preparar un sencillo texto en formato \*.rst
+
+```rst
+
+Auditoría de Ingeniería de Datos:
+=================================
+
+Integridad Ecosistémica de México
+---------------------------------
+
+Este reporte interactivo fue generado automáticamente por **Snakemake**
+para el Programa de Gestión de la Integridad Ecosistémica.
+
+
+**Propósito del Flujo de Trabajo**
+---------------------------------
+
+
+Este *pipeline* demuestra la capacidad del servidor **Cazahuate** para
+procesar datos espaciales a dos escalas distintas de forma simultánea:
+
+1.  **Escala Local (Vectorial):** Agrupamiento de puntos en polígonos
+    dentro de un Geopackage.
+2.  **Escala Nacional (Big Data Ráster):** Implementación del patrón
+    *Scatter-Gather* para particionar, procesar en paralelo y fusionar
+    mapas de gran tamaño en formato GeoTIFF.
+
+En la sección lateral izquierda de este documento, bajo la categoría
+**Reportes de Integridad**, podrá encontrar los documentos interactivos
+de **Quarto** con los resultados cartográficos de ambas corridas.
+
+
+```
+
+Nuevamente tienes que regresar a tu `snakefile` para registrar esto y habilitar lo necesario para el reporte. Se trata básicamente de agregar la línea que define el reporte y algunas indicaciones de que productos poner en bajo etiquetas accesibles en la página que se producirá Un ejemplo de esto se vería así:
+
+
+
+```{.python}
+
+# Cargar la configuración
+configfile: "config/config.yaml"
+
+# Define la portada del reporte maestro de Snakemake {etapa 3}
+report: "reportes/reporte_portada.rst"
+
+# Define la lista para análisis tipo Big Data {etapa 2}
+REGIONES = ["Centro", "Occidente", "Sureste", "Noroeste", "Sur", "Noreste"]
+
+
+# =====================================================================
+# REGLA MAESTRA
+# =====================================================================
+rule all:
+    input:
+        "resultados/reporte_resumen.html",
+        "resultados/reporte_nacional.html" {etapa 2}
+
+# =====================================================================
+# RAMA 1: EL ENFOQUE BÁSICO (Vectorial - Geopackage) {etapa 1}
+# =====================================================================
+rule leer_datos:
+    input: csv = config["datos_entrada"]
+    output: csv_filtrado = "procesados/datos_filtrados.csv"
+    script: "scripts/1_leer_datos.R"
+
+rule construir_tabla:
+    input: csv_filtrado = "procesados/datos_filtrados.csv"
+    output: tabla_resumen = config["salidas"]["tabla_limpia"]
+    script: "scripts/2_construir_tabla.R"
+
+rule construir_geopackage:
+    input: csv_puntos = "procesados/datos_filtrados.csv"
+    output: gpkg = config["salidas"]["gpkg_reticula"]
+    params: res = config["resolucion_vectorial"]
+    script: "scripts/3_crear_reticula.py"
+
+rule generar_reporte_vectorial:
+    input:
+        gpkg = config["salidas"]["gpkg_reticula"],
+        qmd = "reportes/resumen_atributos.qmd"
+    output:
+        # PREPARACIÓN PARA REPORTE: Envuelve lo que quieras con report() {etapa 3}
+        html = report("resultados/reporte_resumen.html",   
+                      category="Reportes de Integridad")
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        oscuro_flag = "true" if config.get("fondo_oscuro", False) else "false",
+        res = config["resolucion_vectorial"]
+    shell:
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P oscuro_reporte:{params.oscuro_flag} -P resolucion:{params.res}
+        mv reportes/resumen_atributos.html {output.html}
+        """
+
+# =====================================================================
+# RAMA 2: EL ENFOQUE BIG DATA (Ráster + Scatter-Gather) {etapa 2}
+# =====================================================================
+rule segmentar_datos:
+    input: csv = "datos/registros_base.csv"
+    output: archivos = expand("procesados/datos_{region}.csv", region=REGIONES)
+    script: "scripts/0_segmentar_csv.R"
+
+rule procesar_region_raster:
+    input: csv_region = "procesados/datos_{region}.csv"
+    output: tif_region = temp("procesados/reticula_{region}.tif")
+    params: res = config["resolucion_raster"]
+    script: "scripts/4_crear_raster_regional.py"
+
+rule fusionar_mexico:
+    input: tifs = expand("procesados/reticula_{region}.tif", region=REGIONES)
+    output: tif_nacional = "resultados/integridad_mexico.tif"
+    shell:
+        "gdal_merge.py -o {output.tif_nacional} -of GTiff -co COMPRESS=DEFLATE {input.tifs}"
+
+rule reporte_nacional_raster:
+    input:
+        tif = "resultados/integridad_mexico.tif",
+        qmd = "reportes/resumen_nacional.qmd"
+    output:
+        # OTRO SEGMENTO PARA EL REPORTE {etapa 3}
+        html = report("resultados/reporte_nacional.html", 
+                      category="Reportes de Integridad")
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        res = config["resolucion_raster"]
+    shell:
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P resolucion:{params.res}
+        mv reportes/resumen_nacional.html {output.html}
+        """
+
+```
+
+
+Al hacer esto, el comando simple:  `snakemake --report reporte_auditoria_iie.html` leerá automáticamente tu archivo de presentación, tomará el título principal y lo pondrá en la barra superior del navegador, además de colocar tu texto explicativo en la página principal del reporte.
 
