@@ -148,7 +148,7 @@ Hay que preparar todo lo necesario para que el renderizado con **Quarto** pueda 
 micromamba activate qgis_env
 
 # 2. Instalar R-Base, dependencias de renderizado (Knitr/RMarkdown) y paquetes del tutorial
-micromamba install -c conda-forge r-base r-codetools r-knitr r-rmarkdown r-sf r-ggplot2 r-dplyr r-readr r-pacman r-terra -y
+micromamba install -c conda-forge r-base r-codetools r-knitr r-rmarkdown r-sf r-ggplot2 r-dplyr r-readr r-pacman r-terra r-ragg -y
 ```
 
 ::: 
@@ -404,9 +404,9 @@ print(f"Reticula vectorial creada con {len(grid)} polígonos reales.")
 ```
 
 
-## 7. Documento Quarto para Reporte (`reportes/resumen_atributos.qmd`)
+## 7. Documento Quarto para Reporte 
 
-Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final.
+Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final. Guarde el doxumento de abajo aquí: `reportes/resumen_atributos.qmd`
 
 ````{markdown} 
 ---
@@ -678,7 +678,7 @@ print(f"Éxito: GeoTIFF regional creado [{width}x{height} píxeles]")
 ```
 
 
-Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así:
+Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así (guardadlo en: `reportes/resumen_nacional.qmd`):
 
 
 ````{markdown}
@@ -929,7 +929,7 @@ Snakemake puede generar un reporte interactivo final que encapsula:
  + El Grafo Acíclico Dirigido (DAG) interactivo. 
  + Nuestros reportes de Quarto incrustados, gracias a que en nuestro Snakefile marcamos nuestras salidas usando la función report(..., category="Reportes de Integridad").
  
-Para *enchular* un poco este reporte se puede preparar un sencillo texto en formato \*.rst
+Para *enchular* un poco este reporte se puede preparar un sencillo texto en formato \*.rst, (guárdalo en `reportes/reporte_portada.rst`):
 
 ```rst
 
