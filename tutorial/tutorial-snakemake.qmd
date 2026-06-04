@@ -55,7 +55,7 @@ Al **agregar `umask 002` a `/etc/bash.bashrc`**, obligamos a que todo archivo nu
 
 #### Shell de verificación 
 
-Para simplificarnis la vida y checar que todo está preparado, conviene preparar un script auxiliar (`nano check_iie_env.sh`), con el siguiente contenido. 
+Para simplificarnos la vida y checar que todo está preparado, conviene preparar un script auxiliar (`nano check_iie_env.sh`), con el siguiente contenido. 
 
 ```bash
 #!/usr/bin/env bash
@@ -148,7 +148,7 @@ Hay que preparar todo lo necesario para que el renderizado con **Quarto** pueda 
 micromamba activate qgis_env
 
 # 2. Instalar R-Base, dependencias de renderizado (Knitr/RMarkdown) y paquetes del tutorial
-micromamba install -c conda-forge r-base r-codetools r-knitr r-rmarkdown r-sf r-ggplot2 r-dplyr r-readr r-pacman r-terra -y
+micromamba install -c conda-forge r-base r-codetools r-knitr r-rmarkdown r-sf r-ggplot2 r-dplyr r-readr r-pacman r-terra r-ragg -y
 ```
 
 ::: 
@@ -179,14 +179,25 @@ Para que Snakemake funcione de forma automática y ordenada, el repositorio debe
 
 ## 3. Preparación del Área de Trabajo y Permisos
 
+Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para hacerlo es [RaiDrive](https://www.raidrive.com/). Conviene por ser muy fácil de usar, aunque en la versión sin cargo tiene anuncios, pero pienso que no son demasiado invasivos. Una vez que la tengas lista en tu equipo, deberás crear un acceso virtual como se ilustra en la captura de pantalla. La **IP** local de Octavio es **`10.0.90.182`**, aunque no es fija, podría cambiar de tiempo en tiempo. Una vez que tengas el disco virtual habilitado, lo verás en tu máquina como si tuvieras un disco más. En él harás las operaciones relacionadas con el proyecto IIE-Workflow.
+
+![Disco virtual en el equipo de Octavio](../img/RaiDrive.png)
+
 Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
 
-Al usar `$USER` los comandos substituirán esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz` o `equihuam`). Lo hará en cualquier comando en el que aparecza.
+
+Al usar `$USER` los comandos substituirán esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz`, `pita` o `equihuam`). Lo hará en cualquier comando en el que aparezca.
 
 
 ### Crear directorios desde la terminal.
 
-Abre la pestaña **Terminal** en RStudio y ejecuta el siguiente bloque de comandos para construir la estructura base del proyecto:
+Abre la pestaña **Terminal** en RStudio y entra a la máquina de Octavio con el protocolo ssh:
+
+```bash
+ssh -p 2222 <<tu-user>>@10.0.90.182
+```
+
+Quizás te diga, ¡cuidado te estas conectando a un equipo que no conoces!, o algo parecido. Si le dices que adelante te pedirá entonces tu clave y si todo va bien, estarás enlazada al equipo de Octavio. Cuando ya estés ahí, ejecuta el siguiente bloque de comandos para construir la estructura base del proyecto:
 
 ```bash
 
@@ -209,13 +220,14 @@ tree /srv/iie-tutor/$USER-iie/
 ```
 
 
-### Operar desde un proyecto RStudio 
+### Operar desde un proyecto RStudio  
 
 En preparación para hacer esto será necesario instalar [RaiDrive](https://www.raidrive.com/es/). Con esta herramienta montaremos un acceso al disco del equipo de Octavio, para que desde sus equipos se vea como un disco más. Una vez que lo tengan instalado verán una pantalla de instalación. Elijan la opción NAS/SFTP y apunten a la ip: 10.0.90.182 (aunque esta ip puede cambiar de vez en cuando al apagar el equipo).  El disco virtual que elijan será su punto de interconexión para todo lo que sigue.
 
 ![Configurar RaiDrive](../img/RaiDrive.png)
 
 Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory.Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, pega la ruta: \\wsl.localhost\Ubuntu\srv\iie-tutor\ (o la carpeta de usuario correspondiente). Dale click a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural.
+
 
 ## 4. Configuración del `snakemake`
 
@@ -397,9 +409,9 @@ print(f"Reticula vectorial creada con {len(grid)} polígonos reales.")
 ```
 
 
-## 7. Documento Quarto para Reporte (`reportes/resumen_atributos.qmd`)
+## 7. Documento Quarto para Reporte 
 
-Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final.
+Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final. Guarde el doxumento de abajo aquí: `reportes/resumen_atributos.qmd`
 
 ````{markdown} 
 ---
@@ -582,7 +594,7 @@ Si quieres monitorear en tiempo real cómo se están comportando los núcleos de
 
 ### Cambiar el enfoque: Ráster vs Vectorial
 
-Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (grandes esoacios y/o alta resolución). Es un error común sefuir la intuición de usar un Geopackage vectorial para guardar una colección de datos referidos a una cuadrícula regular. Una colección vectorial de cuadrados regulares guarda 4 coordenadas completas para cada entidad, además de los datos de topología y  metadatos variados. La cobertura de México completa  a una resolución de 250m tendría un peso estimado de ~15 a 30 GB cinstituida por unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice del pixel. La posición espacial se infiere por cálculo simple, referido a la matriz que forma la colección de pixeles. Hagamos un script (`4_crear_raster_regional.py`) que aborde la tarea que ya hicimos en vectores, pero que ahora volveremos a hacer en formato ráster.
+Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (grandes espacios y/o alta resolución). Es un error común seguir la intuición de usar un Geopackage vectorial para guardar una colección de datos referidos a una cuadrícula regular. Una colección vectorial de cuadrados regulares guarda 4 coordenadas completas para cada entidad, además de los datos de topología y  metadatos variados. La cobertura de México completa  a una resolución de 250m tendría un peso estimado de ~15 a 30 GB constituida por unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice del pixel. La posición espacial se infiere por cálculo simple, referido a la matriz que forma la colección de pixeles. Hagamos un script (`4_crear_raster_regional.py`) que aborde la tarea que ya hicimos en vectores, pero que ahora volveremos a hacer en formato ráster.
   
 
 ```python
@@ -671,7 +683,7 @@ print(f"Éxito: GeoTIFF regional creado [{width}x{height} píxeles]")
 ```
 
 
-Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así:
+Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así (guardadlo en: `reportes/resumen_nacional.qmd`):
 
 
 ````{markdown}
@@ -922,7 +934,7 @@ Snakemake puede generar un reporte interactivo final que encapsula:
  + El Grafo Acíclico Dirigido (DAG) interactivo. 
  + Nuestros reportes de Quarto incrustados, gracias a que en nuestro Snakefile marcamos nuestras salidas usando la función report(..., category="Reportes de Integridad").
  
-Para *enchular* un poco este reporte se puede preparar un sencillo texto en formato \*.rst
+Para *enchular* un poco este reporte se puede preparar un sencillo texto en formato \*.rst, (guárdalo en `reportes/reporte_portada.rst`):
 
 ```rst
 
