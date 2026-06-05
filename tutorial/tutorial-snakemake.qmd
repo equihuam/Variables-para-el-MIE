@@ -179,7 +179,7 @@ Para que Snakemake funcione de forma automática y ordenada, el repositorio debe
 
 ## 3. Preparación del Área de Trabajo y Permisos
 
-Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para hacerlo es [RaiDrive](https://www.raidrive.com/). Conviene por ser muy fácil de usar, aunque en la versión sin cargo tiene anuncios, pero pienso que no son demasiado invasivos. Una vez que la tengas lista en tu equipo, deberás crear un acceso virtual como se ilustra en la captura de pantalla. La **IP** local de Octavio es **`10.0.90.182`**, aunque no es fija, podría cambiar de tiempo en tiempo. Una vez que tengas el disco virtual habilitado, lo verás en tu máquina como si tuvieras un disco más. En él harás las operaciones relacionadas con el proyecto IIE-Workflow.
+Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para hacerlo es [RaiDrive](https://www.raidrive.com/). Conviene por ser muy fácil de usar, aunque en la versión sin cargo tiene anuncios, pero pienso que no son demasiado invasivos. Una vez que la tengas lista en tu equipo, deberás crear un acceso virtual como se ilustra en la captura de pantalla. La **IP** local de Octavio es **`10.0.91.48`**, aunque no es fija, podría cambiar de tiempo en tiempo. Una vez que tengas el disco virtual habilitado, lo verás en tu máquina como si tuvieras un disco más. En él harás las operaciones relacionadas con el proyecto IIE-Workflow.
 
 ![Disco virtual en el equipo de Octavio](../img/RaiDrive.png)
 
@@ -194,7 +194,7 @@ Al usar `$USER` los comandos substituirán esa variable automáticamente por el 
 Abre la pestaña **Terminal** en RStudio y entra a la máquina de Octavio con el protocolo ssh:
 
 ```bash
-ssh -p 2222 <<tu-user>>@10.0.90.182
+ssh -p 2200 <<tu-user>>@10.0.91.48
 ```
 
 Quizás te diga, ¡cuidado te estas conectando a un equipo que no conoces!, o algo parecido. Si le dices que adelante te pedirá entonces tu clave y si todo va bien, estarás enlazada al equipo de Octavio. Cuando ya estés ahí, ejecuta el siguiente bloque de comandos para construir la estructura base del proyecto:
@@ -219,14 +219,45 @@ tree /srv/iie-tutor/$USER-iie/
 
 ```
 
+### Básicos de linux
+
+#### Home
+
+No existe tal cosa como una referencia al disco al estilo windows (C:/ o D:/). Todo se reduce a una lista de ubicaciones separadas por `/`. Hay muchas de ellas y por conveniencia sólo habitaremos `/srv/` normalmente, pero quizás quieras saber que eres dueña de tu casa, a la que puedes llegar con `cd ~` es una manera corta de decir *Cambia al Directorio `/home/<<user>>`* puedes crear directorios y archivos ahí con bastante libertad, pero también viven ahí datos de tu configuración particular que conviene no alterar si no estas segura de lo que estás haciendo.
+
+Mostrar el contenido de cualquier directorio se logra con `ls` o con `dir`. No son equivalentes ni sinónimos, son dos programitas distintos. Para fines prácticos el `ls` crudo produce una salida como chorizo, algo incómoda. Sí haces esto `ls -l`, entonces te produce una tabla con columnas y colores bastante informativa y cómoda de interpretar. `dir` normalmente no es colorida y por lo demás se comporta parecido a `ls` varían en su batería de opciones.
+
+#### Copiar y mover
+
+El comando para copiar archivos o directorios es el siguiente:
+
+```bash
+cp <origen un archivo, una lista o un directorio> <directorio destino>
+```
+En la mayoría de los casos con esto tendrás suficiente, pero el comando tiene un montón de opciones, a las que puedes llegar, como con cualquier comando, agregando la opción `--help`. Cuando te interese una lista, basta con anotar lo que quieras separando con espacios. Otra cosa que te puede interesar es cambiar el nombre "al llegar", sólo agrega una diagonal después del directorio de destino y escribe el nuevo nombre.
+
+Mover archivos se opera con el siguiente comando:
+
+```bash
+mv <origen> <destino>
+```
+
+Es curioso, pero puedes imaginar que este *mover* es en realidad sólo otro manera de decir *cambia el nombre*, si imaginas que el nombre incluye la ubicación. Así, si escribe en `origen` el nombre de un archivo y en `destino` un directorio, el archivo *viajará* a ese nuevo directorio con el mismo nombre. Si escribes dos nombres, entonces obtendrás un nuevo nombre para el origen en el mismo lugar.
+
 
 ### Operar desde un proyecto RStudio  
 
-En preparación para hacer esto será necesario instalar [RaiDrive](https://www.raidrive.com/es/). Con esta herramienta montaremos un acceso al disco del equipo de Octavio, para que desde sus equipos se vea como un disco más. Una vez que lo tengan instalado verán una pantalla de instalación. Elijan la opción NAS/SFTP y apunten a la ip: 10.0.90.182 (aunque esta ip puede cambiar de vez en cuando al apagar el equipo).  El disco virtual que elijan será su punto de interconexión para todo lo que sigue.
+En preparación para hacer esto podría ser conveniente instalar [RaiDrive](https://www.raidrive.com/es/). Con esta herramienta montaremos un acceso al disco del equipo de Octavio, para que desde sus equipos se vea como un disco más. Una vez que lo tengas instalado verán una pantalla de instalación. Elije la opción NAS/SFTP y apunta a la IP: 10.0.91.48 (aunque esta IP puede cambiar de vez en cuando al apagar el equipo).  El disco virtual que elijas será su punto de interconección para todo lo que sigue.
+
+Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de RaiDrive, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el browser la misma **IP** que te funcione para el **ssh** seguido de **:8787** y contesta lo que te pregunte. ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
+
+![http://10.0.91.48:8787](../img/rstudio.png)
+
+Me encantará saber cuál de todas las opciones que les he preparado les parece más natural y fácil de operar.
 
 ![Configurar RaiDrive](../img/RaiDrive.png)
 
-Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory.Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, pega la ruta: \\wsl.localhost\Ubuntu\srv\iie-tutor\ (o la carpeta de usuario correspondiente). Dale click a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural.
+Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory. Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, elige el la unidad RaiDrive que acabas de creear. Dale clic a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural. Si optas por hacerlo con **RStudio servere**, harás lo mismo, pero será más simple, pues ya estas ubicada en la máquina Linux en la que está ocurriendo todo.
 
 
 ## 4. Configuración del `snakemake`
@@ -411,7 +442,7 @@ print(f"Reticula vectorial creada con {len(grid)} polígonos reales.")
 
 ## 7. Documento Quarto para Reporte 
 
-Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final. Guarde el doxumento de abajo aquí: `reportes/resumen_atributos.qmd`
+Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final. Guarde el documento de abajo aquí: `reportes/resumen_atributos.qmd`
 
 ````{markdown} 
 ---

@@ -1,0 +1,224 @@
+---
+title: "Guía de configuración de WSL para el workflow"
+format: html
+---
+
+## Introducción y Contexto
+
+Este documento constituye la memoria técnica y guía de reproducción paso a paso para la configuración del servidor de procesamiento científico compartido del Instituto, operado sobre **Ubuntu 26.04 LTS dentro de Windows Subsystem for Linux (WSL2)**. 
+
+La arquitectura está diseñada específicamente para soportar el *workflow* automatizado del proyecto **"Gestión de la Integridad Ecosistémica"** en sus tres variantes:
+
+1. Integridad Ecosistémica Urbana.
+2. Integridad de Sistemas Costeros.
+3. Integridad de Ecosistemas Terrestres de México.
+
+El objetivo fundamental de esta configuración es proporcionar un entorno **multiusuario homogéneo, transparente y de alto rendimiento**, donde investigadores (Miguel, Octavio, Martha, Maricruz) puedan interactuar simultáneamente a través de SSH de forma aislada, pero compartiendo de manera óptima las librerías geoespaciales avanzadas (QGIS, Python, GDAL) y el espacio de almacenamiento físico, sin necesidad de configuraciones individuales por cuenta de usuario.
+
+
+## 2. Arquitectura General de la Infraestructura
+
+Para maximizar la tasa de transferencia de datos y asegurar el aislamiento correcto de los componentes de software, el sistema se estructuró dividiendo las responsabilidades del hardware de la siguiente manera:
+
+- **Instalación Base del Motor (`/usr/bin/micromamba`):** El binario ejecutable se aloja de forma nativa en las rutas del sistema para que esté disponible globalmente.
+- **Raíz Compartida de Configuración (`/srv/iie/micromamba`):** Alberga los índices de paquetes, configuraciones del sistema y metadatos del motor de ambientes, fuera de los directorios personales (`~`).
+- **Almacén Centralizado de Ambientes (`/srv/iie/envs/`):** Todos los entornos virtuales (como `qgis_env` y `profiling_env`) viven aquí. Las cuentas de usuario leen y ejecutan estas librerías, evitando la duplicación de espacio en el disco duro.
+- **Zona de Procesamiento Rápido (SSD - Unidad `C:` pero dentro del sistema de archivos WSL):** Las operaciones de alineación de mallas ráster congruentes y la generación de matrices de entrenamiento de las redes bayesianas se ejecutan estrictamente en el SSD para evitar cuellos de botella de entrada/salida (I/O). Aunque posible, se para el cómputo evitará mezclar el uso de datos fuera del entorno Linux/WSL.
+- **Unidad de Datos y Productos (Unidad `D:`):** - `D:/iie/datos`: Contiene las réplicas de datos estables y procesados para ser consumidos por reportes dinámicos de Quarto.
+  - `D:/iie/productos`: Almacenamiento final de los mapas GeoTIFF oficiales producidos por la red bayesiana.
+
+---
+
+## 3. Guía de Configuración Paso a Paso (Reproducción de la Infraestructura)
+
+En caso de reinstalación del servidor o migración a una nueva máquina, ejecute los siguientes bloques de comandos de manera secuencial.
+
+### Paso 1: Limpieza de Instalaciones Previas o Híbridas
+
+Antes de comenzar la instalación limpia, asegure el estado del sistema ingresando como superusuario (`root`) y eliminando cualquier rastro o enlace simbólico corrupto de configuraciones previas en la zona común:
+
+```bash
+sudo -i
+rm -rf /srv/iie/micromamba
+rm -f /usr/bin/micromamba
+rm -f /etc/profile.d/micromamba_init.sh
+
+```
+
+
+### Paso 2: Instalación del Descompresor Base
+
+Ubuntu en sus versiones minimalistas para WSL no incluye soporte nativo para compresión `.tar.bz2`. Instale la herramienta esencial:
+
+```bash
+apt-get update && apt-get install -y bzip2
+
+```
+
+### Paso 3: Descarga y Posicionamiento de Micromamba
+
+Descargue el binario oficial compilado para arquitectura Linux x86_64 directamente hacia el directorio de ejecutables del sistema operativo:
+
+```bash
+curl -Ls [https://micro.mamba.pm/api/micromamba/linux-64/latest](https://micro.mamba.pm/api/micromamba/linux-64/latest) | tar -xvj -C /usr/bin/ bin/micromamba
+
+```
+
+*Nota Crítica:* El comando de extracción por defecto creará un subdirectorio residual (`/usr/bin/bin/micromamba`). Es indispensable moverlo un nivel hacia arriba y limpiar el directorio vacío:
+
+```bash
+mv /usr/bin/bin/micromamba /usr/bin/micromamba
+rmdir /usr/bin/bin
+
+```
+
+Valide la correcta instalación ejecutando de forma directa:
+
+```bash
+micromamba --version
+
+```
+
+*(Debe retornar la versión instalada, por ejemplo, `2.6.2`).*
+
+### Paso 4: Declaración de una Ruta Unificada del Sistema
+
+Para garantizar que el motor de micromamba no intente buscar o crear directorios dentro del `home` de cada usuario, inyecte de manera permanente la ruta común en la configuración global de micromamba:
+
+```bash
+export MAMBA_ROOT_PREFIX="/srv/iie/micromamba"
+micromamba config append envs_dirs /srv/iie/envs --system
+
+```
+
+### Paso 5: Automatización del Arranque Global y el Prompt (`PROMPT_COMMAND`)
+
+Para lograr que cualquier usuario que ingrese por SSH caiga directamente dentro del entorno científico `qgis_env` con las librerías precargadas, y que la terminal redibuje visualmente la etiqueta del entorno de forma obligatoria (saltándose las restricciones de las *login shells* de Bash), cree el script de inicialización global:
+
+```bash
+cat << "EOF" > /etc/profile.d/micromamba_init.sh
+# 1. Variables de la infraestructura comunitaria del instituto
+export MAMBA_ROOT_PREFIX="/srv/iie/micromamba"
+export MAMBA_ENVS_DIRS="/srv/iie/envs"
+
+# 2. Cargar el gancho de la shell de forma dinámica para el usuario actual
+eval "$(micromamba shell hook --shell bash --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+
+# 3. Activar el entorno científico por defecto
+if [ -d "/srv/iie/envs/qgis_env" ]; then
+    micromamba activate /srv/iie/envs/qgis_env
+    export CONDA_DEFAULT_ENV="qgis_env"
+else
+    micromamba activate base
+fi
+
+# 4. Inyección de prompt multiusuario mediante PROMPT_COMMAND
+# Asegura que el entorno activo se dibuje visualmente antes de ceder el control al usuario
+ajustar_prompt_mamba() {
+    if [[ "$PS1" != *"(${CONDA_DEFAULT_ENV:-base})"* ]]; then
+        PS1="(${CONDA_DEFAULT_ENV:-base}) $PS1"
+    fi
+}
+
+if [[ -n "$BASH_VERSION" && "$PROMPT_COMMAND" != *"ajustar_prompt_mamba"* ]]; then
+    PROMPT_COMMAND="ajustar_prompt_mamba; $PROMPT_COMMAND"
+fi
+EOF
+
+```
+
+Asigne los permisos de ejecución del script y los permisos de acceso de lectura a la raíz compartida:
+
+```bash
+chmod +x /etc/profile.d/micromamba_init.sh
+mkdir -p /srv/iie/micromamba
+chmod -R 755 /srv/iie/micromamba
+chmod -R 755 /srv/iie/envs
+
+```
+
+Salga del modo administrador:
+
+```bash
+exit
+
+```
+
+---
+
+## 4. Limpieza de Archivos de Configuración Individuales
+
+Para aquellos usuarios que hayan operado previamente en el servidor de forma local (como la cuenta `equihuam`), es necesario limpiar los residuos viejos de inicialización en sus carpetas personales para evitar colisiones de variables.
+
+1. Abra el archivo de configuración personal de la cuenta:
+```bash
+nano ~/.bashrc
+
+```
+
+
+2. Navegue al final del archivo y, si existe, **elimine por completo** el bloque delimitado por:
+
+```text
+# >>> mamba initialize >>>
+...
+# <<< mamba initialize <<<
+
+```
+
+
+3. Elimine también cualquier línea manual de exportación de prompt que se haya introducido con anterioridad, tal como:
+```bash
+export PS1="(${CONDA_DEFAULT_ENV:-base}) ${PS1}"
+
+```
+
+
+4. Guarde (`Ctrl+O`, `Enter`) y salga (`Ctrl+X`).
+
+Al volver a conectarse por SSH, el script global tomará precedencia absoluta, entregando un prompt limpio: `(qgis_env) usuario@DESKTOP-QLC4OUO:~$`.
+
+---
+
+## 5. Resolución de Contingencias de Red: El Secuestro de Puerto por IDEs (PyCharm)
+
+### El Fenómeno del Bloqueo
+
+Cuando un investigador vincula un entorno de desarrollo integrado (IDE) como **PyCharm** mediante un intérprete remoto SSH a través del puerto proxy `2200`, el IDE abre sockets de comunicación persistente (multiplexación SSH) de fondo para la sincronización de archivos e indexación de variables en tiempo real.
+
+Si el IDE se cierra de forma abrupta o no corta la terminal remota de manera ordenada, estos hilos de fondo quedan colgados en la **laptop local** en estado `TIME_WAIT`, bloqueando el puerto `2200` y provocando errores de tipo `Connection timed out` o `Connection reset` en los siguientes intentos de conexión por consola.
+
+### Protocolo de Desbloqueo Rápido (En la Laptop del Usuario)
+
+Para liberar el puerto inmediatamente sin necesidad de reiniciar la computadora, abra una consola de **PowerShell** en su laptop local y ejecute la siguiente instrucción para identificar y terminar por la fuerza el proceso colgado:
+
+```powershell
+# Matar el proceso que tiene secuestrado el puerto local 2200
+Get-NetTCPConnection -LocalPort 2200 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Stop-Process -Id $_ -Force -Verbose }
+
+# Limpiar procesos huérfanos de PyCharm y llaves SSH colgadas en memoria
+Stop-Process -Name "pycharm" -Force -ErrorAction SilentlyContinue
+Stop-Process -Name "fsnotifier" -Force -ErrorAction SilentlyContinue
+ssh-add -D 2>$null
+
+```
+
+### Protocolo de Limpieza en el Servidor (Vía LogMeIn / Consola Directa)
+
+Si el candado de la sesión persistente quedó atorado del lado del servidor WSL2, ingrese a la consola de Windows del instituto y desde PowerShell ejecute el exterminio de los procesos de sincronización remota:
+
+```powershell
+wsl -d Ubuntu -u root -- pkill -f pycharm
+
+```
+
+---
+
+## 6. Buenas Prácticas para el Mantenimiento del Entorno Científico
+
+Para salvaguardar la estabilidad a largo plazo del servidor, el equipo del Instituto se regirá por las siguientes directrices operativas:
+
+1. **Gestión de Despliegue Exclusiva por GitHub:** Está estrictamente prohibido modificar el código fuente de los flujos de trabajo directo en el servidor. Las reglas de `Snakemake` y scripts de Python se prueban localmente con micro-datasets y pruebas de `pytest`. El servidor centralizado solo actualiza su código mediante operaciones controladas de `git pull` en la cuenta de producción (`octavio`).
+2. **Control de Despliegue en PyCharm:** Para evitar que el IDE descargue o cargue masivamente datos pesados (como archivos binarios `.RData` o imágenes satelitales grandes), se debe configurar explícitamente el menú `Tools -> Deployment -> Configuration -> Excluded Paths` en cada laptop local, agregando las extensiones de volumen de datos a las reglas de exclusión.
+3. **Concurrencia de Snakemake:** Debido a que Snakemake bloquea los directorios de trabajo para impedir escrituras corruptas, las ejecuciones a gran escala para las variantes Costera o Terrestre Nacional deben ser coordinadas en el calendario del laboratorio para evitar colisiones de procesos.
+
