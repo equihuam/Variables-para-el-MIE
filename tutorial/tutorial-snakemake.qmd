@@ -179,11 +179,16 @@ Para que Snakemake funcione de forma automática y ordenada, el repositorio debe
 
 ## 3. Preparación del Área de Trabajo y Permisos
 
+<<<<<<< HEAD
 Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para lograr esto es [winscpf](https://winscp.net/). Es una aplicación para windows que te mostrará, lado a lado, el directorio local y el del servidor que estamos usando. Una vez que lo tengas instalado, te pedirá los datos de conexión La **IP** local de Octavio es **` 10.0.122.35`**, tus credenciales y listo. Le das conectar y ya está. Debes saber que esta **IP**, no es fija, seguramente cambiará de tiempo en tiempo.
 
 ![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png)
 
 Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz) podrá trabajar de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
+=======
+
+Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz. Pita) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
+>>>>>>> 541b4a82d3f7475bb5e88014445030bf687a983c
 
 
 Al usar `$USER` los comandos substituirán esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz`, `pita` o `equihuam`). Lo hará en cualquier comando en el que aparezca.
@@ -247,9 +252,9 @@ Es curioso, pero puedes imaginar que este *mover* es en realidad sólo otro mane
 
 ### Operar desde un proyecto RStudio  
 
-En preparación para hacer esto podría ser conveniente instalar [RaiDrive](https://www.raidrive.com/es/). Con esta herramienta montaremos un acceso al disco del equipo de Octavio, para que desde sus equipos se vea como un disco más. Una vez que lo tengas instalado verán una pantalla de instalación. Elije la opción NAS/SFTP y apunta a la IP:  10.0.122.35 (aunque esta IP puede cambiar de vez en cuando al apagar el equipo).  El disco virtual que elijas será su punto de interconexión para todo lo que sigue.
+En preparación para trabajar en el poryecto **Workflow-IIE** podría ser conveniente instalar [RaiDrive](https://www.raidrive.com/es/). Con esta herramienta montaremos un acceso al disco del equipo de Octavio, para que cada quien pueda trabajar desde la comodidad de y vea como un disco más los recursos necesarios del equipo de Octavio. Una vez que lo tengas instalado verán una pantalla de instalación. Elije la opción NAS/SFTP y apunta a la IP: 10.0.91.48 (aunque esta IP puede cambiar de vez en cuando al apagar el equipo).  El disco virtual que elijas será su punto de interconección para todo lo que sigue.
 
-Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de RaiDrive, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el browser la misma **IP** que te funcione para el **ssh** seguido de **:8787** y contesta lo que te pregunte. ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
+Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de RaiDrive, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el navegador la misma **IP** que te funcione para el **ssh** seguido de **:8787**, contesta lo que te pregunte (tus credenciales). ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
 
 ![http:// 10.0.122.35:8787](../img/rstudio.png)
 
