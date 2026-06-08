@@ -138,9 +138,9 @@ rm quarto-1.4.555-linux-amd64.deb
 quarto --version
 ```
 
-#### Habilitar **R** ene el entorno compartido qgis_env
+#### Habilitar **R** en el entorno compartido qgis_env
 
-Hay que preparar todo lo necesario para que el renderizado con **Quarto** pueda operar los bloques {{{r}}} localmente en **WSL**. Para evitar conflictos, montamos una versión apropiada de **R** y aseguramos que los componentes necesarios de *Markdown* y demás bibliotecas estén disponibles directamente dentro del ambiente micromamba geoespacial:
+Hay que preparar todo lo necesario para que el renderizado con **Quarto** pueda operar los bloques **R** localmente en **WSL**. Para evitar conflictos, montamos una versión apropiada de **R** y aseguramos que los componentes necesarios de *Markdown* y demás bibliotecas estén disponibles directamente dentro del ambiente micromamba geoespacial:
 
 
 ```bash
@@ -167,6 +167,7 @@ Para que Snakemake funcione de forma automática y ordenada, el repositorio debe
 │   ├── 1_leer_datos.R
 │   ├── 2_construir_tabla.R
 │   └── 3_crear_reticula.py
+├── plantillas/
 ├── reportes/
 │   └── resumen_atributos.qmd
 ├── datos/
@@ -179,16 +180,13 @@ Para que Snakemake funcione de forma automática y ordenada, el repositorio debe
 
 ## 3. Preparación del Área de Trabajo y Permisos
 
-<<<<<<< HEAD
+
 Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para lograr esto es [winscpf](https://winscp.net/). Es una aplicación para windows que te mostrará, lado a lado, el directorio local y el del servidor que estamos usando. Una vez que lo tengas instalado, te pedirá los datos de conexión La **IP** local de Octavio es **` 10.0.122.35`**, tus credenciales y listo. Le das conectar y ya está. Debes saber que esta **IP**, no es fija, seguramente cambiará de tiempo en tiempo.
 
 ![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png)
 
-Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz) podrá trabajar de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
-=======
 
 Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz. Pita) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
->>>>>>> 541b4a82d3f7475bb5e88014445030bf687a983c
 
 
 Al usar `$USER` los comandos substituirán esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz`, `pita` o `equihuam`). Lo hará en cualquier comando en el que aparezca.
@@ -217,7 +215,7 @@ BASE=/srv/iie-tutor/$USER-iie
 #-------------------------------------------------------------------------
 
 # 1. Crear la carpeta raíz y subdirectorios necesarios
-mkdir -p /srv/iie-tutor/$USER-iie/{config,scripts,reportes,datos,procesados,resultados}
+mkdir -p /srv/iie-tutor/$USER-iie/{config,scripts,reportes,datos,plantillas, procesados,resultados}
 
 # 2. Verificar la estructura creada
 tree /srv/iie-tutor/$USER-iie/
@@ -252,15 +250,13 @@ Es curioso, pero puedes imaginar que este *mover* es en realidad sólo otro mane
 
 ### Operar desde un proyecto RStudio  
 
-En preparación para trabajar en el poryecto **Workflow-IIE** podría ser conveniente instalar [RaiDrive](https://www.raidrive.com/es/). Con esta herramienta montaremos un acceso al disco del equipo de Octavio, para que cada quien pueda trabajar desde la comodidad de y vea como un disco más los recursos necesarios del equipo de Octavio. Una vez que lo tengas instalado verán una pantalla de instalación. Elije la opción NAS/SFTP y apunta a la IP: 10.0.91.48 (aunque esta IP puede cambiar de vez en cuando al apagar el equipo).  El disco virtual que elijas será su punto de interconección para todo lo que sigue.
-
 Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de RaiDrive, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el navegador la misma **IP** que te funcione para el **ssh** seguido de **:8787**, contesta lo que te pregunte (tus credenciales). ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
 
 ![http:// 10.0.122.35:8787](../img/rstudio.png)
 
 Me encantará saber cuál de todas las opciones que les he preparado les parece más natural y fácil de operar.
 
-![Configurar RaiDrive](../img/RaiDrive.png)
+
 
 Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory. Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, elige el la unidad RaiDrive que acabas de crear. Dale clic a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural. Si optas por hacerlo con **RStudio servere**, harás lo mismo, pero será más simple, pues ya estas ubicada en la máquina Linux en la que está ocurriendo todo.
 

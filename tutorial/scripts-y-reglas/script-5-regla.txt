@@ -1,0 +1,35 @@
+```{.python}
+# =====================================================================
+# GENERACIÓN DE PROYECTO QGIS
+# =====================================================================
+rule create_project:
+    input:
+        raster = config["salidas"]["tiff_reticula"],
+        vector = config["salidas"]["gpkg_reticula"],
+        plantilla = "plantillas/iie_cartografia.qgz"
+    output:
+        config["salidas"]["qgis_proyecto"]
+    params:
+        w = config["map_settings"]["map_width_mm"],
+        h = config["map_settings"]["map_height_mm"],
+        m = config["map_settings"]["margin_mm"],
+        env_path = config["rutas"]["python_env"]
+    shell:
+        """
+        # 1. Preparar variables de entorno (modo headless)
+        export QT_QPA_PLATFORM=offscreen
+        export QGIS_NO_PLUGINS=1
+        export DISPLAY=
+        
+        # 2. Definición SEGURA de LD_LIBRARY_PATH
+        # Usamos el operador :- que asigna un valor por defecto vacío si no existe
+        export LD_LIBRARY_PATH="{params.env_path}/lib${{LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}}"
+        
+        # 3. Ejecutar el script de inyección
+        {config[rutas][python_bin]} scripts/5_create_qgis_project.py \\
+            --raster {input.raster} \\
+            --vector {input.vector} \\
+            --output {output} \\
+            --plantilla {input.plantilla}
+        """
+  ```
