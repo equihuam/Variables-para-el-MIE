@@ -179,11 +179,11 @@ Para que Snakemake funcione de forma automática y ordenada, el repositorio debe
 
 ## 3. Preparación del Área de Trabajo y Permisos
 
-Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para hacerlo es [RaiDrive](https://www.raidrive.com/). Conviene por ser muy fácil de usar, aunque en la versión sin cargo tiene anuncios, pero pienso que no son demasiado invasivos. Una vez que la tengas lista en tu equipo, deberás crear un acceso virtual como se ilustra en la captura de pantalla. La **IP** local de Octavio es **`10.0.91.48`**, aunque no es fija, podría cambiar de tiempo en tiempo. Una vez que tengas el disco virtual habilitado, lo verás en tu máquina como si tuvieras un disco más. En él harás las operaciones relacionadas con el proyecto IIE-Workflow.
+Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para lograr esto es [winscpf](https://winscp.net/). Es una aplicación para windows que te mostrará, lado a lado, el directorio local y el del servidor que estamos usando. Una vez que lo tengas instalado, te pedirá los datos de conexión La **IP** local de Octavio es **` 10.0.122.35`**, tus credenciales y listo. Le das conectar y ya está. Debes saber que esta **IP**, no es fija, seguramente cambiará de tiempo en tiempo.
 
-![Disco virtual en el equipo de Octavio](../img/RaiDrive.png)
+![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png)
 
-Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
+Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz) podrá trabajar de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
 
 
 Al usar `$USER` los comandos substituirán esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz`, `pita` o `equihuam`). Lo hará en cualquier comando en el que aparezca.
@@ -194,7 +194,7 @@ Al usar `$USER` los comandos substituirán esa variable automáticamente por el 
 Abre la pestaña **Terminal** en RStudio y entra a la máquina de Octavio con el protocolo ssh:
 
 ```bash
-ssh -p 2200 <<tu-user>>@10.0.91.48
+ssh -p 2200 <<tu-user>>@ 10.0.122.35
 ```
 
 Quizás te diga, ¡cuidado te estas conectando a un equipo que no conoces!, o algo parecido. Si le dices que adelante te pedirá entonces tu clave y si todo va bien, estarás enlazada al equipo de Octavio. Cuando ya estés ahí, ejecuta el siguiente bloque de comandos para construir la estructura base del proyecto:
@@ -247,17 +247,17 @@ Es curioso, pero puedes imaginar que este *mover* es en realidad sólo otro mane
 
 ### Operar desde un proyecto RStudio  
 
-En preparación para hacer esto podría ser conveniente instalar [RaiDrive](https://www.raidrive.com/es/). Con esta herramienta montaremos un acceso al disco del equipo de Octavio, para que desde sus equipos se vea como un disco más. Una vez que lo tengas instalado verán una pantalla de instalación. Elije la opción NAS/SFTP y apunta a la IP: 10.0.91.48 (aunque esta IP puede cambiar de vez en cuando al apagar el equipo).  El disco virtual que elijas será su punto de interconección para todo lo que sigue.
+En preparación para hacer esto podría ser conveniente instalar [RaiDrive](https://www.raidrive.com/es/). Con esta herramienta montaremos un acceso al disco del equipo de Octavio, para que desde sus equipos se vea como un disco más. Una vez que lo tengas instalado verán una pantalla de instalación. Elije la opción NAS/SFTP y apunta a la IP:  10.0.122.35 (aunque esta IP puede cambiar de vez en cuando al apagar el equipo).  El disco virtual que elijas será su punto de interconexión para todo lo que sigue.
 
 Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de RaiDrive, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el browser la misma **IP** que te funcione para el **ssh** seguido de **:8787** y contesta lo que te pregunte. ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
 
-![http://10.0.91.48:8787](../img/rstudio.png)
+![http:// 10.0.122.35:8787](../img/rstudio.png)
 
 Me encantará saber cuál de todas las opciones que les he preparado les parece más natural y fácil de operar.
 
 ![Configurar RaiDrive](../img/RaiDrive.png)
 
-Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory. Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, elige el la unidad RaiDrive que acabas de creear. Dale clic a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural. Si optas por hacerlo con **RStudio servere**, harás lo mismo, pero será más simple, pues ya estas ubicada en la máquina Linux en la que está ocurriendo todo.
+Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamente dentro de la carpeta de Linux que acabas de hacer. Con este proyecto ahí, el panel Files se "anclará" automáticamente a esa ruta cada vez que abras el proyecto. Para construir este espacio en RStudio, ve a File $\rightarrow$ New Project...Selecciona Existing Directory. Haz clic en Browse... y en la barra de direcciones de la ventana que se abre, elige el la unidad RaiDrive que acabas de crear. Dale clic a Create Project y listo. A partir de ahora, RStudio abrirá el panel Files exactamente en esa ruta nativa de WSL, y todos los scripts usarán rutas relativas de manera natural. Si optas por hacerlo con **RStudio servere**, harás lo mismo, pero será más simple, pues ya estas ubicada en la máquina Linux en la que está ocurriendo todo.
 
 
 ## 4. Configuración del `snakemake`
