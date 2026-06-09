@@ -1,0 +1,92 @@
+
+# Cargar la configuración
+configfile: "config/config.yaml"
+
+# Define la portada del reporte maestro de Snakemake {etapa 3}
+report: "reportes/reporte_portada.rst"
+
+# Define la lista para análisis tipo Big Data {etapa 2}
+REGIONES = ["Centro", "Occidente", "Sureste", "Noroeste", "Sur", "Noreste"]
+
+
+# =====================================================================
+# REGLA MAESTRA
+# =====================================================================
+rule all:
+    input:
+        "resultados/reporte_resumen.html",
+        "resultados/reporte_nacional.html" {etapa 2}
+
+# =====================================================================
+# RAMA 1: EL ENFOQUE BÁSICO (Vectorial - Geopackage) {etapa 1}
+# =====================================================================
+rule leer_datos:
+    input: csv = config["datos_entrada"]
+    output: csv_filtrado = "procesados/datos_filtrados.csv"
+    script: "scripts/1_leer_datos.R"
+
+rule construir_tabla:
+    input: csv_filtrado = "procesados/datos_filtrados.csv"
+    output: tabla_resumen = config["salidas"]["tabla_limpia"]
+    script: "scripts/2_construir_tabla.R"
+
+rule construir_geopackage:
+    input: csv_puntos = "procesados/datos_filtrados.csv"
+    output: gpkg = config["salidas"]["gpkg_reticula"]
+    params: res = config["resolucion_vectorial"]
+    script: "scripts/3_crear_reticula.py"
+
+rule generar_reporte_vectorial:
+    input:
+        gpkg = config["salidas"]["gpkg_reticula"],
+        qmd = "reportes/resumen_atributos.qmd"
+    output:
+        # PREPARACIÓN PARA REPORTE: Envuelve lo que quieras con report() {etapa 3}
+        html = report("resultados/reporte_resumen.html",   
+                      category="Reportes de Integridad")
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        oscuro_flag = "true" if config.get("fondo_oscuro", False) else "false",
+        res = config["resolucion_vectorial"]
+    shell:
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P oscuro_reporte:{params.oscuro_flag} -P resolucion:{params.res}
+        mv reportes/resumen_atributos.html {output.html}
+        """
+
+# =====================================================================
+# RAMA 2: EL ENFOQUE BIG DATA (Ráster + Scatter-Gather) {etapa 2}
+# =====================================================================
+rule segmentar_datos:
+    input: csv = "datos/registros_base.csv"
+    output: archivos = expand("procesados/datos_{region}.csv", region=REGIONES)
+    script: "scripts/0_segmentar_csv.R"
+
+rule procesar_region_raster:
+    input: csv_region = "procesados/datos_{region}.csv"
+    output: tif_region = temp("procesados/reticula_{region}.tif")
+    params: res = config["resolucion_raster"]
+    script: "scripts/4_crear_raster_regional.py"
+
+rule fusionar_mexico:
+    input: tifs = expand("procesados/reticula_{region}.tif", region=REGIONES)
+    output: tif_nacional = "resultados/integridad_mexico.tif"
+    shell:
+        "gdal_merge.py -o {output.tif_nacional} -of GTiff -co COMPRESS=DEFLATE {input.tifs}"
+
+rule reporte_nacional_raster:
+    input:
+        tif = "resultados/integridad_mexico.tif",
+        qmd = "reportes/resumen_nacional.qmd"
+    output:
+        # OTRO SEGMENTO PARA EL REPORTE {etapa 3}
+        html = report("resultados/reporte_nacional.html", 
+                      category="Reportes de Integridad")
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        res = config["resolucion_raster"]
+    shell:
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P resolucion:{params.res}
+        mv reportes/resumen_nacional.html {output.html}
+        """

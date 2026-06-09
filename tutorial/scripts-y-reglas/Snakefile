@@ -1,0 +1,138 @@
+# Cargar la configuración
+configfile: "config/config.yaml"
+
+# Definición de regiones para análisis tipo Big Data
+REGIONES = config["regiones_analisis"]
+
+# Define la portada del reporte maestro de Snakemake
+report: "reportes/reporte_portada.rst"
+
+# =====================================================================
+# REGLA MAESTRA
+# =====================================================================
+rule all:
+    input:
+        "resultados/reporte_resumen.html",
+        "resultados/reporte_nacional.html",
+        "resultados/proyecto_standalone.qgz",
+        "resultados/proyecto_server.qgz"
+
+# =====================================================================
+# ASEGURAR CONFIGURACIÓN: El directorio de trabajo existe y es legible
+# =====================================================================
+rule preparar_servidor:
+    output: touch("logs/servidor_listo.txt")
+    shell:
+        """
+        # Asegura permisos para que el contenedor (root) pueda leer tus archivos
+        chmod -R 755 /srv/iie-tutor
+        echo "Infraestructura lista para recibir proyectos." > {output}
+        """        
+
+# =====================================================================
+# RAMA 1: EL ENFOQUE VECTORIAL (Geopackage)
+# =====================================================================
+rule leer_datos:
+    input: csv = config["datos_entrada"]
+    output: csv_filtrado = "procesados/datos_filtrados.csv"
+    script: "scripts/1_leer_datos.R"
+
+rule construir_tabla:
+    input: csv_filtrado = "procesados/datos_filtrados.csv"
+    output: tabla_resumen = config["salidas"]["tabla_limpia"]
+    script: "scripts/2_construir_tabla.R"
+
+rule construir_geopackage:
+    input: csv_puntos = "procesados/datos_filtrados.csv"
+    output: gpkg = config["salidas"]["gpkg_reticula"]
+    params: res = config["resolucion_vectorial"]
+    script: "scripts/3_crear_reticula.py"
+
+rule generar_reporte_vectorial:
+    input:
+        gpkg = config["salidas"]["gpkg_reticula"],
+        qmd = "reportes/resumen_atributos.qmd"
+    output:
+        html = report("resultados/reporte_resumen.html", category="Reportes de Integridad")
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        oscuro_flag = "true" if config.get("fondo_oscuro", False) else "false",
+        res = config["resolucion_vectorial"]
+    shell:
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P oscuro_reporte:{params.oscuro_flag} -P resolucion:{params.res}
+        mv reportes/resumen_atributos.html {output.html}
+        """
+
+rule verificar_r:
+    shell:
+        "which R && R --version"
+
+# =====================================================================
+# RAMA 2: EL ENFOQUE BIG DATA (Ráster)
+# =====================================================================
+rule segmentar_datos:
+    input: csv = "datos/registros_base.csv"
+    output: archivos = expand("procesados/datos_{region}.csv", region=REGIONES)
+    script: "scripts/0_segmentar_csv.R"
+
+rule procesar_region_raster:
+    input: csv_region = "procesados/datos_{region}.csv"
+    output: tif_region = temp("procesados/reticula_{region}.tif")
+    params: res = config["resolucion_raster"]
+    script: "scripts/4_crear_raster_regional.py"
+
+rule fusionar_mexico:
+    input: tifs = expand("procesados/reticula_{region}.tif", region=REGIONES)
+    output: tif_nacional = config["salidas"]["tiff_reticula"] # Usando clave de config
+    shell:
+        "gdal_merge.py -o {output.tif_nacional} -of GTiff -co COMPRESS=DEFLATE {input.tifs}"
+
+rule reporte_nacional_raster:
+    input:
+        tif = "resultados/integridad_mexico.tif",
+        qmd = "reportes/resumen_nacional.qmd"
+    output:
+        html = report("resultados/reporte_nacional.html", category="Reportes de Integridad")
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        res = config["resolucion_raster"]
+    shell:
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P resolucion:{params.res}
+        mv reportes/resumen_nacional.html {output.html}
+        """
+
+rule create_project_standalone:
+    input:
+        raster="resultados/integridad_mexico.tif",
+        vector="resultados/reticula_variable.gpkg",
+        layout="plantillas/iie-cartografia.qpt"
+    output:
+        "resultados/proyecto_standalone.qgz"
+    shell:
+        """
+        python scripts/5_create_qgis_project.py \
+            --raster {input.raster} \
+            --vector {input.vector} \
+            --layout-template {input.layout} \
+            --output {output} \
+            --target standalone
+        """
+
+rule create_project_server:
+    input:
+        raster="resultados/integridad_mexico.tif",
+        vector="resultados/reticula_variable.gpkg",
+        layout="plantillas/iie-cartografia.qpt"
+    output:
+        "resultados/proyecto_server.qgz"
+    shell:
+        """
+        python scripts/5_create_qgis_project.py \
+            --raster {input.raster} \
+            --vector {input.vector} \
+            --layout-template {input.layout} \
+            --output {output} \
+            --target server
+        """

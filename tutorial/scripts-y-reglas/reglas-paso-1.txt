@@ -1,0 +1,46 @@
+
+# Cargar la configuración
+configfile: "config/config.yaml"
+
+# =====================================================================
+# REGLA MAESTRA
+# =====================================================================
+rule all:
+    input:
+        "resultados/reporte_resumen.html"
+        
+# =====================================================================
+# RAMA 1: EL ENFOQUE BÁSICO (Vectorial - Geopackage) {etapa 1}
+# =====================================================================
+rule leer_datos:
+    input: csv = config["datos_entrada"]
+    output: csv_filtrado = "procesados/datos_filtrados.csv"
+    script: "scripts/1_leer_datos.R"
+
+rule construir_tabla:
+    input: csv_filtrado = "procesados/datos_filtrados.csv"
+    output: tabla_resumen = config["salidas"]["tabla_limpia"]
+    script: "scripts/2_construir_tabla.R"
+
+rule construir_geopackage:
+    input: csv_puntos = "procesados/datos_filtrados.csv"
+    output: gpkg = config["salidas"]["gpkg_reticula"]
+    params: res = config["resolucion_vectorial"]
+    script: "scripts/3_crear_reticula.py"
+
+rule generar_reporte_vectorial:
+    input:
+        gpkg = config["salidas"]["gpkg_reticula"],
+        qmd = "reportes/resumen_atributos.qmd"
+    output:
+        # PREPARACIÓN PARA REPORTE: Envolver lo que quieras con report()
+        html = "resultados/reporte_resumen.html"
+    params:
+        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
+        oscuro_flag = "true" if config.get("fondo_oscuro", False) else "false",
+        res = config["resolucion_vectorial"]
+    shell:
+        """
+        quarto render {input.qmd} --to html -M theme={params.tema} -P oscuro_reporte:{params.oscuro_flag} -P resolucion:{params.res}
+        mv reportes/resumen_atributos.html {output.html}
+        """

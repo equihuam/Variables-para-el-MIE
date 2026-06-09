@@ -1,0 +1,141 @@
+---
+title: "Análisis Nacional de Integridad Ecosistémica"
+format:
+  html:
+    embed-resources: true
+
+knitr:
+  opts_chunk:
+    dev: "ragg_png"
+
+params:
+  oscuro_reporte: false
+  resolucion: "No definida" 
+---
+
+### Resultados de la Simulación Nacional (Big Data)
+
+Este reporte ha sido renderizado automáticamente por Snakemake tras recolectar y fusionar los datos procesados en paralelo (Scatter-Gather).
+
+```{r}
+#| label: lee-datos
+#| echo: false
+#| message: false
+#| warning: false
+
+library(terra)
+library(tidyterra)
+library(ggplot2)
+
+Sys.setenv(PROJ_LIB = "/srv/iie/envs/qgis_env/share/proj")
+Sys.setenv(GDAL_DATA = "/srv/iie/envs/qgis_env/share/gdal")
+
+# 1. rast() crea el túnel de lectura directa al disco sin saturar la RAM
+ruta_tif <- "../resultados/integridad_mexico.tif"
+mapa_nacional <- rast(ruta_tif)
+
+# Asignar un nombre limpio a la capa ráster
+names(mapa_nacional) <- "integridad_simulada"
+
+# Capturar los parámetros inyectados
+es_oscuro <- as.logical(params$oscuro_reporte)
+res_metros <- params$resolucion
+```
+
+### 🗄️ Metadatos del Procesamiento
+
+```{r}
+#| label: metadatos
+#| echo: false
+#| results: asis
+
+info_archivo <- file.info(ruta_tif)
+tamano_mb <- round(info_archivo$size / (1024), 2)
+fecha_creacion <- info_archivo$mtime
+
+cat("- **Archivo Principal:** `", basename(ruta_tif), "`\n")
+cat("- **Formato de Almacenamiento:** GeoTIFF (Ráster Matricial)\n")
+cat("- **Tamaño en Disco:**", tamano_mb, "kB (Comprimido con Deflate)\n")
+cat("- **Resolución (Tamaño de píxel):**", res_metros, "metros\n")
+cat("- **Generado el:**", format(fecha_creacion, "%Y-%m-%d %H:%M:%S"), "\n")
+```
+
+
+### El Cambio de Paradigma: Ráster vs Vectorial
+
+Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (alta resolución), es usualmente un error muy común usar un Geopackage vectorial para guardar la cuadrícula.Un polígono vectorial cuadrado guarda 4 coordenadas completas, datos de topología y metadatos. México completo a una resolución de 250m tendría un peso estimado de ~15 a 30 GB para unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice. La posición espacial se infiere por la matemática de la matriz.
+
+
+### Estadísticas descriptivas del Índice
+
+```{r}
+#| label: resumen
+#| echo: false
+summary(values(mapa_nacional), na.rm = TRUE)
+```
+
+
+### Mapa de Integridad Ecosistémica (Streaming)
+
+En lugar de cargar millones de datos a la memoria, geom_spatraster extrae inteligentemente al vuelo (on-the-fly) solo los píxeles necesarios para empatar con la resolución de la pantalla.
+
+```{r}
+#| label: mapa
+#| echo: false
+#| fig-cap: "Distribución espacial a nivel nacional (Streaming de SSD a Gráficos)."
+
+p_mapa <- ggplot() +
+  geom_spatraster(data = mapa_nacional, maxcell = 2e6) + 
+  scale_fill_viridis_c(option = "viridis", na.value = "transparent", name = "Índice de\nIntegridad")
+
+if (es_oscuro) {
+  p_mapa <- p_mapa + theme_void() + 
+       theme(
+         plot.background = element_rect(fill = "#1e1e1e", color = NA),
+         legend.text = element_text(color = "white"),
+         legend.title = element_text(color = "white")
+       )
+} else {
+  p_mapa <- p_mapa + theme_void()
+}
+
+p_mapa
+```
+
+  
+### Histograma de Distribución Espacial (Muestreo)
+
+Para crear el histograma sin desbordar la memoria, extraemos una muestra espacial sistemática del Ráster. 
+
+```{r}
+#| label: histograma
+#| echo: false
+#| warning: false
+
+# Extraer muestra representativa y convertirla a DataFrame para ggplot
+df_muestra <- as.data.frame(spatSample(mapa_nacional, 
+                                       size = 100000, 
+                                       method = "random", 
+                                       na.rm = TRUE)) %>% 
+  filter(integridad_simulada > 0)
+
+p_hist <- ggplot(df_muestra) +
+  geom_histogram(aes(x = integridad_simulada), 
+                 bins = 25, 
+                 fill = "steelblue", 
+                 color = "white") +
+  labs(x = "Integridad Simulada", y = "Frecuencia (Muestra)")
+
+if (es_oscuro) {
+  p_hist <- p_hist + theme_dark() +
+       theme(
+         plot.background = element_rect(fill = "#1e1e1e", color = NA),
+         text = element_text(color = "white"),
+         panel.background = element_rect(fill = "#2d2d2d")
+       )
+} else {
+  p_hist <- p_hist + theme_minimal()
+}
+
+p_hist
+```

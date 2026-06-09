@@ -1,0 +1,125 @@
+---
+title: "Análisis de Atributos del Mapa Geoespacial"
+
+format:
+  html:
+    embed-resources: true
+
+knitr:
+  opts_chunk:
+    dev: "ragg_png"
+    
+params:
+  oscuro_reporte: false
+  resolucion: "No definida"
+---
+
+### Resultados de la Simulación Local (Vectorial)
+
+Este reporte ha sido renderizado automáticamente por Snakemake tras actualizar las reglas del flujo.
+
+```{r}
+#| label: lee-datos
+#| echo: false
+#| message: false
+#| warning: false
+
+Sys.setenv(PROJ_LIB = "/srv/iie/envs/qgis_env/share/proj")
+Sys.setenv(GDAL_DATA = "/srv/iie/envs/qgis_env/share/gdal")
+
+pacman::p_load(sf, ggplot2, dplyr)
+
+# Lectura relativa remontando un nivel hacia la raíz
+ruta_gpkg <- "../resultados/reticula_variable.gpkg"
+mapa_reticula <- st_read(ruta_gpkg, layer = "reticula_integridad", quiet = TRUE)
+
+# Capturar los parámetros inyectados por Snakemake
+es_oscuro <- as.logical(params$oscuro_reporte)
+res_metros <- params$resolucion
+
+```
+
+### 🗄️ Metadatos del Procesamiento
+
+```{r}
+#| label: metadatos
+#| echo: false
+#| results: asis
+
+# Extraer propiedades físicas del archivo
+info_archivo <- file.info(ruta_gpkg)
+tamano_mb <- round(info_archivo$size / (1024), 2)
+fecha_creacion <- info_archivo$mtime
+
+cat("- **Archivo Principal:** `", basename(ruta_gpkg), "`\n")
+cat("- **Formato de Almacenamiento:** Geopackage (Polígonos Vectoriales)\n")
+cat("- **Tamaño en Disco:**", tamano_mb, "kB\n")
+cat("- **Resolución (Tamaño de polígono):**", res_metros, "metros\n")
+cat("- **Generado el:**", format(fecha_creacion, "%Y-%m-%d %H:%M:%S"), "\n")
+```
+
+### Estadísticas descriptivas del Índice
+
+```{r}
+#| label: resumen
+#| echo: false
+
+mapa_reticula %>% 
+  select(integridad_simulada) %>% 
+  summary()
+
+```
+
+
+### Mapa de Integridad Ecosistémica
+
+A continuación se observa la proyección espacial de la retícula generada por el motor de Python.
+
+```{r}
+#| label: mapa
+#| echo: false
+#| fig-cap: "Distribución espacial del índice simulado (Sin bordes para evitar superposición)."
+
+
+
+p_mapa <- ggplot(mapa_reticula) +
+  geom_sf(aes(fill = integridad_simulada), color = NA) +
+  scale_fill_viridis_c(option = "viridis", name = "Índice de\nIntegridad")
+
+if (es_oscuro) {
+  p_mapa <- p_mapa + theme_void() + 
+       theme(
+         plot.background = element_rect(fill = "#1e1e1e", color = NA),
+         legend.text = element_text(color = "white"),
+         legend.title = element_text(color = "white")
+       )
+} else { 
+  p_mapa <- p_mapa + theme_void()
+}
+ 
+p_mapa + coord_sf(crs = st_crs(4326))
+```
+
+
+### Histograma de Distribución Espacial
+
+```{r}
+#| label: histograma
+#| echo: false
+p_hist <- ggplot(mapa_reticula) +
+  geom_histogram(aes(x = integridad_simulada), bins = 25, fill = "steelblue", color = "white") +
+  labs(x = "Integridad Simulada", y = "Frecuencia")
+
+if (es_oscuro) {
+  p_hist <- p_hist + theme_dark() + 
+       theme(
+         plot.background = element_rect(fill = "#1e1e1e", color = NA),
+         text = element_text(color = "white"),
+         panel.background = element_rect(fill = "#2d2d2d")
+       )
+} else {
+  p_hist <- p_hist + theme_minimal()
+}
+
+p_hist
+``` 

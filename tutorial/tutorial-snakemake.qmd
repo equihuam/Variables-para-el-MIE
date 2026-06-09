@@ -288,53 +288,7 @@ salidas:
 Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este archivo le indica a `Snakemake`  cómo conectar las entradas y salidas de las 4 tareas del ejercicio de capacitación.
 
 ```python
-
-
-# Cargar la configuración
-configfile: "config/config.yaml"
-
-# =====================================================================
-# REGLA MAESTRA
-# =====================================================================
-rule all:
-    input:
-        "resultados/reporte_resumen.html"
-        
-# =====================================================================
-# RAMA 1: EL ENFOQUE BÁSICO (Vectorial - Geopackage) {etapa 1}
-# =====================================================================
-rule leer_datos:
-    input: csv = config["datos_entrada"]
-    output: csv_filtrado = "procesados/datos_filtrados.csv"
-    script: "scripts/1_leer_datos.R"
-
-rule construir_tabla:
-    input: csv_filtrado = "procesados/datos_filtrados.csv"
-    output: tabla_resumen = config["salidas"]["tabla_limpia"]
-    script: "scripts/2_construir_tabla.R"
-
-rule construir_geopackage:
-    input: csv_puntos = "procesados/datos_filtrados.csv"
-    output: gpkg = config["salidas"]["gpkg_reticula"]
-    params: res = config["resolucion_vectorial"]
-    script: "scripts/3_crear_reticula.py"
-
-rule generar_reporte_vectorial:
-    input:
-        gpkg = config["salidas"]["gpkg_reticula"],
-        qmd = "reportes/resumen_atributos.qmd"
-    output:
-        # PREPARACIÓN PARA REPORTE: Envolver lo que quieras con report()
-        html = "resultados/reporte_resumen.html"
-    params:
-        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
-        oscuro_flag = "true" if config.get("fondo_oscuro", False) else "false",
-        res = config["resolucion_vectorial"]
-    shell:
-        """
-        quarto render {input.qmd} --to html -M theme={params.tema} -P oscuro_reporte:{params.oscuro_flag} -P resolucion:{params.res}
-        mv reportes/resumen_atributos.html {output.html}
-        """
+{{< include scripts-y-reglas/reglas-paso-1.txt >}} 
 
 ```
 
@@ -344,18 +298,7 @@ rule generar_reporte_vectorial:
 ### Tarea 1: `scripts/1_leer_datos.R`
 
 ```{.r}
-
-library(readr)
-library(dplyr)
-
-# Snakemake expone las variables directo en el entorno de R
-datos <- read_csv(snakemake@input[["csv"]])
-
-# Limpieza básica de coordenadas
-datos_filtrados <- datos %>%
-  filter(!is.na(longitud) & !is.na(latitud))
-
-write_csv(datos_filtrados, snakemake@output[["csv_filtrado"]])
+{{< include scripts-y-reglas/1_leer_datos.R >}}
 
 ```
 
@@ -364,79 +307,14 @@ write_csv(datos_filtrados, snakemake@output[["csv_filtrado"]])
 ### Tarea 2: `scripts/2_construir_tabla.R`
 
 ```{.r}
-library(readr)
-library(dplyr)
-
-datos_f <- read_csv(snakemake@input[["csv_filtrado"]])
-
-# Resumen estadístico agrupado
-tabla_atributos <- datos_f %>%
-  group_by(id_region, tipo_ecosistema) %>%
-  summarise(
-    media_integridad = mean(valor_indice, na.rm = TRUE),
-    conteo_registros = n(),
-    .groups = 'drop'
-  )
-
-write_csv(tabla_atributos, snakemake@output[["tabla_resumen"]])
-
-
+{{< include scripts-y-reglas/2_construir_tabla.R >}}
 ```
+
 
 ### Tarea 3: `scripts/3_crear_reticula.py`
 
 ```python
-
-import pandas as pd
-import geopandas as gpd
-from shapely.geometry import Point, box
-import numpy as np
-import shapely.wkt
-
-# 1. Capturar parámetros de Snakemake
-input_csv = snakemake.input["csv_puntos"]
-output_gpkg = snakemake.output["gpkg"]
-pixel_size_metros = snakemake.params["res"]
-
-res_grados = pixel_size_metros / 111000.0
-
-# 2. Leer los datos reales
-df = pd.read_csv(input_csv)
-
-# Detectar el nombre correcto de la columna automáticamente
-col_valor = 'valor_iie' if 'valor_iie' in df.columns else 'valor_indice'
-
-# Convertir a geometrías espaciales
-geometrias = [Point(xy) for xy in zip(df['longitud'], df['latitud'])]
-gdf = gpd.GeoDataFrame(df, geometry=geometrias, crs="EPSG:4326")
-
-# 3. Función matemática para encajar el punto en una cuadrícula exacta
-def create_pixel_box(point, res):
-    # Redondea la coordenada hacia abajo para "anclar" el píxel en una malla global
-    x_snap = np.floor(point.x / res) * res
-    y_snap = np.floor(point.y / res) * res
-    return box(x_snap, y_snap, x_snap + res, y_snap + res)
-
-# Transformar cada punto en un polígono cuadrado
-gdf['geometry'] = gdf.geometry.apply(lambda p: create_pixel_box(p, res_grados))
-
-# 4. Disolver (Agrupar) píxeles superpuestos
-# Si dos registros caen dentro del mismo cuadrado, promediamos su valor
-gdf['geom_wkt'] = gdf.geometry.apply(lambda g: g.wkt) # Convertir a texto para poder agrupar
-grid = gdf.groupby('geom_wkt').agg({col_valor: 'mean'}).reset_index()
-
-# Reconstruir el GeoDataFrame
-grid['geometry'] = grid['geom_wkt'].apply(shapely.wkt.loads)
-grid = gpd.GeoDataFrame(grid, geometry='geometry', crs="EPSG:4326")
-grid.drop(columns=['geom_wkt'], inplace=True)
-
-# Renombrar para que el reporte Quarto lo encuentre con el mismo nombre
-grid.rename(columns={col_valor: 'integridad_simulada'}, inplace=True)
-
-# 5. Exportar el Geopackage
-grid.to_file(output_gpkg, driver="GPKG", layer="reticula_integridad")
-print(f"Reticula vectorial creada con {len(grid)} polígonos reales.")
-
+{{< include scripts-y-reglas/3_crear_reticula.py >}}
 
 ```
 
@@ -445,126 +323,9 @@ print(f"Reticula vectorial creada con {len(grid)} polígonos reales.")
 
 Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final. Guarde el documento de abajo aquí: `reportes/resumen_atributos.qmd`
 
-````{markdown} 
----
-title: "Análisis de Atributos del Mapa Geoespacial"
+````{text} 
 
-format:
-  html:
-    embed-resources: true
-
-knitr:
-  opts_chunk:
-    dev: "ragg_png"
-    
-params:
-  oscuro_reporte: false
-  resolucion: "No definida"
----
-
-### Resultados de la Simulación Local (Vectorial)
-
-Este reporte ha sido renderizado automáticamente por Snakemake tras actualizar las reglas del flujo.
-
-```{.r}
-#| label: lee-datos
-#| echo: false
-#| message: false
-
-pacman::p_load(sf, ggplot2, dplyr)
-
-# Lectura relativa remontando un nivel hacia la raíz
-ruta_gpkg <- "../resultados/reticula_variable.gpkg"
-mapa_reticula <- st_read(ruta_gpkg, layer = "reticula_integridad", quiet = TRUE)
-
-# Capturar los parámetros inyectados por Snakemake
-es_oscuro <- as.logical(params$oscuro_reporte)
-res_metros <- params$resolucion
-
-```
-
-### 🗄️ Metadatos del Procesamiento
-
-```{.r}
-#| label: metadatos
-#| echo: false
-#| results: asis
-
-# Extraer propiedades físicas del archivo
-info_archivo <- file.info(ruta_gpkg)
-tamano_mb <- round(info_archivo$size / (1024), 2)
-fecha_creacion <- info_archivo$mtime
-
-cat("- **Archivo Principal:** `", basename(ruta_gpkg), "`\n")
-cat("- **Formato de Almacenamiento:** Geopackage (Polígonos Vectoriales)\n")
-cat("- **Tamaño en Disco:**", tamano_mb, "kB\n")
-cat("- **Resolución (Tamaño de polígono):**", res_metros, "metros\n")
-cat("- **Generado el:**", format(fecha_creacion, "%Y-%m-%d %H:%M:%S"), "\n")
-```
-
-### Estadísticas descriptivas del Índice
-
-```{.r}
-#| label: resumen
-#| echo: false
-
-mapa_reticula %>% 
-  select(integridad_simulada) %>% 
-  summary()
-
-```
-
-
-### Mapa de Integridad Ecosistémica
-
-A continuación se observa la proyección espacial de la retícula generada por el motor de Python.
-
-```{.r}
-#| label: mapa
-#| echo: false
-#| fig-cap: "Distribución espacial del índice simulado (Sin bordes para evitar superposición)."
-
-p_mapa <- ggplot(mapa_reticula) +
-  geom_sf(aes(fill = integridad_simulada), color = NA) +
-  scale_fill_viridis_c(option = "viridis", name = "Índice de\nIntegridad")
-
-if (es_oscuro) {
-  p_mapa <- p_mapa + theme_void() + 
-       theme(
-         plot.background = element_rect(fill = "#1e1e1e", color = NA),
-         legend.text = element_text(color = "white"),
-         legend.title = element_text(color = "white")
-       )
-} else {
-  p_mapa <- p_mapa + theme_void()
-}
-
-p_mapa
-```
-
-
-### Histograma de Distribución Espacial
-
-```{.r}
-#| label: histograma
-#| echo: false
-p_hist <- ggplot(mapa_reticula) +
-  geom_histogram(aes(x = integridad_simulada), bins = 25, fill = "steelblue", color = "white") +
-  labs(x = "Integridad Simulada", y = "Frecuencia")
-
-if (es_oscuro) {
-  p_hist <- p_hist + theme_dark() + 
-       theme(
-         plot.background = element_rect(fill = "#1e1e1e", color = NA),
-         text = element_text(color = "white"),
-         panel.background = element_rect(fill = "#2d2d2d")
-       )
-} else {
-  p_hist <- p_hist + theme_minimal()
-}
-
-p_hist
-``` 
+{{< include scripts-y-reglas/resumen_atributos.qmdtx >}}
 
 ````   
 
@@ -630,87 +391,7 @@ Este ejemplo es bueno para apreciar la conveniencia de optar por el formato rás
   
 
 ```python
-
-import pandas as pd
-import geopandas as gpd
-from shapely.geometry import Point
-import rasterio
-from rasterio.transform import from_bounds
-from rasterio.features import rasterize
-import numpy as np
-
-# =====================================================================
-# 1. Capturar parámetros dinámicos orquestados por Snakemake
-# =====================================================================
-input_csv = snakemake.input["csv_region"]
-output_tif = snakemake.output["tif_region"]
-pixel_size_metros = snakemake.params["res"] # Ej: 50000 o 250
-
-# Conversión aproximada a grados (solo para EPSG:4326)
-res_grados = pixel_size_metros / 111000.0
-
-# =====================================================================
-# 2. Leer datos y convertirlos a Geometría Espacial
-# =====================================================================
-# Leemos SOLO la fracción regional que nos mandó Snakemake
-df = pd.read_csv(input_csv)
-
-# Convertir las coordenadas en objetos geométricos reales (Puntos)
-geometrias = [Point(xy) for xy in zip(df['longitud'], df['latitud'])]
-gdf = gpd.GeoDataFrame(df, geometry=geometrias, crs="EPSG:4326")
-
-# =====================================================================
-# 3. Definir la "Caja Espacial" (Bounding Box) y la Matriz
-# =====================================================================
-# Obtener los límites extremos de estos puntos específicos
-xmin, ymin, xmax, ymax = gdf.total_bounds
-
-# Expandir un margen de seguridad para que ningún punto quede fuera
-xmin, ymin = xmin - res_grados, ymin - res_grados
-xmax, ymax = xmax + res_grados, ymax + res_grados
-
-# Calcular las dimensiones del "lienzo" fotográfico (filas y columnas)
-width = int(np.ceil((xmax - xmin) / res_grados))
-height = int(np.ceil((ymax - ymin) / res_grados))
-
-# Crear la "Transformación Afín": La brújula matemática que le dice al GeoTIFF 
-# en qué coordenada de la Tierra cae exactamente el píxel [0,0]
-transform = from_bounds(xmin, ymin, xmax, ymax, width, height)
-
-# =====================================================================
-# 4. El proceso de Rasterización (Quemar los vectores en la matriz)
-# =====================================================================
-# Extraemos pares de (geometría, valor_iie)
-shapes = ((geom, value) for geom, value in zip(gdf.geometry, gdf['valor_indice']))
-
-# rasterize() de Rasterio hace el trabajo sucio en C++. Convierte los puntos en 
-# una matriz Numpy hiper-ligera. Los píxeles vacíos tendrán valor -9999.
-matriz_raster = rasterize(
-    shapes=shapes,
-    out_shape=(height, width),
-    transform=transform,
-    fill=-9999,
-    dtype=rasterio.float32
-)
-
-# =====================================================================
-# 5. Exportar el Ráster al Disco (SSD)
-# =====================================================================
-with rasterio.open(
-    output_tif, 'w',
-    driver='GTiff',
-    height=height, width=width,
-    count=1, 
-    dtype=rasterio.float32,
-    crs='EPSG:4326',
-    transform=transform,
-    nodata=-9999,          # VITAL para que gdal_merge haga el fondo transparente
-    compress='deflate'     # VITAL en BigData: Comprime los vacíos y ahorra 80% de peso
-) as dst:
-    dst.write(matriz_raster, 1)
-
-print(f"Éxito: GeoTIFF regional creado [{width}x{height} píxeles]")
-
+{{< include scripts-y-reglas/4_crear_raster_regional.py >}}
 
 ```
 
@@ -718,240 +399,16 @@ print(f"Éxito: GeoTIFF regional creado [{width}x{height} píxeles]")
 Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así (guardadlo en: `reportes/resumen_nacional.qmd`):
 
 
-````{markdown}
----
-title: "Análisis Nacional de Integridad Ecosistémica"
-format:
-  html:
-    embed-resources: true
+````{text}
+{{< include scripts-y-reglas/resumen_nacional.qmdtx >}}
 
-knitr:
-  opts_chunk:
-    dev: "ragg_png"
-
-params:
-  oscuro_reporte: false
-  resolucion: "No definida" 
----
-
-### Resultados de la Simulación Nacional (Big Data)
-
-Este reporte ha sido renderizado automáticamente por Snakemake tras recolectar y fusionar los datos procesados en paralelo (Scatter-Gather).
-
-
-```{.r}
-#| label: lee-datos
-#| echo: false
-#| message: false
-#| warning: false
-
-library(terra)
-library(tidyterra)
-library(ggplot2)
-
-# 1. rast() crea el túnel de lectura directa al disco sin saturar la RAM
-ruta_tif <- "../resultados/integridad_mexico.tif"
-mapa_nacional <- rast(ruta_tif)
-
-# Asignar un nombre limpio a la capa ráster
-names(mapa_nacional) <- "integridad_simulada"
-
-# Capturar los parámetros inyectados
-es_oscuro <- as.logical(params$oscuro_reporte)
-res_metros <- params$resolucion
-```
-
-### 🗄️ Metadatos del Procesamiento
-
-```{.r}
-#| label: metadatos
-#| echo: false
-#| results: asis
-
-info_archivo <- file.info(ruta_tif)
-tamano_mb <- round(info_archivo$size / (1024), 2)
-fecha_creacion <- info_archivo$mtime
-
-cat("- **Archivo Principal:** `", basename(ruta_tif), "`\n")
-cat("- **Formato de Almacenamiento:** GeoTIFF (Ráster Matricial)\n")
-cat("- **Tamaño en Disco:**", tamano_mb, "kB (Comprimido con Deflate)\n")
-cat("- **Resolución (Tamaño de píxel):**", res_metros, "metros\n")
-cat("- **Generado el:**", format(fecha_creacion, "%Y-%m-%d %H:%M:%S"), "\n")
-```
-
-
-### El Cambio de Paradigma: Ráster vs Vectorial
-
-Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (alta resolución), es usualmente un error muy común usar un Geopackage vectorial para guardar la cuadrícula.Un polígono vectorial cuadrado guarda 4 coordenadas completas, datos de topología y metadatos. México completo a una resolución de 250m tendría un peso estimado de ~15 a 30 GB para unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice. La posición espacial se infiere por la matemática de la matriz.
-
-
-### Estadísticas descriptivas del Índice
-
-
-```{.r}
-#| label: resumen
-#| echo: false
-summary(values(mapa_nacional), na.rm = TRUE)
-```
-
-
-### Mapa de Integridad Ecosistémica (Streaming)
-
-En lugar de cargar millones de datos a la memoria, geom_spatraster extrae inteligentemente al vuelo (on-the-fly) solo los píxeles necesarios para empatar con la resolución de la pantalla.
-
-```{.r}
-#| label: mapa
-#| echo: false
-#| fig-cap: "Distribución espacial a nivel nacional (Streaming de SSD a Gráficos)."
-
-p_mapa <- ggplot() +
-  geom_spatraster(data = mapa_nacional, maxcell = 2e6) + 
-  scale_fill_viridis_c(option = "viridis", na.value = "transparent", name = "Índice de\nIntegridad")
-
-if (es_oscuro) {
-  p_mapa <- p_mapa + theme_void() + 
-       theme(
-         plot.background = element_rect(fill = "#1e1e1e", color = NA),
-         legend.text = element_text(color = "white"),
-         legend.title = element_text(color = "white")
-       )
-} else {
-  p_mapa <- p_mapa + theme_void()
-}
-
-p_mapa
-```
-
-  
-### Histograma de Distribución Espacial (Muestreo)
-
-Para crear el histograma sin desbordar la memoria, extraemos una muestra espacial sistemática del Ráster. 
-
-```{.r}
-#| label: histograma
-#| echo: false
-#| warning: false
-
-# Extraer muestra representativa y convertirla a DataFrame para ggplot
-df_muestra <- as.data.frame(spatSample(mapa_nacional, 
-                                       size = 100000, 
-                                       method = "random", 
-                                       na.rm = TRUE)) %>% 
-  filter(integridad_simulada > 0)
-
-p_hist <- ggplot(df_muestra) +
-  geom_histogram(aes(x = integridad_simulada), 
-                 bins = 25, 
-                 fill = "steelblue", 
-                 color = "white") +
-  labs(x = "Integridad Simulada", y = "Frecuencia (Muestra)")
-
-if (es_oscuro) {
-  p_hist <- p_hist + theme_dark() +
-       theme(
-         plot.background = element_rect(fill = "#1e1e1e", color = NA),
-         text = element_text(color = "white"),
-         panel.background = element_rect(fill = "#2d2d2d")
-       )
-} else {
-  p_hist <- p_hist + theme_minimal()
-}
-
-p_hist
-```
 ````
 
 Ahora sólo resta ajustar `snakefile` para incorporar las nuevas capacidades.
 Con esta nueva opción de cómputo en su lugar, hay que regresar al archivo `snakefile` y actualizarlo para incorporar la nueva capacidad y aprovecharla para producir nuevos resultados. Deberá quedar así:
 
 ```python
-
-# Cargar la configuración
-configfile: "config/config.yaml"
-
-# Define la lista para análisis tipo Big Data {etapa 2}
-REGIONES = ["Centro", "Occidente", "Sureste", "Noroeste", "Sur", "Noreste"]
-
-
-# =====================================================================
-# REGLA MAESTRA
-# =====================================================================
-rule all:
-    input:
-        "resultados/reporte_resumen.html",
-        "resultados/reporte_nacional.html" {etapa 2}
-
-# =====================================================================
-# RAMA 1: EL ENFOQUE BÁSICO (Vectorial - Geopackage) {etapa 1}
-# =====================================================================
-rule leer_datos:
-    input: csv = config["datos_entrada"]
-    output: csv_filtrado = "procesados/datos_filtrados.csv"
-    script: "scripts/1_leer_datos.R"
-
-rule construir_tabla:
-    input: csv_filtrado = "procesados/datos_filtrados.csv"
-    output: tabla_resumen = config["salidas"]["tabla_limpia"]
-    script: "scripts/2_construir_tabla.R"
-
-rule construir_geopackage:
-    input: csv_puntos = "procesados/datos_filtrados.csv"
-    output: gpkg = config["salidas"]["gpkg_reticula"]
-    params: res = config["resolucion_vectorial"]
-    script: "scripts/3_crear_reticula.py"
-
-rule generar_reporte_vectorial:
-    input:
-        gpkg = config["salidas"]["gpkg_reticula"],
-        qmd = "reportes/resumen_atributos.qmd"
-    output:
-        # PREPARACIÓN PARA REPORTE: Envuelve lo que quieras con report() {etapa 3}
-        html = "resultados/reporte_resumen.html" 
-    params:
-        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
-        oscuro_flag = "true" if config.get("fondo_oscuro", False) else "false",
-        res = config["resolucion_vectorial"]
-    shell:
-        """
-        quarto render {input.qmd} --to html -M theme={params.tema} -P oscuro_reporte:{params.oscuro_flag} -P resolucion:{params.res}
-        mv reportes/resumen_atributos.html {output.html}
-        """
-
-# =====================================================================
-# RAMA 2: EL ENFOQUE BIG DATA (Ráster + Scatter-Gather) {etapa 2}
-# =====================================================================
-rule segmentar_datos:
-    input: csv = "datos/registros_base.csv"
-    output: archivos = expand("procesados/datos_{region}.csv", region=REGIONES)
-    script: "scripts/0_segmentar_csv.R"
-
-rule procesar_region_raster:
-    input: csv_region = "procesados/datos_{region}.csv"
-    output: tif_region = temp("procesados/reticula_{region}.tif")
-    params: res = config["resolucion_raster"]
-    script: "scripts/4_crear_raster_regional.py"
-
-rule fusionar_mexico:
-    input: tifs = expand("procesados/reticula_{region}.tif", region=REGIONES)
-    output: tif_nacional = "resultados/integridad_mexico.tif"
-    shell:
-        "gdal_merge.py -o {output.tif_nacional} -of GTiff -co COMPRESS=DEFLATE {input.tifs}"
-
-rule reporte_nacional_raster:
-    input:
-        tif = "resultados/integridad_mexico.tif",
-        qmd = "reportes/resumen_nacional.qmd"
-    output:
-        # OTRO SEGMENTO PARA EL REPORTE {etapa 3}
-        html = "resultados/reporte_nacional.html"
-    params:
-        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
-        res = config["resolucion_raster"]
-    shell:
-        """
-        quarto render {input.qmd} --to html -M theme={params.tema} -P resolucion:{params.res}
-        mv reportes/resumen_nacional.html {output.html}
-        """
+{{< include scripts-y-reglas/reglas-paso-2.txt >}}
 
 ```
 
@@ -1005,101 +462,53 @@ Nuevamente tienes que regresar a tu `snakefile` para registrar esto y habilitar 
 
 
 ```{.python}
-
-# Cargar la configuración
-configfile: "config/config.yaml"
-
-# Define la portada del reporte maestro de Snakemake {etapa 3}
-report: "reportes/reporte_portada.rst"
-
-# Define la lista para análisis tipo Big Data {etapa 2}
-REGIONES = ["Centro", "Occidente", "Sureste", "Noroeste", "Sur", "Noreste"]
-
-
-# =====================================================================
-# REGLA MAESTRA
-# =====================================================================
-rule all:
-    input:
-        "resultados/reporte_resumen.html",
-        "resultados/reporte_nacional.html" {etapa 2}
-
-# =====================================================================
-# RAMA 1: EL ENFOQUE BÁSICO (Vectorial - Geopackage) {etapa 1}
-# =====================================================================
-rule leer_datos:
-    input: csv = config["datos_entrada"]
-    output: csv_filtrado = "procesados/datos_filtrados.csv"
-    script: "scripts/1_leer_datos.R"
-
-rule construir_tabla:
-    input: csv_filtrado = "procesados/datos_filtrados.csv"
-    output: tabla_resumen = config["salidas"]["tabla_limpia"]
-    script: "scripts/2_construir_tabla.R"
-
-rule construir_geopackage:
-    input: csv_puntos = "procesados/datos_filtrados.csv"
-    output: gpkg = config["salidas"]["gpkg_reticula"]
-    params: res = config["resolucion_vectorial"]
-    script: "scripts/3_crear_reticula.py"
-
-rule generar_reporte_vectorial:
-    input:
-        gpkg = config["salidas"]["gpkg_reticula"],
-        qmd = "reportes/resumen_atributos.qmd"
-    output:
-        # PREPARACIÓN PARA REPORTE: Envuelve lo que quieras con report() {etapa 3}
-        html = report("resultados/reporte_resumen.html",   
-                      category="Reportes de Integridad")
-    params:
-        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
-        oscuro_flag = "true" if config.get("fondo_oscuro", False) else "false",
-        res = config["resolucion_vectorial"]
-    shell:
-        """
-        quarto render {input.qmd} --to html -M theme={params.tema} -P oscuro_reporte:{params.oscuro_flag} -P resolucion:{params.res}
-        mv reportes/resumen_atributos.html {output.html}
-        """
-
-# =====================================================================
-# RAMA 2: EL ENFOQUE BIG DATA (Ráster + Scatter-Gather) {etapa 2}
-# =====================================================================
-rule segmentar_datos:
-    input: csv = "datos/registros_base.csv"
-    output: archivos = expand("procesados/datos_{region}.csv", region=REGIONES)
-    script: "scripts/0_segmentar_csv.R"
-
-rule procesar_region_raster:
-    input: csv_region = "procesados/datos_{region}.csv"
-    output: tif_region = temp("procesados/reticula_{region}.tif")
-    params: res = config["resolucion_raster"]
-    script: "scripts/4_crear_raster_regional.py"
-
-rule fusionar_mexico:
-    input: tifs = expand("procesados/reticula_{region}.tif", region=REGIONES)
-    output: tif_nacional = "resultados/integridad_mexico.tif"
-    shell:
-        "gdal_merge.py -o {output.tif_nacional} -of GTiff -co COMPRESS=DEFLATE {input.tifs}"
-
-rule reporte_nacional_raster:
-    input:
-        tif = "resultados/integridad_mexico.tif",
-        qmd = "reportes/resumen_nacional.qmd"
-    output:
-        # OTRO SEGMENTO PARA EL REPORTE {etapa 3}
-        html = report("resultados/reporte_nacional.html", 
-                      category="Reportes de Integridad")
-    params:
-        tema = "dracula" if config.get("fondo_oscuro", False) else "cosmo",
-        res = config["resolucion_raster"]
-    shell:
-        """
-        quarto render {input.qmd} --to html -M theme={params.tema} -P resolucion:{params.res}
-        mv reportes/resumen_nacional.html {output.html}
-        """
+{{< include reglas-paso-3-txt>}}
 
 ```
 
 
 Al hacer esto, el comando simple:  `snakemake --report reporte_auditoria_iie.html` leerá automáticamente tu archivo de presentación, tomará el título principal y lo pondrá en la barra superior del navegador, además de colocar tu texto explicativo en la página principal del reporte.
+
+
+## 11 Cerra ceeando un proyecto QGis
+
+Una última estapa es incorporar en Snakefile la producción de un proyecto QGIS completamente funcional. Lo haremos ahora definiendo primero la regla de producción y luego generamos el script necesario para llevarlo a cabo.
+
+Agrega en `snakefile` un nuevo bloque. Lo que describe esta regla es que tomaremos tres componentes: 
+
+1) los datos ráster y vectoriales que produce nuestro flujo de trabajo. 
+2) Una propuesta de "plantilla de proyecto" hecha en QGis 3.44 (que es la versión de las librerías que tenemos montadas). 
+
+Con eso, lo que resta es el ensamblado y la integración de metadatos necesarios para que el proyecto sea funcional.
+
+
+```{.python}
+{{< include scripts-y-reglas/reglas-paso-4.txt >}}
+```
+
+Se consolidó una estrategia reproducible para generar proyectos QGIS desde Snakemake sin depender de una plantilla .qgz. El flujo construye el proyecto desde cero con PyQGIS, carga raster y vector desde productos generados por el workflow, aplica simbología por código, importa únicamente una plantilla .qpt para el layout de impresión y produce dos variantes del proyecto: una standalone para revisión en QGIS Desktop y otra server para QGIS Server en Docker.
+
+La versión standalone mantiene las capas con rutas absolutas válidas durante la generación y configura el proyecto para guardar rutas relativas. Esto evita romper la simbología o la leyenda al forzar manualmente rutas relativas con setDataSource(). La versión server sí reescribe las fuentes de datos a rutas absolutas internas del contenedor, usando el prefijo /data.
+
+Para el raster se aplicó una paleta tipo viridis mediante QgsSingleBandPseudoColorRenderer, QgsRasterShader y QgsColorRampShader. La clave para evitar que el raster apareciera inicialmente en gris o que la leyenda mostrara valores nan fue construir el renderer con estadísticas válidas del raster, forzar la clasificación de la rampa con classifyColorRamp(), aplicar el renderer mientras la capa conserva una fuente de datos válida y evitar reload() después de aplicar la simbología.
+
+Para el vector se generó un GeoPackage con esquema estable, incluyendo los campos valor_indice e integridad_simulada, y se aplicó simbología graduada sobre integridad_simulada. La retícula vectorial se mantuvo encima del raster y con transparencia para permitir lectura conjunta.
+
+La arquitectura final separa claramente tres responsabilidades:
+1. Datos geoespaciales generados por Snakemake: GeoPackage y GeoTIFF.
+2. Proyecto QGIS reproducible: generado por PyQGIS, sin plantilla .qgz heredada.
+3. Diseño de impresión: definido por una plantilla .qpt reutilizable.
+
+Productos finales:
+- resultados/proyecto_standalone.qgz: proyecto con rutas relativas para QGIS Desktop.
+- resultados/proyecto_server.qgz: proyecto con rutas /data/... para QGIS Server en Docker.
+
+
+El código Python que  acompaña a esta regla se encarga de localizazr y ensamblar en el proyecro QGis las capas deseadas. Cuida de definir el sistema de coordenadas y agrega los metadaros necesarios. Tambipen incluye las previsiones necesarias por si se quisiera utilizar este proyecto como base de datos para entregar mapas mediante [*Web Maping Services* (**WMS**, **WCS** o **WFS**)](https://gisgeography.com/web-mapping-services-wms/), a través de la Web. El código es el siguiente:
+
+```python
+{{< include scripts-y-reglas/5_create_qgis_project.py >}}
+```
+
+
 
