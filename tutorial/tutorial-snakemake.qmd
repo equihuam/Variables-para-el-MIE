@@ -653,7 +653,10 @@ Primero quiero una versión mínima que:
 No agregues todavía layouts, WMS, WFS ni WCS. Sólo quiero validar carga de capas y escritura del proyecto.
 ```
 
+
 Has una corrida de prueba desde tu **terminal SSH**, deberás estar ubicada en /srv/iie-tutor/$USER-iie:
+
+
 
 ```bash
 python scripts/5_create_qgis_project.py \
@@ -700,7 +703,7 @@ No agregues todavía layouts ni configuración server.
 
 Como resultado de esta solicitud te entregará la segunda versión del script. Substituye el que ya tienes en la carpeta por esta nueva versión y prúebalo desde tu consola de **Terminal SSH**.
 
-Validación rápida, básicamente :
+Validación rápida, básicamente se trata de averiguar si tienes un archivo bien armado (un qgz es una variante de contenedor zipeado), así puedes ver que no esté vacío. La otra, claro está, es abrirlo en qgis, pero si lo haces no lo guardes, para no alterar el proceso:
 
 ```bash
 unzip -o resultados/prueba_minima.qgz -d /tmp/qgz_test
