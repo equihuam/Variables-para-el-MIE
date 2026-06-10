@@ -470,9 +470,575 @@ Nuevamente tienes que regresar a tu `snakefile` para registrar esto y habilitar 
 Al hacer esto, el comando simple:  `snakemake --report reporte_auditoria_iie.html` leerá automáticamente tu archivo de presentación, tomará el título principal y lo pondrá en la barra superior del navegador, además de colocar tu texto explicativo en la página principal del reporte.
 
 
-## 11 Cerra ceeando un proyecto QGis
+## 12 Cierre: hacer un script complejo
 
-Una última estapa es incorporar en Snakefile la producción de un proyecto QGIS completamente funcional. Lo haremos ahora definiendo primero la regla de producción y luego generamos el script necesario para llevarlo a cabo.
+Espero que con el recorrido anterior haya desarrollado una comprensión inicial del concepto de construir un *workflow*. Ahora te propongo hacer algo más complicado y explorar como es que podemos recurrir a la *IA generativa* para desarrollar código que nos sirva. La idea que te propongo es desarrollar un nuevo paso del workflow que nos entregue un proyecto completo y funcional en **QGis**. Lo que haremos ahora es más que ver el código en sí, comentar sobre la secuencia de prompts que nos lleve a tener ese producto. El servidor de Octavio está preparado para 
+
+
+### Snakemake + PyQGIS + pruebas
+
+La ruta de trabajo que te propongo ahora aborda lo siguiente:
+
+```text
+1. Reglas Snakemake
+2. Script Python/PyQGIS
+3. Pruebas de salida
+```
+
+Lo que haré es compartir una secuencia de prompts que usé como parte del proceso del desarrollo de los componentes de código necesarios
+
+#### Prompt 0 — Contexto inicial del trabajo
+
+```text
+Estoy trabajando en un workflow geoespacial orquestado con Snakemake. Necesito generar proyectos QGIS reproducibles desde salidas del workflow.
+
+Quiero producir dos variantes:
+
+1. `proyecto_standalone.qgz`
+   - Para abrir en QGIS Desktop.
+   - Debe incluir layouts editoriales imprimibles.
+   - Usa una plantilla QPT.
+
+2. `proyecto_server.qgz`
+   - Para ser publicado por QGIS Server.
+   - No debe incluir layouts.
+   - Debe preparar capas para WMS, WFS y WCS.
+   - Debe usar rutas internas esperadas por el entorno servidor, pero sin depender de edición manual en QGIS GUI.
+
+No quiero tocar configuración Docker ni infraestructura. Asume que el servidor ya está configurado. Ayúdame sólo con:
+- reglas Snakemake;
+- script Python/PyQGIS;
+- pruebas de funcionamiento.
+
+Estándar de documentación de scripts:
+Todo script Python que generemos o modifiquemos debe incluir un encabezado informativo claro al inicio del archivo, con al menos estas secciones:
+
+1. Descripción
+   - Qué hace el script.
+   - En qué parte del workflow se usa.
+   - Qué problema resuelve.
+
+2. Precondiciones
+   - Archivos de entrada esperados.
+   - Supuestos sobre nombres de capas, campos, CRS, rutas o entorno.
+   - Dependencias relevantes, por ejemplo PyQGIS, GDAL/OGR o ejecución headless.
+
+3. Resultados
+   - Archivos de salida generados.
+   - Productos esperados para cada modo o parámetro relevante.
+   - Criterios mínimos para considerar exitosa la ejecución.
+
+4. Notas relevantes
+   - Advertencias técnicas.
+   - Decisiones de diseño.
+   - Limitaciones conocidas.
+   - Casos especiales, si aplica.
+
+Además:
+- El código debe estar organizado en funciones reutilizables.
+- Debe tener `main()`.
+- Debe validar entradas y salidas.
+- Debe emitir mensajes claros de avance o error.
+- Debe evitar mezclar la lógica `standalone` y `server` cuando puedan mantenerse separadas.
+```
+
+Una vez recibido ese *prompt 0* conviene que le especifiques lo siguiente:
+
+
+```text
+
+Todo script Python generado o modificado debe iniciar con un encabezado informativo con esta estructura:
+
+"""
+=============================================================================
+<nombre_del_script.py>
+-----------------------------------------------------------------------------
+
+Descripción
+-----------
+<Explicar qué hace el script, en qué parte del workflow se usa y qué problema resuelve.>
+
+Precondiciones
+--------------
+<Listar entradas esperadas, nombres de capas, campos, CRS, rutas, entorno o dependencias relevantes.>
+
+Resultados
+----------
+<Listar archivos o productos generados, modos de ejecución y criterios mínimos de éxito.>
+
+Notas relevantes
+----------------
+<Registrar advertencias técnicas, decisiones de diseño, limitaciones conocidas o casos especiales.>
+
+=============================================================================
+"""
+```
+
+Con esto habrás sentado las bases para todo el proceso de desarrollo. Ahora, con los siguientes prompts, entraremos en materia.
+
+
+
+#### Prompt 1 — Definir dos reglas Snakemake
+
+En este caso yo quise considerar el escenario en el que el Workflow me entregará dos productos derivados de la misma lógica de cómputo. Un primer producto es un **proyecto QGis** plenamente funcional y estético con las capas que quiero, con las paletas que me gusten y además previsión de *layouts para impresión*, adecuados y que cumplan con mis especificaciones precisas. Otro producto muy similar, es también un **proyecto QGis** pero organizado de tal manera que me sirva como base de un servidor de mapas a través de **QGis-server** (que ya lo tenemos habilitado en el servidor de Octavio) Esto me hace pensar que conviene tener dos reglas separadas para especificar la tarea, aunque resulten de correr el mismo script. A mi se me ocurrió llamar a esa dos reglas `create_project_standalone`, `create_project_server` pero tu puedes elegir lo que te resulte más evocativo. También indiqué la sugerencia del nombre del script, que aunque todavía no existe, es el 5° en nuestra secuencia de trabajo en este tutorial y el nombre será a tu gusto de nuevo (nada más no olvide lo que decidas), en mi caso acabé en `create_project_standalone`. Hecha esta reflexión, involucra ahora a tu **IA** y dile:
+
+
+
+
+```text
+Ayúdame a definir dos reglas Snakemake separadas para generar proyectos QGIS:
+
+- `create_project_standalone`
+- `create_project_server`
+
+Ambas deben llamar al mismo script:
+
+`scripts/5_create_qgis_project.py`
+
+pero con distinto argumento:
+
+- `--target standalone`
+- `--target server`
+
+Entradas:
+
+- raster: `resultados/integridad_mexico.tif`
+- vector: `resultados/reticula_variable.gpkg`
+- plantilla QPT: `plantillas/iie-cartografia.qpt`
+
+Salidas:
+
+- `resultados/proyecto_standalone.qgz`
+- `resultados/proyecto_server.qgz`
+
+Quiero reglas claras, independientes, fáciles de forzar con Snakemake, y comandos de prueba para ejecutar cada una por separado.
+```
+
+Criterio de validación:
+
+```bash
+snakemake --cores 3 --force create_project_standalone --scheduler greedy
+snakemake --cores 3 --force create_project_server --scheduler greedy
+```
+
+
+
+#### Prompt 2 — Construir script mínimo PyQGIS
+
+Ahora vamos a abordar el desarrollo del script 5. Imaginé qu debería dejar la opción abierta a que los ingredientes del proyecto que construira puedan ser variables. Eso significa que hay que preveer que el script acepte argumentos en donde se especifique eso. Como tenemos un producto vectorial y otro ráster, consideré que habría que preveer espacio para canalizar esos dos productos. Estudiando el tema, encontré que es bastante facil lograr hacer mapas bonitos programáticamente con QGis, si cuento con una plantilla a mi gusto, hecha por mi lado. Eso hice y entonces necesito un parámetro para indicarle en dónde tengo la plantilla que quiero que use. Finalmente, quiero tener la libertad de escoger como se llamará el resultado y algo para indicarle que tipo de proceso desarrollará. Con todo esto ya claro, pídele a la **IA** lo siguiente:
+
+
+```text
+Construyamos `scripts/5_create_qgis_project.py` por etapas.
+
+Primero quiero una versión mínima que:
+
+- acepte argumentos:
+  - `--raster`
+  - `--vector`
+  - `--layout-template`
+  - `--output`
+  - `--target`, con opciones `standalone` y `server`;
+
+- inicialice PyQGIS en modo headless;
+- cargue un raster GeoTIFF;
+- cargue una capa GeoPackage;
+- use la capa interna del GeoPackage llamada `reticula_variable`;
+- valide que ambas capas son válidas;
+- asigne CRS de proyecto `EPSG:4326`;
+- agregue las capas al proyecto;
+- coloque el vector arriba y el raster abajo;
+- escriba un `.qgz` válido.
+
+No agregues todavía layouts, WMS, WFS ni WCS. Sólo quiero validar carga de capas y escritura del proyecto.
+```
+
+Has una corrida de prueba desde tu **terminal SSH**, deberás estar ubicada en /srv/iie-tutor/$USER-iie:
+
+```bash
+python scripts/5_create_qgis_project.py \
+  --raster resultados/integridad_mexico.tif \
+  --vector resultados/reticula_variable.gpkg \
+  --layout-template plantillas/iie-cartografia.qpt \
+  --output resultados/prueba_minima.qgz \
+  --target standalone
+```
+
+Si todo resultó bien, ahora tienes una propuesta de script 5 en proceso de desarrollo. Deberas guardarla con el nombre que elegiste en la **carpeta de nuestra estructura canónica: scripts**. Lo siguiente que hice fue resolver como quería que se viera el mapa. Básicamente resolver las paletas de los dos tipos de mapas. Lo hice con algo parecido a la siguiente interacción con la **IA**
+
+
+## Prompt 3 — Agregar simbología raster y vectorial
+
+```text
+Ahora quiero extender el script PyQGIS para aplicar simbología reproducible.
+
+Para el raster:
+- usar banda 1;
+- calcular mínimo y máximo;
+- aplicar una rampa tipo viridis de cinco clases;
+- evitar leyendas con valores `nan`;
+- asegurar que el renderer quede guardado en el proyecto.
+
+Para el vector:
+- buscar el campo de clasificación en este orden:
+  1. `integridad_simulada`
+  2. `valor_indice`
+  3. `valor_iie`
+
+- crear una simbología graduada de cinco clases;
+- si no se puede clasificar, usar un símbolo de contorno como respaldo.
+
+Quiero funciones separadas para:
+- obtener min/max raster;
+- construir renderer raster;
+- encontrar campo vectorial;
+- construir renderer vectorial;
+- aplicar ambos renderers.
+
+No agregues todavía layouts ni configuración server.
+```
+
+Como resultado de esta solicitud te entregará la segunda versión del script. Substituye el que ya tienes en la carpeta por esta nueva versión y prúebalo desde tu consola de **Terminal SSH**.
+
+Validación rápida, básicamente :
+
+```bash
+unzip -o resultados/prueba_minima.qgz -d /tmp/qgz_test
+grep -n "singlebandpseudocolor\|colorrampshader" /tmp/qgz_test/*.qgs
+grep -n "graduatedSymbol\|renderer-v2" /tmp/qgz_test/*.qgs
+```
+
+---
+
+## Prompt 4 — Construir variante standalone con layouts
+
+```text
+Ahora quiero implementar la variante `--target standalone`.
+
+Requisitos:
+
+- Debe generar `resultados/proyecto_standalone.qgz`.
+- Debe cargar la plantilla `plantillas/iie-cartografia.qpt`.
+- Debe crear dos layouts independientes:
+  - `iie-cartografia-raster`
+  - `iie-cartografia-vectorial`
+
+Cada layout debe:
+- tener una sola página US Letter horizontal;
+- conservar la estructura editorial del QPT;
+- tener mapa de:
+  - ancho: 180 mm
+  - alto: 209.4 mm
+  - escala: 1:15,000,000
+- conservar el encuadre del QPT;
+- no autoajustarse al extent de la capa;
+- mostrar sólo su capa correspondiente;
+- reutilizar la leyenda existente del QPT;
+- actualizar el título.
+
+Títulos:
+- raster: `Mapa raster de\nintegridad ecosistémica`
+- vector: `Mapa vectorial de\nintegridad ecosistémica`
+
+Quiero código modular y que esta lógica sólo corra cuando `--target standalone`.
+```
+
+Validación:
+
+```bash
+snakemake --cores 3 --force create_project_standalone --scheduler greedy
+```
+
+Revisión manual en QGIS Desktop:
+
+```text
+- abre proyecto_standalone.qgz;
+- existen dos layouts;
+- cada layout tiene una página;
+- mapa con escala fija;
+- leyenda correcta;
+- título correcto;
+- capas correctas por layout.
+```
+
+---
+
+## Prompt 5 — Construir variante server sin layouts
+
+```text
+Ahora quiero implementar la variante `--target server`.
+
+Requisitos:
+
+- Debe generar `resultados/proyecto_server.qgz`.
+- No debe importar layouts QPT.
+- Debe publicar nombres de capa estables:
+  - raster: `iie_mapa_raster`
+  - vector: `iie_mapa_vectorial`
+
+Debe preparar el proyecto para servicios OGC:
+
+- WMS:
+  - raster y vectorial;
+
+- WFS:
+  - sólo vectorial;
+
+- WCS:
+  - sólo raster.
+
+Importante:
+Quiero evitar llamadas PyQGIS frágiles que puedan provocar `SIGSEGV`, especialmente:
+- no cambiar datasources a rutas que no existan desde el entorno donde corre PyQGIS;
+- no depender de pasos manuales en QGIS GUI.
+
+Propón una arquitectura donde PyQGIS:
+1. cargue capas con rutas válidas locales;
+2. aplique simbología;
+3. escriba un proyecto QGIS válido;
+4. y luego, si hace falta, se parchee el `.qgs` interno del `.qgz` como XML para ajustar rutas y propiedades OGC.
+
+Quiero el código de la variante server integrado en el mismo script, manteniendo separada la lógica `standalone` y `server`.
+```
+
+Validación:
+
+```bash
+snakemake --cores 3 --force create_project_server --scheduler greedy
+```
+
+---
+
+## Prompt 6 — Pruebas internas del `.qgz`
+
+```text
+Ya se generó `resultados/proyecto_server.qgz`.
+
+Ayúdame a inspeccionar el `.qgz` para verificar que el `.qgs` interno contiene:
+
+- capas con nombres:
+  - `iie_mapa_raster`
+  - `iie_mapa_vectorial`
+
+- renderer raster:
+  - `singlebandpseudocolor`
+  - `colorrampshader`
+
+- propiedades OGC:
+  - `WMSServiceTitle`
+  - `WFSServiceTitle`
+  - `WCSServiceTitle`
+  - `WFSLayers`
+  - `WCSLayers`
+
+Dame comandos `unzip`, `grep` y `sed` para revisar el contenido.
+```
+
+Comandos:
+
+```bash
+rm -rf /tmp/qgz_server
+mkdir -p /tmp/qgz_server
+unzip -o resultados/proyecto_server.qgz -d /tmp/qgz_server
+
+grep -n "iie_mapa_raster\|iie_mapa_vectorial" /tmp/qgz_server/*.qgs
+
+grep -n "singlebandpseudocolor\|colorrampshader" /tmp/qgz_server/*.qgs
+
+grep -n "WMSServiceTitle\|WFSServiceTitle\|WCSServiceTitle\|WFSLayers\|WCSLayers" /tmp/qgz_server/*.qgs
+```
+
+Para revisar valores internos:
+
+```bash
+sed -n '850,900p' /tmp/qgz_server/*.qgs
+```
+
+---
+
+## Prompt 7 — Validar WMS
+
+```text
+Quiero validar que el proyecto QGIS Server generado por el script funciona correctamente como WMS.
+
+Asume que el servidor ya está configurado y que el endpoint base es:
+
+`http://localhost:8085/cgi-bin/qgis_mapserv.fcgi`
+
+Capas esperadas:
+- `iie_mapa_raster`
+- `iie_mapa_vectorial`
+
+Dame URLs de prueba para:
+- `GetCapabilities`;
+- `GetMap` raster;
+- `GetMap` vectorial;
+- `GetLegendGraphic`.
+
+Usa WMS 1.1.1 en las pruebas `GetMap` con EPSG:4326 para evitar problemas de orden de ejes.
+```
+
+---
+
+## Prompt 8 — Validar WCS
+
+```text
+Quiero validar WCS para la capa raster `iie_mapa_raster`.
+
+Asume endpoint base:
+
+`http://localhost:8085/cgi-bin/qgis_mapserv.fcgi`
+
+Dame pruebas para:
+- `GetCapabilities`;
+- `DescribeCoverage`.
+
+Aclara que WCS entrega el raster como cobertura numérica y no necesariamente como mapa estilizado.
+```
+
+---
+
+## Prompt 9 — Validar WFS fuera de QGIS GUI
+
+```text
+Quiero validar WFS para la capa vectorial `iie_mapa_vectorial` sin depender de QGIS GUI.
+
+Asume endpoint base:
+
+`http://localhost:8085/cgi-bin/qgis_mapserv.fcgi`
+
+Datos esperados:
+- capa: `iie_mapa_vectorial`;
+- geometría: Polygon;
+- feature count: 862;
+- campos:
+  - `fid`
+  - `valor_indice`
+  - `integridad_simulada`;
+- extent aproximado:
+  `(-118.50, 14.33) - (-86.44, 32.77)`.
+
+Dame pruebas con:
+- `curl`;
+- `grep`;
+- `ogrinfo`;
+- opcionalmente `ogr2ogr` para exportar a GPKG.
+
+También ayúdame a interpretar avisos de orden de ejes en EPSG:4326.
+```
+
+Comandos clave:
+
+```bash
+curl -s "http://localhost:8085/cgi-bin/qgis_mapserv.fcgi?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=iie_mapa_vectorial" > /tmp/iie_wfs.gml
+
+ls -lh /tmp/iie_wfs.gml
+grep -c "gml:featureMember" /tmp/iie_wfs.gml
+grep -n "fid" /tmp/iie_wfs.gml | head
+```
+
+```bash
+ogrinfo -ro \
+  "WFS:http://localhost:8085/cgi-bin/qgis_mapserv.fcgi?SERVICE=WFS&VERSION=1.0.0" \
+  iie_mapa_vectorial \
+  -so
+```
+
+---
+
+## Prompt 10 — Diagnóstico de QGIS GUI como cliente WFS
+
+```text
+El WFS ya fue validado con `curl` y `ogrinfo`, pero al cargarlo como capa viva en QGIS Desktop puede aparecer incompleto o mostrar avisos de coordenadas.
+
+Ayúdame a distinguir si esto es un problema del servicio o del cliente QGIS GUI.
+
+Considera:
+- `forceInitialGetFeature=false`;
+- `restrictToRequestBBOX=1`;
+- `pagingEnabled=default`;
+- `version=auto`;
+- render inicial antes de que se complete la lectura de features.
+
+Quiero recomendaciones para usuarios de QGIS Desktop:
+- usar WMS para visualización;
+- usar WFS para consulta/descarga;
+- abrir tabla o exportar para forzar `GetFeature`;
+- guardar a GPKG si se va a trabajar localmente;
+- probar WFS 1.0.0;
+- activar Initial GetFeature si está disponible;
+- desactivar restricción por BBOX durante validación.
+```
+
+---
+
+## Prompt 11 — Nota final para README o bitácora
+
+```text
+Ayúdame a redactar una nota técnica final para README o bitácora.
+
+Debe explicar:
+
+- Se implementaron dos reglas Snakemake separadas:
+  - `create_project_standalone`
+  - `create_project_server`
+
+- `create_project_standalone` genera un proyecto QGIS Desktop con layouts editoriales desde QPT.
+
+- `create_project_server` genera un proyecto QGIS Server sin layouts y preparado para WMS/WFS/WCS.
+
+- El script Python/PyQGIS se construyó por etapas:
+  1. carga y validación de capas;
+  2. simbología raster/vectorial;
+  3. layouts standalone;
+  4. proyecto server;
+  5. parche XML del `.qgz` para propiedades OGC cuando fue necesario.
+
+- Se evitó mezclar la lógica Desktop y Server.
+
+- Validaciones:
+  - WMS validado como canal de visualización estilizada.
+  - WCS validado como cobertura raster numérica.
+  - WFS validado como canal vectorial con 862 polígonos, extent correcto y atributos esperados.
+
+- Salvedad:
+  - QGIS GUI puede cargar inicialmente una capa WFS viva de forma parcial hasta que una consulta, apertura de tabla o exportación fuerza el `GetFeature` completo. Esto se considera comportamiento del cliente QGIS Desktop, no falla del servicio.
+```
+
+---
+
+La versión corta para tus usuarios sería:
+
+```text
+No tocar Docker.
+Sólo modificar:
+1. Snakefile.
+2. scripts/5_create_qgis_project.py.
+3. Pruebas de salida con Snakemake, unzip/grep, curl y ogrinfo.
+```
+
+Y el orden que más protege contra errores es:
+
+```text
+Snakemake separado
+→ script mínimo
+→ simbología
+→ standalone
+→ server
+→ inspección del .qgz
+→ WMS
+→ WCS
+→ WFS
+→ nota de cierre
+```
+
+
+
+------------------
+
+
+-------------------
+Una última etapa es incorporar en Snakefile la producción de un proyecto QGIS completamente funcional. Lo haremos ahora definiendo primero la regla de producción y luego generamos el script necesario para llevarlo a cabo.
 
 Agrega en `snakefile` un nuevo bloque. Lo que describe esta regla es que tomaremos tres componentes: 
 
