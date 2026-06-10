@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 =============================================================================
 5_create_qgis_project.py
@@ -15,27 +18,29 @@ Productos esperados:
         pensado para QGIS Server.
 
 Estrategia:
-    - Cargar raster y vector desde salidas reales del workflow.
+    - Cargar raster y vector desde salidas reales del workflow usando rutas del host.
     - Aplicar simbología raster tipo viridis.
     - Aplicar simbología vectorial graduada.
-    - Generar dos layouts independientes desde el mismo QPT:
-        1. iie-cartografia-raster
-        2. iie-cartografia-vectorial
-    - Cada layout conserva la estructura editorial del QPT.
-    - Cada layout contiene una página US-letter horizontal.
-    - Cada layout contiene un solo mapa con:
-        ancho: 180 mm
-        alto: 209.4 mm
-        escala: 1:15,000,000
-    - El mapa no se autoajusta al contenido.
-    - La leyenda usa el componente previsto en el QPT.
+    - Para standalone:
+        generar dos layouts editoriales independientes desde el mismo QPT.
+    - Para server:
+        evitar llamadas frágiles de PyQGIS Server.
+        El proyecto se escribe primero con rutas válidas del host y luego se
+        parchea el .qgs interno para:
+            * reemplazar /srv/iie-tutor por /data;
+            * publicar WMS/WFS/WCS;
+            * registrar capas WFS/WCS.
 =============================================================================
 """
 
 import argparse
 import math
 import os
+import re
 import sys
+import tempfile
+import zipfile
+from xml.sax.saxutils import escape as xml_escape
 
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtXml import QDomDocument
@@ -88,6 +93,11 @@ CONTAINER_PREFIX = "/data"
 
 PROJECT_CRS = "EPSG:4326"
 
+OGC_WMS_CRS_LIST = ["EPSG:4326", "EPSG:3857", "EPSG:6372"]
+OGC_WFS_CRS_LIST = ["EPSG:4326"]
+#OGC_WFS_CRS_LIST = ["EPSG:6372"]
+OGC_WCS_CRS_LIST = ["EPSG:4326"]
+
 VECTOR_LAYER_INTERNAL = "reticula_variable"
 VECTOR_LAYER_TITLE = "Retícula de integridad ecosistémica"
 RASTER_LAYER_TITLE = "Integridad ecosistémica raster"
@@ -103,7 +113,6 @@ PREFERRED_VALUE_FIELDS = [
 # Layout imprimible
 # =============================================================================
 
-# US Letter landscape
 US_LETTER_W_MM = 279.4
 US_LETTER_H_MM = 215.9
 
@@ -111,7 +120,6 @@ MAP_W_MM = 180.0
 MAP_H_MM = 209.4
 MAP_SCALE = 15_000_000
 
-# Fallbacks si el QPT no trae mapa, título o leyenda identificables.
 DEFAULT_MAP_X_MM = 10.0
 DEFAULT_MAP_Y_MM = 3.25
 
@@ -125,6 +133,25 @@ LAYOUT_VECTOR_NAME = "iie-cartografia-vectorial"
 
 TITLE_RASTER = "Mapa raster de\nintegridad ecosistémica"
 TITLE_VECTOR = "Mapa vectorial de\nintegridad ecosistémica"
+
+
+# =============================================================================
+# QGIS Server / OGC
+# =============================================================================
+
+OGC_SERVICE_TITLE = "IIE - Integridad ecosistémica"
+OGC_SERVICE_ABSTRACT = (
+    "Servicio OGC generado automáticamente por el workflow IIE. "
+    "Incluye variantes raster y vectorial de integridad ecosistémica."
+)
+
+OGC_RASTER_NAME = "iie_mapa_raster"
+OGC_VECTOR_NAME = "iie_mapa_vectorial"
+
+OGC_RASTER_TITLE = "Mapa raster de integridad ecosistémica"
+OGC_VECTOR_TITLE = "Mapa vectorial de integridad ecosistémica"
+
+OGC_CRS_LIST = ["EPSG:4326", "EPSG:3857"]
 
 
 # =============================================================================
@@ -210,9 +237,6 @@ def find_value_field(layer: QgsVectorLayer) -> str:
 def get_raster_minmax(layer: QgsRasterLayer) -> tuple[float, float]:
     """
     Calcula mínimo y máximo de la banda 1 usando la capa válida del host.
-
-    Se hace antes de cambiar rutas a modo server, porque /data/... puede no
-    existir desde el host donde corre Snakemake.
     """
     provider = layer.dataProvider()
 
@@ -246,10 +270,9 @@ def build_raster_viridis_renderer(
     vmax: float,
 ) -> QgsSingleBandPseudoColorRenderer:
     """
-    Construye un renderer raster tipo viridis y fuerza clasificación interna.
+    Construye un renderer raster tipo viridis.
 
-    Esto replica programáticamente el efecto de pulsar "Clasificar" en la
-    interfaz de QGIS y evita leyendas con 'nan'.
+    Se usa rampa discreta para hacerlo más robusto en QGIS Server WMS.
     """
     provider = layer.dataProvider()
 
@@ -280,26 +303,9 @@ def build_raster_viridis_renderer(
     ]
 
     color_ramp_shader = QgsColorRampShader(float(vmin), float(vmax))
-    color_ramp_shader.setColorRampType(QgsColorRampShader.Interpolated)
+    color_ramp_shader.setColorRampType(QgsColorRampShader.Discrete)
     color_ramp_shader.setColorRampItemList(color_ramp_items)
     color_ramp_shader.setClip(True)
-
-    try:
-        color_ramp_shader.classifyColorRamp(
-            len(color_ramp_items),
-            1,
-            layer.extent(),
-            provider,
-        )
-    except TypeError:
-        try:
-            color_ramp_shader.classifyColorRamp(len(color_ramp_items))
-        except Exception:
-            pass
-    except Exception:
-        pass
-
-    color_ramp_shader.setColorRampItemList(color_ramp_items)
 
     raster_shader = QgsRasterShader()
     raster_shader.setRasterShaderFunction(color_ramp_shader)
@@ -423,6 +429,20 @@ def set_layer_order(project: QgsProject, raster_layer, vector_layer) -> None:
     root.insertChildNode(1, QgsLayerTreeLayer(raster_layer))
 
 
+def configure_server_layer_tree(project: QgsProject, raster_layer, vector_layer) -> None:
+    """
+    Organiza el árbol de capas para QGIS Server sin usar serverProperties().
+    """
+    root = project.layerTreeRoot()
+    root.removeAllChildren()
+
+    vector_node = root.insertLayer(0, vector_layer)
+    vector_node.setItemVisibilityChecked(True)
+
+    raster_node = root.insertLayer(1, raster_layer)
+    raster_node.setItemVisibilityChecked(True)
+
+
 # =============================================================================
 # Layout QPT: dos layouts independientes desde la misma plantilla
 # =============================================================================
@@ -477,9 +497,7 @@ def item_size_mm(item, default_w: float, default_h: float) -> tuple[float, float
 
 
 def ensure_single_letter_landscape_page(layout: QgsPrintLayout) -> None:
-    """
-    Asegura una sola página US-letter en orientación landscape.
-    """
+    """Asegura una sola página US-letter en orientación landscape."""
     pages = layout.pageCollection()
 
     if pages.pageCount() == 0:
@@ -502,19 +520,12 @@ def ensure_single_letter_landscape_page(layout: QgsPrintLayout) -> None:
     )
 
 
-def configure_map_item(
-    layout: QgsPrintLayout,
-    layer,
-) -> None:
+def configure_map_item(layout: QgsPrintLayout, layer) -> None:
     """
     Configura el mapa del layout.
 
-    Importante:
-        - No usa layer.extent().
-        - Conserva el encuadre que traiga el QPT.
-        - Sólo fuerza tamaño exacto y escala fija.
-
-    Esto evita el autoajuste al contenido.
+    No usa layer.extent(); conserva el encuadre del QPT y sólo fuerza tamaño
+    y escala.
     """
     map_item = preferred_layout_item(
         layout,
@@ -551,20 +562,16 @@ def configure_map_item(
         )
     )
 
-    # Cada layout muestra sólo su capa.
     map_item.setLayers([layer])
 
-    # Mantener encuadre del template. No autoajustar a la capa.
     if not template_extent.isEmpty():
         map_item.setExtent(template_extent)
 
-    # Escala fija.
     try:
         map_item.setScale(MAP_SCALE)
     except Exception:
         map_item.zoomScale(MAP_SCALE)
 
-    # Reforzar tamaño después de fijar escala.
     map_item.attemptResize(
         QgsLayoutSize(
             MAP_W_MM,
@@ -581,16 +588,8 @@ def configure_map_item(
     map_item.refresh()
 
 
-def configure_title_item(
-    layout: QgsPrintLayout,
-    title_text: str,
-) -> None:
-    """
-    Actualiza el título del layout.
-
-    Usa un label con id/displayName que contenga titulo, title o map_title.
-    Si no existe, usa el primer label.
-    """
+def configure_title_item(layout: QgsPrintLayout, title_text: str) -> None:
+    """Actualiza el título del layout."""
     label_item = preferred_layout_item(
         layout,
         QgsLayoutItemLabel,
@@ -622,7 +621,6 @@ def configure_title_item(
         )
     )
 
-    # Conserva el tamaño del componente del QPT si existe.
     label_item.attemptResize(
         QgsLayoutSize(
             title_w,
@@ -635,15 +633,8 @@ def configure_title_item(
     label_item.refresh()
 
 
-def configure_legend_item(
-    layout: QgsPrintLayout,
-    layer,
-) -> None:
-    """
-    Configura la leyenda existente del QPT para mostrar sólo la capa del layout.
-
-    Reutiliza el componente previsto en la plantilla. No elimina la leyenda.
-    """
+def configure_legend_item(layout: QgsPrintLayout, layer) -> None:
+    """Configura la leyenda existente del QPT para mostrar sólo la capa."""
     legend_item = preferred_layout_item(
         layout,
         QgsLayoutItemLegend,
@@ -673,12 +664,7 @@ def load_layout_from_qpt(
     qpt_path: str,
     layout_name: str,
 ) -> QgsPrintLayout:
-    """
-    Carga una instancia independiente del QPT.
-
-    El nombre se asigna después de loadFromTemplate(), porque el QPT puede
-    traer su propio nombre de layout y sobreescribir el nombre previo.
-    """
+    """Carga una instancia independiente del QPT."""
     if not os.path.exists(qpt_path):
         raise RuntimeError(f"No existe la plantilla de layout: {qpt_path}")
 
@@ -701,8 +687,6 @@ def load_layout_from_qpt(
 
     context = QgsReadWriteContext()
     layout.loadFromTemplate(doc, context)
-
-    # Clave para evitar que ambos layouts queden con el mismo nombre.
     layout.setName(layout_name)
 
     return layout
@@ -724,9 +708,7 @@ def configure_editorial_layout(
     layer,
     title_text: str,
 ) -> None:
-    """
-    Configura una instancia de layout editorial de una sola página.
-    """
+    """Configura una instancia de layout editorial de una sola página."""
     ensure_single_letter_landscape_page(layout)
     configure_map_item(layout, layer)
     configure_title_item(layout, title_text)
@@ -779,21 +761,19 @@ def import_layout_templates(
 
 def apply_target_datasources(
     project: QgsProject,
-    vector_layer,
-    raster_layer,
     host_vector: str,
     host_raster: str,
     target: str,
 ) -> tuple[str, str]:
     """
-    Define las rutas finales guardadas en el proyecto.
+    Define las rutas finales esperadas.
 
     target == standalone:
-        No cambia datasource. Las capas permanecen válidas con rutas del host,
-        y QGIS escribe rutas relativas al guardar.
+        Las capas permanecen con rutas del host. QGIS escribe rutas relativas.
 
     target == server:
-        Cambia datasource a rutas internas del contenedor Docker.
+        Las capas permanecen con rutas del host durante PyQGIS.
+        Las rutas /data/... se escriben después parcheando el .qgz.
     """
     if target == "standalone":
         project.writeEntry("Paths", "Absolute", False)
@@ -802,30 +782,232 @@ def apply_target_datasources(
         raster_uri = host_raster
 
     elif target == "server":
-        project.writeEntry("Paths", "Absolute", True)
-
+        # Usamos rutas finales sólo para reporte y parche XML.
+        # No llamar setDataSource() aquí.
         server_vector = to_container_path(host_vector)
         server_raster = to_container_path(host_raster)
 
         vector_uri = gpkg_uri(server_vector, VECTOR_LAYER_INTERNAL)
         raster_uri = server_raster
 
-        vector_layer.setDataSource(
-            vector_uri,
-            VECTOR_LAYER_TITLE,
-            "ogr",
-        )
-
-        raster_layer.setDataSource(
-            raster_uri,
-            RASTER_LAYER_TITLE,
-            "gdal",
-        )
-
     else:
         raise ValueError(f"Destino no reconocido: {target}")
 
     return vector_uri, raster_uri
+
+
+# =============================================================================
+# Parche XML del .qgz server
+# =============================================================================
+
+def _xml_text(value: str) -> str:
+    """Escapa texto para XML."""
+    return xml_escape(str(value), {'"': "&quot;"})
+
+
+def _qstring_property(tag: str, value: str) -> str:
+    return (
+        f'    <{tag} type="QString">'
+        f'{_xml_text(value)}'
+        f'</{tag}>\n'
+    )
+
+
+def _bool_property(tag: str, value: bool) -> str:
+    text = "true" if value else "false"
+    return f'    <{tag} type="bool">{text}</{tag}>\n'
+
+
+def _qstringlist_property(tag: str, values: list[str]) -> str:
+    lines = [f'    <{tag} type="QStringList">\n']
+
+    for value in values:
+        lines.append(f'      <value>{_xml_text(value)}</value>\n')
+
+    lines.append(f'    </{tag}>\n')
+
+    return "".join(lines)
+
+
+def _replace_or_insert_property(content: str, tag: str, xml_block: str) -> str:
+    """
+    Reemplaza una propiedad de proyecto si existe; si no existe, la inserta
+    antes de </properties>.
+    """
+    pattern = re.compile(
+        rf"\s*<{re.escape(tag)}\b[^>]*>.*?</{re.escape(tag)}>\s*",
+        flags=re.DOTALL,
+    )
+
+    if pattern.search(content):
+        return pattern.sub("\n" + xml_block, content)
+
+    if "</properties>" not in content:
+        # Fallback defensivo. Normalmente todo .qgs tiene <properties>.
+        content = content.replace(
+            "<qgis ",
+            "<qgis ",
+            1,
+        )
+        content = content.replace(
+            ">\n",
+            ">\n  <properties>\n  </properties>\n",
+            1,
+        )
+
+    return content.replace("</properties>", xml_block + "  </properties>", 1)
+
+
+def _patch_ogc_project_properties(
+    content: str,
+    raster_layer_id: str,
+    vector_layer_id: str,
+) -> str:
+    """
+    Inyecta propiedades OGC de QGIS Server directamente en el XML del proyecto.
+
+    Esto evita usar project.writeEntry() para la configuración server, que en
+    algunos entornos headless puede ser inestable.
+    """
+    replacements = {
+        "WMSServiceTitle": _qstring_property("WMSServiceTitle", OGC_SERVICE_TITLE),
+        "WMSServiceAbstract": _qstring_property(
+            "WMSServiceAbstract",
+            OGC_SERVICE_ABSTRACT,
+        ),
+        "WFSServiceTitle": _qstring_property("WFSServiceTitle", OGC_SERVICE_TITLE),
+        "WFSServiceAbstract": _qstring_property(
+            "WFSServiceAbstract",
+            OGC_SERVICE_ABSTRACT,
+        ),
+        "WCSServiceTitle": _qstring_property("WCSServiceTitle", OGC_SERVICE_TITLE),
+        "WCSServiceAbstract": _qstring_property(
+            "WCSServiceAbstract",
+            OGC_SERVICE_ABSTRACT,
+        ),
+
+
+        "WMSUseLayerIDs": _bool_property("WMSUseLayerIDs", False),
+        "WMSCrsList": _qstringlist_property("WMSCrsList", OGC_WMS_CRS_LIST),
+        "WFSCrsList": _qstringlist_property("WFSCrsList", OGC_WFS_CRS_LIST),
+        "WCSCrsList": _qstringlist_property("WCSCrsList", OGC_WCS_CRS_LIST),
+        "WFSLayers": _qstringlist_property("WFSLayers", [vector_layer_id]),
+        "WCSLayers": _qstringlist_property("WCSLayers", [raster_layer_id]),
+        "WFSTLayers": _qstringlist_property("WFSTLayers", []),
+    }
+
+    for tag, xml_block in replacements.items():
+        content = _replace_or_insert_property(content, tag, xml_block)
+
+    return content
+
+
+def patch_qgz_for_server(
+    input_qgz: str,
+    output_qgz: str,
+    raster_layer_id: str,
+    vector_layer_id: str,
+    host_prefix: str = HOST_PREFIX,
+    container_prefix: str = CONTAINER_PREFIX,
+) -> None:
+    """
+    Abre un .qgz, reemplaza rutas del host por rutas del contenedor e inyecta
+    propiedades OGC en el .qgs interno.
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = os.path.abspath(tmpdir)
+
+        with zipfile.ZipFile(input_qgz, "r") as zin:
+            zin.extractall(tmpdir)
+
+        qgs_files = [
+            os.path.join(tmpdir, name)
+            for name in os.listdir(tmpdir)
+            if name.endswith(".qgs")
+        ]
+
+        if len(qgs_files) != 1:
+            raise RuntimeError(
+                f"Esperaba exactamente un .qgs dentro de {input_qgz}, "
+                f"pero encontré {len(qgs_files)}"
+            )
+
+        qgs_path = qgs_files[0]
+
+        with open(qgs_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Convertir rutas host -> contenedor.
+        content = content.replace(host_prefix, container_prefix)
+
+        # Inyectar publicación OGC.
+        content = _patch_ogc_project_properties(
+            content=content,
+            raster_layer_id=raster_layer_id,
+            vector_layer_id=vector_layer_id,
+        )
+
+        with open(qgs_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        with zipfile.ZipFile(output_qgz, "w", zipfile.ZIP_DEFLATED) as zout:
+            for root, _, files in os.walk(tmpdir):
+                for filename in files:
+                    full_path = os.path.join(root, filename)
+                    arcname = os.path.relpath(full_path, tmpdir)
+                    zout.write(full_path, arcname)
+
+
+def write_project(
+    project: QgsProject,
+    output_project: str,
+    target: str,
+    raster_layer,
+    vector_layer,
+) -> None:
+    """
+    Guarda el proyecto.
+
+    Para standalone:
+        escribe directamente.
+
+    Para server:
+        escribe un .qgz temporal con rutas válidas del host y luego parchea
+        el .qgs interno para rutas Docker y propiedades OGC.
+    """
+    if target == "standalone":
+        if not project.write(output_project):
+            raise RuntimeError(f"No se pudo guardar el proyecto: {output_project}")
+        return
+
+    if target == "server":
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_qgz = os.path.join(tmpdir, os.path.basename(output_project))
+
+            # Esta entrada es relativamente segura y ayuda a que el .qgs guarde
+            # rutas absolutas que luego podamos reemplazar.
+            try:
+                project.writeEntry("Paths", "Absolute", True)
+            except Exception:
+                pass
+
+            if not project.write(tmp_qgz):
+                raise RuntimeError(
+                    f"No se pudo guardar el proyecto temporal: {tmp_qgz}"
+                )
+
+            patch_qgz_for_server(
+                input_qgz=tmp_qgz,
+                output_qgz=output_project,
+                raster_layer_id=raster_layer.id(),
+                vector_layer_id=vector_layer.id(),
+                host_prefix=HOST_PREFIX,
+                container_prefix=CONTAINER_PREFIX,
+            )
+
+        return
+
+    raise ValueError(f"Destino no reconocido: {target}")
 
 
 # =============================================================================
@@ -838,7 +1020,7 @@ def main() -> None:
     parser.add_argument("--raster", required=True)
     parser.add_argument("--vector", required=True)
     parser.add_argument("--output", required=True)
-    parser.add_argument("--layout-template", required=True)
+    parser.add_argument("--layout-template", required=False)
 
     parser.add_argument(
         "--target",
@@ -848,6 +1030,11 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+
+    if args.target == "standalone" and not args.layout_template:
+        raise RuntimeError(
+            "--layout-template es requerido para target standalone"
+        )
 
     qgs = QgsApplication([], False)
     qgs.initQgis()
@@ -861,7 +1048,12 @@ def main() -> None:
 
         host_raster = abs_path(args.raster)
         host_vector = abs_path(args.vector)
-        layout_template = abs_path(args.layout_template)
+        layout_template = (
+            abs_path(args.layout_template)
+            if args.layout_template
+            else None
+        )
+
         output_project = args.output
 
         # 1. Cargar capas desde rutas válidas del host.
@@ -871,14 +1063,23 @@ def main() -> None:
         raster_layer.setCrs(target_crs)
         vector_layer.setCrs(target_crs)
 
-        # 2. Agregar capas al proyecto.
+        # 2. Nombres públicos estables.
+        # Evitamos layer.serverProperties() para no disparar SIGSEGV.
+        if args.target == "server":
+            raster_layer.setName(OGC_RASTER_NAME)
+            vector_layer.setName(OGC_VECTOR_NAME)
+
+        # 3. Agregar capas al proyecto.
         project.addMapLayer(raster_layer, False)
         project.addMapLayer(vector_layer, False)
 
-        # 3. Orden visual general del proyecto.
-        set_layer_order(project, raster_layer, vector_layer)
+        # 4. Orden visual.
+        if args.target == "server":
+            configure_server_layer_tree(project, raster_layer, vector_layer)
+        else:
+            set_layer_order(project, raster_layer, vector_layer)
 
-        # 4. Preparar simbología raster.
+        # 5. Preparar simbología raster.
         raster_vmin, raster_vmax = get_raster_minmax(raster_layer)
         raster_renderer = build_raster_viridis_renderer(
             raster_layer,
@@ -886,7 +1087,7 @@ def main() -> None:
             raster_vmax,
         )
 
-        # 5. Preparar simbología vectorial.
+        # 6. Preparar simbología vectorial.
         value_field = find_value_field(vector_layer)
 
         try:
@@ -896,7 +1097,8 @@ def main() -> None:
             )
             print(
                 f"Simbología vectorial graduada preparada usando campo: "
-                f"{value_field}"
+                f"{value_field}",
+                flush=True,
             )
         except Exception as e:
             print(
@@ -904,59 +1106,89 @@ def main() -> None:
                 "Se usará retícula de contorno.\n"
                 f"Detalle: {e}",
                 file=sys.stderr,
+                flush=True,
             )
             vector_renderer = build_vector_outline_renderer(vector_layer)
 
-        # 6. Definir rutas finales según destino.
+        # 7. Aplicar renderers mientras las capas siguen usando rutas válidas.
+        raster_layer.setRenderer(raster_renderer)
+        vector_layer.setRenderer(vector_renderer)
+
+        print(
+            f"Simbología raster tipo viridis clasificada y aplicada: "
+            f"min={raster_vmin:.4f}, max={raster_vmax:.4f}",
+            flush=True,
+        )
+
+        # 8. Resolver rutas finales esperadas.
         vector_uri_final, raster_uri_final = apply_target_datasources(
             project=project,
-            vector_layer=vector_layer,
-            raster_layer=raster_layer,
             host_vector=host_vector,
             host_raster=host_raster,
             target=args.target,
         )
 
-        # 7. Aplicar renderers después de definir destino.
-        raster_layer.setRenderer(raster_renderer)
-        raster_layer.triggerRepaint()
+        # 9. Configuración específica por destino.
+        if args.target == "standalone":
+            raster_layer.triggerRepaint()
+            vector_layer.triggerRepaint()
 
-        vector_layer.setRenderer(vector_renderer)
-        vector_layer.triggerRepaint()
+            if layout_template is None:
+                raise RuntimeError(
+                    "--layout-template es requerido para target standalone"
+                )
 
-        print(
-            f"Simbología raster tipo viridis clasificada y aplicada: "
-            f"min={raster_vmin:.4f}, max={raster_vmax:.4f}"
-        )
-        print("Simbología vectorial aplicada después de definir destino.")
+            import_layout_templates(
+                project=project,
+                qpt_path=layout_template,
+                raster_layer=raster_layer,
+                vector_layer=vector_layer,
+            )
 
-        # 8. Importar dos layouts independientes desde el mismo QPT.
-        import_layout_templates(
+        elif args.target == "server":
+            # No hacer nada adicional con PyQGIS Server aquí.
+            # WMS/WFS/WCS se inyectan por parche XML después de project.write().
+            pass
+
+        else:
+            raise ValueError(f"Destino no reconocido: {args.target}")
+
+        # 10. Guardar proyecto.
+        write_project(
             project=project,
-            qpt_path=layout_template,
+            output_project=output_project,
+            target=args.target,
             raster_layer=raster_layer,
             vector_layer=vector_layer,
         )
 
-        # 9. Guardar proyecto.
-        if project.write(output_project):
-            print(f"Éxito: proyecto generado en {output_project}")
-            print(f"Destino:       {args.target}")
-            print(f"Raster host:   {host_raster}")
-            print(f"Vector host:   {gpkg_uri(host_vector, VECTOR_LAYER_INTERNAL)}")
-            print(f"Raster final:  {raster_uri_final}")
-            print(f"Vector final:  {vector_uri_final}")
-            print(f"Layout QPT:    {layout_template}")
-            print(f"Layouts:       {LAYOUT_RASTER_NAME}, {LAYOUT_VECTOR_NAME}")
+        print(f"Éxito: proyecto generado en {output_project}", flush=True)
+        print(f"Destino:       {args.target}", flush=True)
+        print(f"Raster host:   {host_raster}", flush=True)
+        print(f"Vector host:   {gpkg_uri(host_vector, VECTOR_LAYER_INTERNAL)}", flush=True)
+        print(f"Raster final:  {raster_uri_final}", flush=True)
+        print(f"Vector final:  {vector_uri_final}", flush=True)
+
+        if args.target == "standalone":
+            print(f"Layout QPT:    {layout_template}", flush=True)
+            print(f"Layouts:       {LAYOUT_RASTER_NAME}, {LAYOUT_VECTOR_NAME}", flush=True)
         else:
-            raise RuntimeError(f"No se pudo guardar el proyecto: {output_project}")
+            print("Layouts:       no incluidos en variante server", flush=True)
+            print(f"WMS layers:    {OGC_RASTER_NAME}, {OGC_VECTOR_NAME}", flush=True)
+            print(f"WFS layers:    {OGC_VECTOR_NAME}", flush=True)
+            print(f"WCS layers:    {OGC_RASTER_NAME}", flush=True)
 
     except Exception as e:
-        print(f"Error crítico: {e}", file=sys.stderr)
+        print(f"Error crítico: {e}", file=sys.stderr, flush=True)
         sys.exit(1)
 
     finally:
-        qgs.exitQgis()
+        # En algunos entornos headless, qgs.exitQgis() puede provocar SIGSEGV
+        # durante la destrucción de objetos C++ aunque el trabajo haya terminado.
+        try:
+            QgsProject.instance().clear()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

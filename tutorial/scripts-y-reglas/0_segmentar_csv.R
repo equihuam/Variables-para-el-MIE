@@ -1,15 +1,15 @@
-"""
-=============================================================================
-0_segmentar_csv.R
------------------------------------------------------------------------------
-Propósito:
-    Dividir un dataset maestro masivo en subconjuntos regionales. 
-    Facilita el paralelismo del workflow y la distribución de carga.
 
-Rol en el workflow:
-    Pre-procesamiento. Segmentación (Scatter) para procesos independientes.
-=============================================================================
-"""
+#=============================================================================
+#0_segmentar_csv.R
+#-----------------------------------------------------------------------------
+#Propósito:
+#    Dividir un dataset maestro masivo en subconjuntos regionales. 
+#    Facilita el paralelismo del workflow y la distribución de carga.
+#
+#Rol en el workflow:
+#    Pre-procesamiento. Segmentación (Scatter) para procesos independientes.
+#=============================================================================
+
 
 library(readr)
 library(dplyr)

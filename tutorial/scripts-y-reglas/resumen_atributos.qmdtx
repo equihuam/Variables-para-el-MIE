@@ -31,7 +31,7 @@ pacman::p_load(sf, ggplot2, dplyr)
 
 # Lectura relativa remontando un nivel hacia la raíz
 ruta_gpkg <- "../resultados/reticula_variable.gpkg"
-mapa_reticula <- st_read(ruta_gpkg, layer = "reticula_integridad", quiet = TRUE)
+mapa_reticula <- st_read(ruta_gpkg, layer = "reticula_variable", quiet = TRUE)
 
 # Capturar los parámetros inyectados por Snakemake
 es_oscuro <- as.logical(params$oscuro_reporte)
@@ -65,7 +65,7 @@ cat("- **Generado el:**", format(fecha_creacion, "%Y-%m-%d %H:%M:%S"), "\n")
 #| echo: false
 
 mapa_reticula %>% 
-  select(integridad_simulada) %>% 
+  select(valor_indice) %>% 
   summary()
 
 ```
@@ -83,7 +83,7 @@ A continuación se observa la proyección espacial de la retícula generada por 
 
 
 p_mapa <- ggplot(mapa_reticula) +
-  geom_sf(aes(fill = integridad_simulada), color = NA) +
+  geom_sf(aes(fill = valor_indice), color = NA) +
   scale_fill_viridis_c(option = "viridis", name = "Índice de\nIntegridad")
 
 if (es_oscuro) {
@@ -107,7 +107,7 @@ p_mapa + coord_sf(crs = st_crs(4326))
 #| label: histograma
 #| echo: false
 p_hist <- ggplot(mapa_reticula) +
-  geom_histogram(aes(x = integridad_simulada), bins = 25, fill = "steelblue", color = "white") +
+  geom_histogram(aes(x = valor_indice), bins = 25, fill = "steelblue", color = "white") +
   labs(x = "Integridad Simulada", y = "Frecuencia")
 
 if (es_oscuro) {

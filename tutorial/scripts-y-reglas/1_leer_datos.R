@@ -10,6 +10,7 @@
 #     Capa de validación. Filtrado de datos atípicos o incompletos.
 # =============================================================================
 
+
 library(readr)
 library(dplyr)
 
