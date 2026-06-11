@@ -614,18 +614,23 @@ Salidas:
 Quiero reglas claras, independientes, fáciles de forzar con Snakemake, y comandos de prueba para ejecutar cada una por separado.
 ```
 
-Criterio de validación:
-
-```bash
-snakemake --cores 3 --force create_project_standalone --scheduler greedy
-snakemake --cores 3 --force create_project_server --scheduler greedy
-```
+Las reglas que te proponga la **AI** ponlas al final de archivo snakefile. 
 
 
 
 #### Prompt 2 — Construir script mínimo PyQGIS
 
-Ahora vamos a abordar el desarrollo del script 5. Imaginé qu debería dejar la opción abierta a que los ingredientes del proyecto que construira puedan ser variables. Eso significa que hay que preveer que el script acepte argumentos en donde se especifique eso. Como tenemos un producto vectorial y otro ráster, consideré que habría que preveer espacio para canalizar esos dos productos. Estudiando el tema, encontré que es bastante facil lograr hacer mapas bonitos programáticamente con QGis, si cuento con una plantilla a mi gusto, hecha por mi lado. Eso hice y entonces necesito un parámetro para indicarle en dónde tengo la plantilla que quiero que use. Finalmente, quiero tener la libertad de escoger como se llamará el resultado y algo para indicarle que tipo de proceso desarrollará. Con todo esto ya claro, pídele a la **IA** lo siguiente:
+Ahora vamos a abordar el desarrollo del script 5. Imaginé qu debería dejar la opción abierta a que los ingredientes del proyecto que construira puedan ser variables. Eso significa que hay que preveer que el script acepte argumentos en donde se especifique eso. Como tenemos un producto vectorial y otro ráster, consideré que habría que preveer espacio para canalizar esos dos productos. Estudiando el tema, encontré que es bastante facil lograr hacer mapas bonitos programáticamente con QGis, si cuento con una plantilla a mi gusto, hecha por mi lado. Eso hice y entonces necesito un parámetro para indicarle en dónde tengo la plantilla que quiero que use.
+
+La plantilla que hice a mi gusto la puedes descargar y arreglar según tu preferencia. Ponla en `plantillas/`, en la *estructura canónica de directorios*. 
+
+{{< downloadthis  iie-cartografia.qpt >}}
+
+Use el logo del Inecol, para que funcione asegurate de poderlo desplegar en tu diseño. También puedes descargar aquí ese logo.
+
+{{< downloadthis  img/inecol.svg >}}
+
+Finalmente, quiero tener la libertad de escoger como se llamará el resultado y algo para indicarle que tipo de proceso desarrollará. Con todo esto ya claro y preparado, pídele a la **IA** lo siguiente:
 
 
 ```text
@@ -653,9 +658,7 @@ Primero quiero una versión mínima que:
 No agregues todavía layouts, WMS, WFS ni WCS. Sólo quiero validar carga de capas y escritura del proyecto.
 ```
 
-
-Has una corrida de prueba desde tu **terminal SSH**, deberás estar ubicada en /srv/iie-tutor/$USER-iie:
-
+Si todo resultó bien, ahora tienes una propuesta de script 5 en proceso de desarrollo. Deberas guardarla con el nombre que elegiste en la **carpeta de nuestra estructura canónica: scripts**. Ahora puedes hacer una primera corrida de prueba desde tu **terminal SSH**, deberás estar ubicada en /srv/iie-tutor/$USER-iie.
 
 
 ```bash
@@ -667,10 +670,10 @@ python scripts/5_create_qgis_project.py \
   --target standalone
 ```
 
-Si todo resultó bien, ahora tienes una propuesta de script 5 en proceso de desarrollo. Deberas guardarla con el nombre que elegiste en la **carpeta de nuestra estructura canónica: scripts**. Lo siguiente que hice fue resolver como quería que se viera el mapa. Básicamente resolver las paletas de los dos tipos de mapas. Lo hice con algo parecido a la siguiente interacción con la **IA**
+Lo siguiente es resolver como quieres que se vea el mapa. Básicamente hay que resolver como consruir la simbología, las paletas de colores de los dos tipos de mapas. Lo podemos hacer con algo parecido a la siguiente interacción con la **IA**. 
 
 
-## Prompt 3 — Agregar simbología raster y vectorial
+#### Prompt 3 — Agregar simbología raster y vectorial
 
 ```text
 Ahora quiero extender el script PyQGIS para aplicar simbología reproducible.
@@ -701,9 +704,9 @@ Quiero funciones separadas para:
 No agregues todavía layouts ni configuración server.
 ```
 
-Como resultado de esta solicitud te entregará la segunda versión del script. Substituye el que ya tienes en la carpeta por esta nueva versión y prúebalo desde tu consola de **Terminal SSH**.
+Como resultado de esta solicitud te entregará la segunda versión del script. Substituye el que ya tienes en la carpeta por esta nueva versión y prúebalo desde tu consola de **Terminal SSH**. Puedes volver a correrlo con la misma llamada de arriba. Te entregará una nueva versión de `prueba_minima.qgz`. Ábrelo y anota lo que no te guste para buscar resolverlo, no lo modifiques ni lo guardes, para o alterar el proceso de producción mediante script. 
 
-Validación rápida, básicamente se trata de averiguar si tienes un archivo bien armado (un qgz es una variante de contenedor zipeado), así puedes ver que no esté vacío. La otra, claro está, es abrirlo en qgis, pero si lo haces no lo guardes, para no alterar el proceso:
+Para una validación auxiliada por la **IA** puedes buscar averiguar si tienes un archivo bien armado (un **qgz** es una variante de contenedor zipeado). Estas líneas abajo hacen el desempacado y luego usan el commando de bpusqueda `grep`para extraer información sobre las paletas (ráster y vectorial). Puedes copiar lo que salga de eso y comoartirlo con la **IA** para que de su valoración técnica. 
 
 ```bash
 unzip -o resultados/prueba_minima.qgz -d /tmp/qgz_test
@@ -711,9 +714,10 @@ grep -n "singlebandpseudocolor\|colorrampshader" /tmp/qgz_test/*.qgs
 grep -n "graduatedSymbol\|renderer-v2" /tmp/qgz_test/*.qgs
 ```
 
----
+Si la simbología quedó a tu gusto, podemos pasar a construir la solución de proyecto **QGis** completo. Lo que nos falta para eso es  revisar y resolver el diseño para impresión. Te propongo el siguiente prompt para hacerlo.
 
-## Prompt 4 — Construir variante standalone con layouts
+
+#### Prompt 4 — Construir variante standalone con layouts
 
 ```text
 Ahora quiero implementar la variante `--target standalone`.
@@ -746,13 +750,14 @@ Títulos:
 Quiero código modular y que esta lógica sólo corra cuando `--target standalone`.
 ```
 
-Validación:
+Toma la nueva versión del script y substituye la que tienes. Ahora puedes usasr snakemake para probar el funcionamiento. la frace `--force create_projecr_standalone` hace que snakemake corra esa tarea sí o sí. Si le cambiaste de nombre no olvides poner el que usaste realmente. 
+
 
 ```bash
 snakemake --cores 3 --force create_project_standalone --scheduler greedy
 ```
 
-Revisión manual en QGIS Desktop:
+Si todo funciona bien, la tarea correra el script con los parámetros adecuados y te entregará un proyecto **QGis** comoleto. Ábrelo y ve que esté a ru gusto. Si hay cosas que quieras ajustar o cambiar toma nota y pídele a la **AI** que te ayude, haz peticiones específicas, e indica de la mejor manera posible como quieres el resultado. Revisión manual en QGIS Desktop:
 
 ```text
 - abre proyecto_standalone.qgz;
@@ -764,7 +769,8 @@ Revisión manual en QGIS Desktop:
 - capas correctas por layout.
 ```
 
----
+Cuando estes satisfecha con el resultado pasa al siguiente producto, que es preparar un proyecto para que actue como servidor de mapas. Esta versión no requiere tener un diseño de mapas para imprimir. Debe adecuar los metadatos de las capas para que el servidor de mapas las ubique y las haga disponibles a través de la web. Por la forma como configuré el servidor ahora, este mapa debe llamarse forsozamente `proyecto_server.qgz`.
+
 
 ## Prompt 5 — Construir variante server sin layouts
 
@@ -804,15 +810,15 @@ Propón una arquitectura donde PyQGIS:
 Quiero el código de la variante server integrado en el mismo script, manteniendo separada la lógica `standalone` y `server`.
 ```
 
-Validación:
+Aahora tendrás una nueva versión del script. Nuevamente substituye la que ya tienes. Estas lista para una nueva corrida de prueba, pero ahora la regla que usaras es `create_project_server`:
+
 
 ```bash
 snakemake --cores 3 --force create_project_server --scheduler greedy
 ```
 
----
 
-## Prompt 6 — Pruebas internas del `.qgz`
+#### Prompt 6 — Pruebas internas del `.qgz`
 
 ```text
 Ya se generó `resultados/proyecto_server.qgz`.
