@@ -580,7 +580,7 @@ Con esto habrás sentado las bases para todo el proceso de desarrollo. Ahora, co
 
 #### Prompt 1 — Definir dos reglas Snakemake
 
-En este caso yo quise considerar el escenario en el que el Workflow me entregará dos productos derivados de la misma lógica de cómputo. Un primer producto es un **proyecto QGis** plenamente funcional y estético con las capas que quiero, con las paletas que me gusten y además previsión de *layouts para impresión*, adecuados y que cumplan con mis especificaciones precisas. Otro producto muy similar, es también un **proyecto QGis** pero organizado de tal manera que me sirva como base de un servidor de mapas a través de **QGis-server** (que ya lo tenemos habilitado en el servidor de Octavio) Esto me hace pensar que conviene tener dos reglas separadas para especificar la tarea, aunque resulten de correr el mismo script. A mi se me ocurrió llamar a esa dos reglas `create_project_standalone`, `create_project_server` pero tu puedes elegir lo que te resulte más evocativo. También indiqué la sugerencia del nombre del script, que aunque todavía no existe, es el 5° en nuestra secuencia de trabajo en este tutorial y el nombre será a tu gusto de nuevo (nada más no olvide lo que decidas), en mi caso acabé en `create_project_standalone`. Hecha esta reflexión, involucra ahora a tu **IA** y dile:
+En este caso yo quise considerar el escenario en el que el Workflow me entregará dos productos derivados de la misma lógica de cómputo. Un primer producto es un **proyecto QGis** plenamente funcional y estético con las capas que quiero, con las paletas que me gusten y además previsión de *diseños para impresión* adecuados, estéticos, y que cumplan con mis especificaciones precisas. Otro producto muy similar, es también un **proyecto QGis** pero organizado de tal manera que me sirva como base de un servidor de mapas a través de **QGis-server** (que ya lo tenemos habilitado en el servidor de Octavio) Esto me hace pensar que conviene tener dos reglas separadas para especificar la tarea, aunque resulten de correr el mismo script. A mi se me ocurrió llamar a esa dos reglas `create_project_standalone`, `create_project_server` pero tu puedes elegir lo que te resulte más evocativo. También indiqué la sugerencia del nombre del script, que aunque todavía no existe, es el 5° en nuestra secuencia de trabajo en este tutorial y el nombre será a tu gusto de nuevo (nada más no olvide lo que decidas), en mi caso acabé en `create_project_standalone`. Hecha esta reflexión, involucra ahora a tu **IA** y dile:
 
 
 
@@ -620,13 +620,13 @@ Las reglas que te proponga la **AI** ponlas al final de archivo snakefile.
 
 #### Prompt 2 — Construir script mínimo Py**QGis**
 
-Ahora vamos a abordar el desarrollo del script 5. Imaginé qu debería dejar la opción abierta a que los ingredientes del proyecto que construira puedan ser variables. Eso significa que hay que preveer que el script acepte argumentos en donde se especifique eso. Como tenemos un producto vectorial y otro ráster, consideré que habría que preveer espacio para canalizar esos dos productos. Estudiando el tema, encontré que es bastante facil lograr hacer mapas bonitos programáticamente con QGis, si cuento con una plantilla a mi gusto, hecha por mi lado. Eso hice y entonces necesito un parámetro para indicarle en dónde tengo la plantilla que quiero que use.
+Ahora vamos a abordar el desarrollo del script 5. Imaginé que debería dejar la opción abierta a que los ingredientes del proyecto que construirá puedan ser variables. Eso significa que hay que prever que el script acepte argumentos en donde se especifique eso. Como tenemos un producto vectorial y otro ráster, consideré que habría que prever espacio para canalizar esos dos productos. Estudiando el tema, encontré que es bastante fácil lograr hacer mapas bonitos programáticamente con QGis, si cuento con una plantilla a mi gusto, hecha por mi lado. Eso hice y entonces necesito un parámetro para indicarle en dónde tengo la plantilla que quiero que use.
 
 La plantilla que hice a mi gusto la puedes descargar y arreglar según tu preferencia. Ponla en `plantillas/`, en la *estructura canónica de directorios*. 
 
 {{< downloadthis  iie-cartografia.qpt >}}
 
-Use el logo del Inecol, para que funcione asegurate de poderlo desplegar en tu diseño. También puedes descargar aquí ese logo.
+Use el logo del Inecol, para que funcione asegúrate de poderlo desplegar en tu diseño. También puedes descargar aquí ese logo.
 
 {{< downloadthis  img/inecol.svg >}}
 
@@ -658,7 +658,7 @@ Primero quiero una versión mínima que:
 No agregues todavía layouts, WMS, WFS ni WCS. Sólo quiero validar carga de capas y escritura del proyecto.
 ```
 
-Si todo resultó bien, ahora tienes una propuesta de script 5 en proceso de desarrollo. Deberas guardarla con el nombre que elegiste en la **carpeta de nuestra estructura canónica: scripts**. Ahora puedes hacer una primera corrida de prueba desde tu **terminal SSH**, deberás estar ubicada en /srv/iie-tutor/$USER-iie.
+Si todo resultó bien, ahora tienes una propuesta de script 5 en proceso de desarrollo. Deberás guardarla con el nombre que elegiste en la **carpeta de nuestra estructura canónica: scripts**. Ahora puedes hacer una primera corrida de prueba desde tu **terminal SSH**, deberás estar ubicada en /srv/iie-tutor/$USER-iie.
 
 
 ```bash
@@ -670,7 +670,7 @@ python scripts/5_create_qgis_project.py \
   --target standalone
 ```
 
-Lo siguiente es resolver como quieres que se vea el mapa. Básicamente hay que resolver como consruir la simbología, las paletas de colores de los dos tipos de mapas. Lo podemos hacer con algo parecido a la siguiente interacción con la **IA**. 
+Lo siguiente es resolver como quieres que se vea el mapa. Básicamente hay que resolver como construir la simbología, las paletas de colores de los dos tipos de mapas. Lo podemos hacer con algo parecido a la siguiente interacción con la **IA**. 
 
 
 #### Prompt 3 — Agregar simbología raster y vectorial
@@ -706,7 +706,7 @@ No agregues todavía layouts ni configuración server.
 
 Como resultado de esta solicitud te entregará la segunda versión del script. Substituye el que ya tienes en la carpeta por esta nueva versión y prúebalo desde tu consola de **Terminal SSH**. Puedes volver a correrlo con la misma llamada de arriba. Te entregará una nueva versión de `prueba_minima.qgz`. Ábrelo y anota lo que no te guste para buscar resolverlo, no lo modifiques ni lo guardes, para o alterar el proceso de producción mediante script. 
 
-Para una validación auxiliada por la **IA** puedes buscar averiguar si tienes un archivo bien armado (un **qgz** es una variante de contenedor zipeado). Estas líneas abajo hacen el desempacado y luego usan el commando de bpusqueda `grep`para extraer información sobre las paletas (ráster y vectorial). Puedes copiar lo que salga de eso y comoartirlo con la **IA** para que de su valoración técnica. 
+Para una validación auxiliada por la **IA** puedes buscar averiguar si tienes un archivo bien armado (un **qgz** es una variante de contenedor zipeado). Estas líneas abajo hacen el desempacado y luego usan el comando de búsqueda `grep`para extraer información sobre las paletas (ráster y vectorial). Puedes copiar lo que salga de eso y compartirlo con la **IA** para que de su valoración técnica. 
 
 ```bash
 unzip -o resultados/prueba_minima.qgz -d /tmp/qgz_test
@@ -750,14 +750,14 @@ Títulos:
 Quiero código modular y que esta lógica sólo corra cuando `--target standalone`.
 ```
 
-Toma la nueva versión del script y substituye la que tienes. Ahora puedes usasr snakemake para probar el funcionamiento. la frace `--force create_projecr_standalone` hace que snakemake corra esa tarea sí o sí. Si le cambiaste de nombre no olvides poner el que usaste realmente. 
+Toma la nueva versión del script y substituye la que tienes. Ahora puedes usar snakemake para probar el funcionamiento. la frase `--force create_projecr_standalone` hace que snakemake corra esa tarea sí o sí. Si le cambiaste de nombre no olvides poner el que usaste realmente. 
 
 
 ```bash
 snakemake --cores 3 --force create_project_standalone --scheduler greedy
 ```
 
-Si todo funciona bien, la tarea correra el script con los parámetros adecuados y te entregará un proyecto **QGis** comoleto. Ábrelo y ve que esté a ru gusto. Si hay cosas que quieras ajustar o cambiar toma nota y pídele a la **AI** que te ayude, haz peticiones específicas, e indica de la mejor manera posible como quieres el resultado. Revisión manual en **QGis** Desktop:
+Si todo funciona bien, la tarea correrá el script con los parámetros adecuados y te entregará un proyecto **QGis** completo. Ábrelo y ve que esté a ru gusto. Si hay cosas que quieras ajustar o cambiar toma nota y pídele a la **AI** que te ayude, haz peticiones específicas, e indica de la mejor manera posible como quieres el resultado. Revisión manual en **QGis** Desktop:
 
 ```text
 - abre proyecto_standalone.qgz;
@@ -769,7 +769,7 @@ Si todo funciona bien, la tarea correra el script con los parámetros adecuados 
 - capas correctas por layout.
 ```
 
-Cuando estes satisfecha con el resultado pasa al siguiente producto, que es preparar un proyecto para que actue como servidor de mapas. Esta versión no requiere tener un diseño de mapas para imprimir. Debe adecuar los metadatos de las capas para que el servidor de mapas las ubique y las haga disponibles a través de la web. Por la forma como configuré el servidor ahora, este mapa debe llamarse forsozamente `proyecto_server.qgz`.
+Cuando estés satisfecha con el resultado pasa al siguiente producto, que es preparar un proyecto para que actúe como servidor de mapas. Esta versión no requiere tener un diseño de mapas para imprimir. Debe adecuar los metadatos de las capas para que el servidor de mapas las ubique y las haga disponibles a través de la web. Por la forma como configuré el servidor ahora, este mapa debe llamarse forzosamente `proyecto_server.qgz`.
 
 
 #### Prompt 5 — Construir variante server sin layouts
@@ -810,7 +810,7 @@ Propón una arquitectura donde Py**QGis**:
 Quiero el código de la variante server integrado en el mismo script, manteniendo separada la lógica `standalone` y `server`.
 ```
 
-Aahora tendrás una nueva versión del script. Nuevamente substituye la que ya tienes. Estas lista para una nueva corrida de prueba, pero ahora la regla que usaras es `create_project_server`:
+Ahora tendrás una nueva versión del script. Nuevamente substituye la que ya tienes. Estas lista para una nueva corrida de prueba, pero ahora la regla que usaras es `create_project_server`:
 
 
 ```bash
@@ -843,7 +843,7 @@ Ayúdame a inspeccionar el `.qgz` para verificar que el `.qgs` interno contiene:
 Dame comandos `unzip`, `grep` y `sed` para revisar el contenido.
 ```
 
-Seguramente la **IA** te propondrá algo como lo que me dió a mi. Basicamente es lo necesario para abir el zip que es el proyecto **qgz** y poderlo analizar. Revisa la especificaciójn de las leyendas y los metadatos necesarios para servir loṡmapas en la Web:
+Seguramente la **IA** te propondrá algo como lo que me dio a mi. Básicamente es lo necesario para abrir el zip que es el proyecto **qgz** y poderlo analizar. Revisa la especificación de las leyendas y los metadatos necesarios para servir los mapas en la Web:
 
 ```bash
 rm -rf /tmp/qgz_server
@@ -857,7 +857,7 @@ grep -n "singlebandpseudocolor\|colorrampshader" /tmp/qgz_server/*.qgs
 grep -n "WMSServiceTitle\|WFSServiceTitle\|WCSServiceTitle\|WFSLayers\|WCSLayers" /tmp/qgz_server/*.qgs
 ```
 
-Para revisar valores internos. Aqí le pides que saque a la pantalla las líneas de la 850 a la 900 del *XML*. Puedes pedirle ayuda a la **IA** para interpretar lo que salga.
+Para revisar valores internos. Aquí le pides que saque a la pantalla las líneas de la 850 a la 900 del *XML*. Puedes pedirle ayuda a la **IA** para interpretar lo que salga.
 
 ```bash
 sed -n '850,900p' /tmp/qgz_server/*.qgs
@@ -867,9 +867,9 @@ El servir mapas en la Web se hace con la tecnología [**WMS**](https://mapserver
 
 1. **WMS**: En **QGis** entrega una versión gráfica del mapa, es decir algo como un png o jpg. No es operable, pero se entrega con la paleta y detalles gráficos especificados durante el diseño.
 2. **WFS**. *Web Feature Service* es la opción que entrega datos vectoriales sin las especificaciones de diseño de leyendas.
-3. **WCS**. **Web Coverage Service** es la opción que entrega datos en formato raster y puede incluir series de tiempo. 
+3. **WCS**. **Web Coverage Service** es la opción que entrega datos en formato ráster y puede incluir series de tiempo. 
 
-En nuestra configuración, el servidor de mapas está montado en el equipo de Octavio y llegas a él mediante el puerto **8085**. En **QGiz**, busca la sección "browser", ahí encontrarás las etiquetas **WMS**, **WFS** y **WCS**. Si das click con botón derecho del mouse, te dará oportunidad de dar de alta un nuevo enlace del tipo. Entra ahí, elige un nimbre para identificar tu conexión y en `URL` anota `http://10.0.90.76:8085/cgi-bin/qgis_mapserv.fcgi`, cambia la **IP** que tenga el equipo de Octavio en este momento. Guarda y verifica el resultado. Deberías ver que la conexión se activa y te ofrece los productos que tu proyecto ha especificado.
+En nuestra configuración, el servidor de mapas está montado en el equipo de Octavio y llegas a él mediante el puerto **8085**. En **QGis**, busca la sección "browser", ahí encontrarás las etiquetas **WMS**, **WFS** y **WCS**. Si das clic con botón derecho del mouse, te dará oportunidad de dar de alta un nuevo enlace del tipo. Entra ahí, elige un nombre para identificar tu conexión y en `URL` anota `http://10.0.90.76:8085/cgi-bin/qgis_mapserv.fcgi`, cambia la **IP** que tenga el equipo de Octavio en este momento. Guarda y verifica el resultado. Deberías ver que la conexión se activa y te ofrece los productos que tu proyecto ha especificado.
 
 
 #### Revisar la entrega de mapas formateados mediante **WMS**
@@ -900,7 +900,7 @@ Usa WMS 1.1.1 en las pruebas `GetMap` con EPSG:4326 para evitar problemas de ord
 
 #### Revisar la entrega **WCS**
 
-Ahoa busca la sección **WCS**  y verifica que puedes recupera la capa raster `iie_mapa_raster`. Revuerda que este canal entrega el raster como cobertura numérica y no como mapa estilizado. Le puedes pedir a la **IA** algo como esto para verificar el resultado.
+Ahora busca la sección **WCS**  y verifica que puedes recupera la capa ráster `iie_mapa_raster`. Recuerda que este canal entrega el ráster como cobertura numérica y no como mapa estilizado. Le puedes pedir a la **IA** algo como esto para verificar el resultado.
 
 
 ```text
@@ -965,7 +965,7 @@ ogrinfo -ro \
 
 #### Diagnóstico de **QGis** GUI como cliente WFS
 
-En mi ensayo, encontré varias dificultades para que el *map server* me entregara exactamente lo que yo quería. Puedes tu tambipen intentar abordar algunos de los problemas que me encontré y desde luego los tuyos propios. Así le puedes pedir ayuda a la **IA**.
+En mi ensayo, encontré varias dificultades para que el *map server* me entregara exactamente lo que yo quería. Puedes tu también intentar abordar algunos de los problemas que me encontré y desde luego los tuyos propios. Así le puedes pedir ayuda a la **IA**.
 
 ```text
 El WFS ya fue validado con `curl` y `ogrinfo`, pero al cargarlo como capa viva en **QGis** Desktop puede aparecer incompleto o mostrar avisos de coordenadas.
@@ -993,7 +993,7 @@ Quiero recomendaciones para usuarios de **QGis** Desktop:
 
 #### Documentación: preparar README o bitácora
 
-No olvides documentar lo que hiciste. También le puedes pedir ayuda a la **IA** para generar un documento de acompañamiento. No traté aquí nada de la documentación y registro de los metadaros. **Maricruz nos orientará sobre este tema**.
+No olvides documentar lo que hiciste. También le puedes pedir ayuda a la **IA** para generar un documento de acompañamiento. No traté aquí nada de la documentación y registro de los matadatos. **Maricruz nos orientará sobre este tema**.
 
 ```text
 
@@ -1056,17 +1056,17 @@ Snakemake separado
 
 ### 13 Cierre
 
-A lo largo de este ejercicio se presentó y consolidó una estrategia reproducible para generar proyectos **QGis** desde Snakemake. El flujo construye el proyecto desde cero con **PyQGis**, carga raster y vector desde productos generados por el workflow, aplica simbología por código, importa únicamente una plantilla .qpt para el layout de impresión y produce dos variantes del proyecto: una standalone para revisión en **QGis** Desktop y otra server para **QGis Server** que ya tenemos habilitado en el equipo de Octavio con **Docker**.
+A lo largo de este ejercicio se presentó y consolidó una estrategia reproducible para generar proyectos **QGis** desde Snakemake. El flujo construye el proyecto desde cero con **PyQGis**, carga ráster y vector desde productos generados por el workflow, aplica simbología por código, importa únicamente una plantilla .qpt para el layout de impresión y produce dos variantes del proyecto: una standalone para revisión en **QGis** Desktop y otra server para **QGis Server** que ya tenemos habilitado en el equipo de Octavio con **Docker**.
 
-Se produce una versión *standalone* funcionak y estable, que contiene simbología. La versión server se produce cuidando que sea funcional en el contexto de como se ha habilitado el servidor que tenemos montado y que define una ubicación virtual base: `/data`.
+Se produce una versión *standalone* funcional y estable, que contiene simbología. La versión server se produce cuidando que sea funcional en el contexto de como se ha habilitado el servidor que tenemos montado y que define una ubicación virtual base: `/data`.
 
-Para el raster se aplicó una paleta tipo *viridis* mediante QgsSingleBandPseudoColorRenderer, QgsRasterShader y QgsColorRampShader. La clave para evitar que el raster apareciera inicialmente en gris o que la leyenda mostrara valores nan fue construir el renderer con estadísticas válidas del raster, forzar la clasificación de la rampa con classifyColorRamp(), aplicar el renderer mientras la capa conserva una fuente de datos válida y evitar reload() después de aplicar la simbología.
+Para el ráster se aplicó una paleta tipo *viridis* mediante QgsSingleBandPseudoColorRenderer, QgsRasterShader y QgsColorRampShader. La clave para evitar que el ráster apareciera inicialmente en gris o que la leyenda mostrara valores `nan` fue construir el renderer con estadísticas válidas del ráster, forzar la clasificación de la rampa con classifyColorRamp(), aplicar el renderer mientras la capa conserva una fuente de datos válida y evitar reload() después de aplicar la simbología.
 
-Para el vector se generó un GeoPackage con esquema estable, incluyendo los campos valor_indice e integridad_simulada, y se aplicó simbología graduada sobre la columna integridad_simulada. La retícula vectorial se mantuvo encima del raster y con transparencia para permitir lectura conjunta.
+Para el vector se generó un GeoPackage con esquema estable, incluyendo los campos valor_indice e integridad_simulada, y se aplicó simbología graduada sobre la columna integridad_simulada. La retícula vectorial se mantuvo encima del ráster y con transparencia para permitir lectura conjunta.
 
 La arquitectura final separa claramente tres responsabilidades:
 1. Datos geoespaciales generados por Snakemake: GeoPackage y GeoTIFF.
-2. Proyecto **QGis** reproducible: generado por Py**QGis**, sin plantilla .qgz heredada.
+2. Proyecto **QGis** reproducible: generado por **PyQGis**, sin plantilla .qgz heredada.
 3. Diseño de impresión: definido por una plantilla .qpt reutilizable.
 
 Productos finales:
