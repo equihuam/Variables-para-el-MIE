@@ -470,18 +470,18 @@ Nuevamente tienes que regresar a tu `snakefile` para registrar esto y habilitar 
 Al hacer esto, el comando simple:  `snakemake --report reporte_auditoria_iie.html` leerá automáticamente tu archivo de presentación, tomará el título principal y lo pondrá en la barra superior del navegador, además de colocar tu texto explicativo en la página principal del reporte.
 
 
-## 12 Cierre: hacer un script complejo
+## 12 Gran desafío: hacer un script complejo
 
 Espero que con el recorrido anterior haya desarrollado una comprensión inicial del concepto de construir un *workflow*. Ahora te propongo hacer algo más complicado y explorar como es que podemos recurrir a la *IA generativa* para desarrollar código que nos sirva. La idea que te propongo es desarrollar un nuevo paso del workflow que nos entregue un proyecto completo y funcional en **QGis**. Lo que haremos ahora es más que ver el código en sí, comentar sobre la secuencia de prompts que nos lleve a tener ese producto. El servidor de Octavio está preparado para 
 
 
-### Snakemake + PyQGIS + pruebas
+### Snakemake + Py**QGis** + pruebas
 
 La ruta de trabajo que te propongo ahora aborda lo siguiente:
 
 ```text
 1. Reglas Snakemake
-2. Script Python/PyQGIS
+2. Script Python/Py**QGis**
 3. Pruebas de salida
 ```
 
@@ -490,24 +490,24 @@ Lo que haré es compartir una secuencia de prompts que usé como parte del proce
 #### Prompt 0 — Contexto inicial del trabajo
 
 ```text
-Estoy trabajando en un workflow geoespacial orquestado con Snakemake. Necesito generar proyectos QGIS reproducibles desde salidas del workflow.
+Estoy trabajando en un workflow geoespacial orquestado con Snakemake. Necesito generar proyectos **QGis** reproducibles desde salidas del workflow.
 
 Quiero producir dos variantes:
 
 1. `proyecto_standalone.qgz`
-   - Para abrir en QGIS Desktop.
+   - Para abrir en **QGis** Desktop.
    - Debe incluir layouts editoriales imprimibles.
    - Usa una plantilla QPT.
 
 2. `proyecto_server.qgz`
-   - Para ser publicado por QGIS Server.
+   - Para ser publicado por **QGis** Server.
    - No debe incluir layouts.
    - Debe preparar capas para WMS, WFS y WCS.
-   - Debe usar rutas internas esperadas por el entorno servidor, pero sin depender de edición manual en QGIS GUI.
+   - Debe usar rutas internas esperadas por el entorno servidor, pero sin depender de edición manual en **QGis** GUI.
 
 No quiero tocar configuración Docker ni infraestructura. Asume que el servidor ya está configurado. Ayúdame sólo con:
 - reglas Snakemake;
-- script Python/PyQGIS;
+- script Python/Py**QGis**;
 - pruebas de funcionamiento.
 
 Estándar de documentación de scripts:
@@ -521,7 +521,7 @@ Todo script Python que generemos o modifiquemos debe incluir un encabezado infor
 2. Precondiciones
    - Archivos de entrada esperados.
    - Supuestos sobre nombres de capas, campos, CRS, rutas o entorno.
-   - Dependencias relevantes, por ejemplo PyQGIS, GDAL/OGR o ejecución headless.
+   - Dependencias relevantes, por ejemplo Py**QGis**, GDAL/OGR o ejecución headless.
 
 3. Resultados
    - Archivos de salida generados.
@@ -586,7 +586,7 @@ En este caso yo quise considerar el escenario en el que el Workflow me entregar�
 
 
 ```text
-Ayúdame a definir dos reglas Snakemake separadas para generar proyectos QGIS:
+Ayúdame a definir dos reglas Snakemake separadas para generar proyectos **QGis**:
 
 - `create_project_standalone`
 - `create_project_server`
@@ -618,7 +618,7 @@ Las reglas que te proponga la **AI** ponlas al final de archivo snakefile.
 
 
 
-#### Prompt 2 — Construir script mínimo PyQGIS
+#### Prompt 2 — Construir script mínimo Py**QGis**
 
 Ahora vamos a abordar el desarrollo del script 5. Imaginé qu debería dejar la opción abierta a que los ingredientes del proyecto que construira puedan ser variables. Eso significa que hay que preveer que el script acepte argumentos en donde se especifique eso. Como tenemos un producto vectorial y otro ráster, consideré que habría que preveer espacio para canalizar esos dos productos. Estudiando el tema, encontré que es bastante facil lograr hacer mapas bonitos programáticamente con QGis, si cuento con una plantilla a mi gusto, hecha por mi lado. Eso hice y entonces necesito un parámetro para indicarle en dónde tengo la plantilla que quiero que use.
 
@@ -645,7 +645,7 @@ Primero quiero una versión mínima que:
   - `--output`
   - `--target`, con opciones `standalone` y `server`;
 
-- inicialice PyQGIS en modo headless;
+- inicialice Py**QGis** en modo headless;
 - cargue un raster GeoTIFF;
 - cargue una capa GeoPackage;
 - use la capa interna del GeoPackage llamada `reticula_variable`;
@@ -676,7 +676,7 @@ Lo siguiente es resolver como quieres que se vea el mapa. Básicamente hay que r
 #### Prompt 3 — Agregar simbología raster y vectorial
 
 ```text
-Ahora quiero extender el script PyQGIS para aplicar simbología reproducible.
+Ahora quiero extender el script Py**QGis** para aplicar simbología reproducible.
 
 Para el raster:
 - usar banda 1;
@@ -757,7 +757,7 @@ Toma la nueva versión del script y substituye la que tienes. Ahora puedes usasr
 snakemake --cores 3 --force create_project_standalone --scheduler greedy
 ```
 
-Si todo funciona bien, la tarea correra el script con los parámetros adecuados y te entregará un proyecto **QGis** comoleto. Ábrelo y ve que esté a ru gusto. Si hay cosas que quieras ajustar o cambiar toma nota y pídele a la **AI** que te ayude, haz peticiones específicas, e indica de la mejor manera posible como quieres el resultado. Revisión manual en QGIS Desktop:
+Si todo funciona bien, la tarea correra el script con los parámetros adecuados y te entregará un proyecto **QGis** comoleto. Ábrelo y ve que esté a ru gusto. Si hay cosas que quieras ajustar o cambiar toma nota y pídele a la **AI** que te ayude, haz peticiones específicas, e indica de la mejor manera posible como quieres el resultado. Revisión manual en **QGis** Desktop:
 
 ```text
 - abre proyecto_standalone.qgz;
@@ -772,7 +772,7 @@ Si todo funciona bien, la tarea correra el script con los parámetros adecuados 
 Cuando estes satisfecha con el resultado pasa al siguiente producto, que es preparar un proyecto para que actue como servidor de mapas. Esta versión no requiere tener un diseño de mapas para imprimir. Debe adecuar los metadatos de las capas para que el servidor de mapas las ubique y las haga disponibles a través de la web. Por la forma como configuré el servidor ahora, este mapa debe llamarse forsozamente `proyecto_server.qgz`.
 
 
-## Prompt 5 — Construir variante server sin layouts
+#### Prompt 5 — Construir variante server sin layouts
 
 ```text
 Ahora quiero implementar la variante `--target server`.
@@ -797,14 +797,14 @@ Debe preparar el proyecto para servicios OGC:
   - sólo raster.
 
 Importante:
-Quiero evitar llamadas PyQGIS frágiles que puedan provocar `SIGSEGV`, especialmente:
-- no cambiar datasources a rutas que no existan desde el entorno donde corre PyQGIS;
-- no depender de pasos manuales en QGIS GUI.
+Quiero evitar llamadas Py**QGis** frágiles que puedan provocar `SIGSEGV`, especialmente:
+- no cambiar datasources a rutas que no existan desde el entorno donde corre Py**QGis**;
+- no depender de pasos manuales en **QGis** GUI.
 
-Propón una arquitectura donde PyQGIS:
+Propón una arquitectura donde Py**QGis**:
 1. cargue capas con rutas válidas locales;
 2. aplique simbología;
-3. escriba un proyecto QGIS válido;
+3. escriba un proyecto **QGis** válido;
 4. y luego, si hace falta, se parchee el `.qgs` interno del `.qgz` como XML para ajustar rutas y propiedades OGC.
 
 Quiero el código de la variante server integrado en el mismo script, manteniendo separada la lógica `standalone` y `server`.
@@ -843,7 +843,7 @@ Ayúdame a inspeccionar el `.qgz` para verificar que el `.qgs` interno contiene:
 Dame comandos `unzip`, `grep` y `sed` para revisar el contenido.
 ```
 
-Comandos:
+Seguramente la **IA** te propondrá algo como lo que me dió a mi. Basicamente es lo necesario para abir el zip que es el proyecto **qgz** y poderlo analizar. Revisa la especificaciójn de las leyendas y los metadatos necesarios para servir loṡmapas en la Web:
 
 ```bash
 rm -rf /tmp/qgz_server
@@ -857,22 +857,31 @@ grep -n "singlebandpseudocolor\|colorrampshader" /tmp/qgz_server/*.qgs
 grep -n "WMSServiceTitle\|WFSServiceTitle\|WCSServiceTitle\|WFSLayers\|WCSLayers" /tmp/qgz_server/*.qgs
 ```
 
-Para revisar valores internos:
+Para revisar valores internos. Aqí le pides que saque a la pantalla las líneas de la 850 a la 900 del *XML*. Puedes pedirle ayuda a la **IA** para interpretar lo que salga.
 
 ```bash
 sed -n '850,900p' /tmp/qgz_server/*.qgs
 ```
 
----
+El servir mapas en la Web se hace con la tecnología [**WMS**](https://mapserver.org/ogc/wms_server.html). Hay tres puntos a verificar:
 
-## Prompt 7 — Validar WMS
+1. **WMS**: En **QGis** entrega una versión gráfica del mapa, es decir algo como un png o jpg. No es operable, pero se entrega con la paleta y detalles gráficos especificados durante el diseño.
+2. **WFS**. *Web Feature Service* es la opción que entrega datos vectoriales sin las especificaciones de diseño de leyendas.
+3. **WCS**. **Web Coverage Service** es la opción que entrega datos en formato raster y puede incluir series de tiempo. 
+
+En nuestra configuración, el servidor de mapas está montado en el equipo de Octavio y llegas a él mediante el puerto **8085**. En **QGiz**, busca la sección "browser", ahí encontrarás las etiquetas **WMS**, **WFS** y **WCS**. Si das click con botón derecho del mouse, te dará oportunidad de dar de alta un nuevo enlace del tipo. Entra ahí, elige un nimbre para identificar tu conexión y en `URL` anota `http://10.0.90.76:8085/cgi-bin/qgis_mapserv.fcgi`, cambia la **IP** que tenga el equipo de Octavio en este momento. Guarda y verifica el resultado. Deberías ver que la conexión se activa y te ofrece los productos que tu proyecto ha especificado.
+
+
+#### Revisar la entrega de mapas formateados mediante **WMS**
+
+Para validar que el proyecto **QGis** Server generado por el script funciona correctamente como WMS busca lo siguiente.
+
 
 ```text
-Quiero validar que el proyecto QGIS Server generado por el script funciona correctamente como WMS.
 
 Asume que el servidor ya está configurado y que el endpoint base es:
 
-`http://localhost:8085/cgi-bin/qgis_mapserv.fcgi`
+`http://10.0.90.76:8085/cgi-bin/qgis_mapserv.fcgi`
 
 Capas esperadas:
 - `iie_mapa_raster`
@@ -887,34 +896,33 @@ Dame URLs de prueba para:
 Usa WMS 1.1.1 en las pruebas `GetMap` con EPSG:4326 para evitar problemas de orden de ejes.
 ```
 
----
 
-## Prompt 8 — Validar WCS
+
+#### Revisar la entrega **WCS**
+
+Ahoa busca la sección **WCS**  y verifica que puedes recupera la capa raster `iie_mapa_raster`. Revuerda que este canal entrega el raster como cobertura numérica y no como mapa estilizado. Le puedes pedir a la **IA** algo como esto para verificar el resultado.
+
 
 ```text
-Quiero validar WCS para la capa raster `iie_mapa_raster`.
 
 Asume endpoint base:
 
-`http://localhost:8085/cgi-bin/qgis_mapserv.fcgi`
+`http://10.0.90.76:8085/cgi-bin/qgis_mapserv.fcgi`
 
 Dame pruebas para:
 - `GetCapabilities`;
 - `DescribeCoverage`.
 
-Aclara que WCS entrega el raster como cobertura numérica y no necesariamente como mapa estilizado.
 ```
 
----
-
-## Prompt 9 — Validar WFS fuera de QGIS GUI
+#### Revisar la entrega **WFS** sin recurrir a **QGis GUI**
 
 ```text
-Quiero validar WFS para la capa vectorial `iie_mapa_vectorial` sin depender de QGIS GUI.
+Quiero validar WFS para la capa vectorial `iie_mapa_vectorial` sin depender de **QGis** GUI.
 
 Asume endpoint base:
 
-`http://localhost:8085/cgi-bin/qgis_mapserv.fcgi`
+`http://10.0.90.76:8085/cgi-bin/qgis_mapserv.fcgi`
 
 Datos esperados:
 - capa: `iie_mapa_vectorial`;
@@ -939,7 +947,7 @@ También ayúdame a interpretar avisos de orden de ejes en EPSG:4326.
 Comandos clave:
 
 ```bash
-curl -s "http://localhost:8085/cgi-bin/qgis_mapserv.fcgi?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=iie_mapa_vectorial" > /tmp/iie_wfs.gml
+curl -s "http://10.0.90.76:8085/cgi-bin/qgis_mapserv.fcgi?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=iie_mapa_vectorial" > /tmp/iie_wfs.gml
 
 ls -lh /tmp/iie_wfs.gml
 grep -c "gml:featureMember" /tmp/iie_wfs.gml
@@ -948,19 +956,21 @@ grep -n "fid" /tmp/iie_wfs.gml | head
 
 ```bash
 ogrinfo -ro \
-  "WFS:http://localhost:8085/cgi-bin/qgis_mapserv.fcgi?SERVICE=WFS&VERSION=1.0.0" \
+  "WFS:http://10.0.90.76:8085/cgi-bin/qgis_mapserv.fcgi?SERVICE=WFS&VERSION=1.0.0" \
   iie_mapa_vectorial \
   -so
 ```
 
 ---
 
-## Prompt 10 — Diagnóstico de QGIS GUI como cliente WFS
+#### Diagnóstico de **QGis** GUI como cliente WFS
+
+En mi ensayo, encontré varias dificultades para que el *map server* me entregara exactamente lo que yo quería. Puedes tu tambipen intentar abordar algunos de los problemas que me encontré y desde luego los tuyos propios. Así le puedes pedir ayuda a la **IA**.
 
 ```text
-El WFS ya fue validado con `curl` y `ogrinfo`, pero al cargarlo como capa viva en QGIS Desktop puede aparecer incompleto o mostrar avisos de coordenadas.
+El WFS ya fue validado con `curl` y `ogrinfo`, pero al cargarlo como capa viva en **QGis** Desktop puede aparecer incompleto o mostrar avisos de coordenadas.
 
-Ayúdame a distinguir si esto es un problema del servicio o del cliente QGIS GUI.
+Ayúdame a distinguir si esto es un problema del servicio o del cliente **QGis** GUI.
 
 Considera:
 - `forceInitialGetFeature=false`;
@@ -969,7 +979,7 @@ Considera:
 - `version=auto`;
 - render inicial antes de que se complete la lectura de features.
 
-Quiero recomendaciones para usuarios de QGIS Desktop:
+Quiero recomendaciones para usuarios de **QGis** Desktop:
 - usar WMS para visualización;
 - usar WFS para consulta/descarga;
 - abrir tabla o exportar para forzar `GetFeature`;
@@ -979,11 +989,14 @@ Quiero recomendaciones para usuarios de QGIS Desktop:
 - desactivar restricción por BBOX durante validación.
 ```
 
----
 
-## Prompt 11 — Nota final para README o bitácora
+
+#### Documentación: preparar README o bitácora
+
+No olvides documentar lo que hiciste. También le puedes pedir ayuda a la **IA** para generar un documento de acompañamiento. No traté aquí nada de la documentación y registro de los metadaros. **Maricruz nos orientará sobre este tema**.
 
 ```text
+
 Ayúdame a redactar una nota técnica final para README o bitácora.
 
 Debe explicar:
@@ -992,11 +1005,11 @@ Debe explicar:
   - `create_project_standalone`
   - `create_project_server`
 
-- `create_project_standalone` genera un proyecto QGIS Desktop con layouts editoriales desde QPT.
+- `create_project_standalone` genera un proyecto **QGis** Desktop con layouts editoriales desde QPT.
 
-- `create_project_server` genera un proyecto QGIS Server sin layouts y preparado para WMS/WFS/WCS.
+- `create_project_server` genera un proyecto **QGis** Server sin layouts y preparado para WMS/WFS/WCS.
 
-- El script Python/PyQGIS se construyó por etapas:
+- El script Python/Py**QGis** se construyó por etapas:
   1. carga y validación de capas;
   2. simbología raster/vectorial;
   3. layouts standalone;
@@ -1011,10 +1024,10 @@ Debe explicar:
   - WFS validado como canal vectorial con 862 polígonos, extent correcto y atributos esperados.
 
 - Salvedad:
-  - QGIS GUI puede cargar inicialmente una capa WFS viva de forma parcial hasta que una consulta, apertura de tabla o exportación fuerza el `GetFeature` completo. Esto se considera comportamiento del cliente QGIS Desktop, no falla del servicio.
+  - **QGis** GUI puede cargar inicialmente una capa WFS viva de forma parcial hasta que una consulta, apertura de tabla o exportación fuerza el `GetFeature` completo. Esto se considera comportamiento del cliente **QGis** Desktop, no falla del servicio.
 ```
 
----
+
 
 La versión corta para tus usuarios sería:
 
@@ -1041,45 +1054,25 @@ Snakemake separado
 → nota de cierre
 ```
 
+### 13 Cierre
 
--------------------
-Una última etapa es incorporar en Snakefile la producción de un proyecto QGIS completamente funcional. Lo haremos ahora definiendo primero la regla de producción y luego generamos el script necesario para llevarlo a cabo.
+A lo largo de este ejercicio se presentó y consolidó una estrategia reproducible para generar proyectos **QGis** desde Snakemake. El flujo construye el proyecto desde cero con **PyQGis**, carga raster y vector desde productos generados por el workflow, aplica simbología por código, importa únicamente una plantilla .qpt para el layout de impresión y produce dos variantes del proyecto: una standalone para revisión en **QGis** Desktop y otra server para **QGis Server** que ya tenemos habilitado en el equipo de Octavio con **Docker**.
 
-Agrega en `snakefile` un nuevo bloque. Lo que describe esta regla es que tomaremos tres componentes: 
+Se produce una versión *standalone* funcionak y estable, que contiene simbología. La versión server se produce cuidando que sea funcional en el contexto de como se ha habilitado el servidor que tenemos montado y que define una ubicación virtual base: `/data`.
 
-1) los datos ráster y vectoriales que produce nuestro flujo de trabajo. 
-2) Una propuesta de "plantilla de proyecto" hecha en QGis 3.44 (que es la versión de las librerías que tenemos montadas). 
+Para el raster se aplicó una paleta tipo *viridis* mediante QgsSingleBandPseudoColorRenderer, QgsRasterShader y QgsColorRampShader. La clave para evitar que el raster apareciera inicialmente en gris o que la leyenda mostrara valores nan fue construir el renderer con estadísticas válidas del raster, forzar la clasificación de la rampa con classifyColorRamp(), aplicar el renderer mientras la capa conserva una fuente de datos válida y evitar reload() después de aplicar la simbología.
 
-Con eso, lo que resta es el ensamblado y la integración de metadatos necesarios para que el proyecto sea funcional.
-
-
-```{.python}
-{{< include scripts-y-reglas/reglas-paso-4.txt >}}
-```
-
-Se consolidó una estrategia reproducible para generar proyectos QGIS desde Snakemake sin depender de una plantilla .qgz. El flujo construye el proyecto desde cero con PyQGIS, carga raster y vector desde productos generados por el workflow, aplica simbología por código, importa únicamente una plantilla .qpt para el layout de impresión y produce dos variantes del proyecto: una standalone para revisión en QGIS Desktop y otra server para QGIS Server en Docker.
-
-La versión standalone mantiene las capas con rutas absolutas válidas durante la generación y configura el proyecto para guardar rutas relativas. Esto evita romper la simbología o la leyenda al forzar manualmente rutas relativas con setDataSource(). La versión server sí reescribe las fuentes de datos a rutas absolutas internas del contenedor, usando el prefijo /data.
-
-Para el raster se aplicó una paleta tipo viridis mediante QgsSingleBandPseudoColorRenderer, QgsRasterShader y QgsColorRampShader. La clave para evitar que el raster apareciera inicialmente en gris o que la leyenda mostrara valores nan fue construir el renderer con estadísticas válidas del raster, forzar la clasificación de la rampa con classifyColorRamp(), aplicar el renderer mientras la capa conserva una fuente de datos válida y evitar reload() después de aplicar la simbología.
-
-Para el vector se generó un GeoPackage con esquema estable, incluyendo los campos valor_indice e integridad_simulada, y se aplicó simbología graduada sobre integridad_simulada. La retícula vectorial se mantuvo encima del raster y con transparencia para permitir lectura conjunta.
+Para el vector se generó un GeoPackage con esquema estable, incluyendo los campos valor_indice e integridad_simulada, y se aplicó simbología graduada sobre la columna integridad_simulada. La retícula vectorial se mantuvo encima del raster y con transparencia para permitir lectura conjunta.
 
 La arquitectura final separa claramente tres responsabilidades:
 1. Datos geoespaciales generados por Snakemake: GeoPackage y GeoTIFF.
-2. Proyecto QGIS reproducible: generado por PyQGIS, sin plantilla .qgz heredada.
+2. Proyecto **QGis** reproducible: generado por Py**QGis**, sin plantilla .qgz heredada.
 3. Diseño de impresión: definido por una plantilla .qpt reutilizable.
 
 Productos finales:
-- resultados/proyecto_standalone.qgz: proyecto con rutas relativas para QGIS Desktop.
-- resultados/proyecto_server.qgz: proyecto con rutas /data/... para QGIS Server en Docker.
+- resultados/proyecto_standalone.qgz: proyecto con rutas relativas para **QGis** Desktop.
+- resultados/proyecto_server.qgz: proyecto con rutas /data/... para **QGis** Server en Docker.
 
-
-El código Python que  acompaña a esta regla se encarga de localizazr y ensamblar en el proyecro QGis las capas deseadas. Cuida de definir el sistema de coordenadas y agrega los metadaros necesarios. Tambipen incluye las previsiones necesarias por si se quisiera utilizar este proyecto como base de datos para entregar mapas mediante [*Web Maping Services* (**WMS**, **WCS** o **WFS**)](https://gisgeography.com/web-mapping-services-wms/), a través de la Web. El código es el siguiente:
-
-```python
-{{< include scripts-y-reglas/5_create_qgis_project.py >}}
-```
 
 
 
