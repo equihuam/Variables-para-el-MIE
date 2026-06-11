@@ -1036,10 +1036,6 @@ Snakemake separado
 ```
 
 
-
-------------------
-
-
 -------------------
 Una última etapa es incorporar en Snakefile la producción de un proyecto QGIS completamente funcional. Lo haremos ahora definiendo primero la regla de producción y luego generamos el script necesario para llevarlo a cabo.
 
