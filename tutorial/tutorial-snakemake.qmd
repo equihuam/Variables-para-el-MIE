@@ -181,7 +181,13 @@ Para que Snakemake funcione de forma automática y ordenada, el repositorio debe
 ## 3. Preparación del Área de Trabajo y Permisos
 
 
-Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para lograr esto es [winscpf](https://winscp.net/). Es una aplicación para windows que te mostrará, lado a lado, el directorio local y el del servidor que estamos usando. Una vez que lo tengas instalado, te pedirá los datos de conexión La **IP** local de Octavio es **` 10.0.122.35`**, tus credenciales y listo. Le das conectar y ya está. Debes saber que esta **IP**, no es fija, seguramente cambiará de tiempo en tiempo.
+Todo este tutorial se opera mediante terminal conectada al equipo de Octavio. Hay varias formas de conseguir esas terminales. La más directa es con **PowerShell** (🪟 + R [powershell]), pero también puedes usar la **Rstudio** en tu equipo o la de **Rstudio server** que está corriendo directamente en el equipo de Cctavio. En todos los casos el gran misterio es ¿cuál es la **IP** vigente de ese equipo?  Desafortunadamente la **IP** de nuestros equipos en el Inecol no es fija, seguramente cambiará de tiempo en tiempo, pero se mantendrá mientras el equipo no se apague. Para conseguir la dirección actual de la máquina de Octavio dentro del Inecol, puedes usar lo siguiente desde una terminal de **PowerSHell** (ese -4, pide específicamente una **IP** versión 4 que es el tipo que usaremos:
+
+```powershell
+ping DESKTOP-QLC4OUO -4
+```
+
+Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para lograr esto es [winscpf](https://winscp.net/). Es una aplicación para Windows que te mostrará, lado a lado, el directorio local y el del servidor que estamos usando. Una vez que lo tengas instalado, te pedirá los datos de conexión La **IP** local de Octavio, tus credenciales y listo. Le das conectar y ya está. 
 
 ![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png)
 
