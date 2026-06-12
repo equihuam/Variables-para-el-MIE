@@ -187,7 +187,7 @@ Todo este tutorial se opera mediante terminal conectada al equipo de Octavio. Ha
 ping DESKTOP-QLC4OUO -4
 ```
 
-Para los siguientes pasos necesitaras tener acceso cómodo al disco que usaremos todos, en el equipo de Octavio. Una herramienta para lograr esto es [winscpf](https://winscp.net/). Es una aplicación para Windows que te mostrará, lado a lado, el directorio local y el del servidor que estamos usando. Una vez que lo tengas instalado, te pedirá los datos de conexión La **IP** local de Octavio, tus credenciales y listo. Le das conectar y ya está. 
+Para los siguientes pasos puede convenir tener acceso cómodo al disco que usaremos todos, en la máquina de Octavio. Una herramienta para lograr esto es [winscpf](https://winscp.net/). Es una aplicación para Windows que te mostrará, lado a lado, el directorio local y el del servidor que estamos usando. Una vez que lo tengas instalado, te pedirá los datos de conexión La **IP** local de Octavio, tus credenciales y listo. Le das conectar y ya está. 
 
 ![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png)
 
