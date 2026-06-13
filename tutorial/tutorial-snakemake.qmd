@@ -335,11 +335,13 @@ Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este a
 
 Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final. Guarde el documento de abajo aquí: `reportes/resumen_atributos.qmd`
 
-````{text} 
+:::{.quarto}
+````{text}
 
 {{< include scripts-y-reglas/resumen_atributos.qmdtx >}}
 
-````   
+````
+:::
 
 
 ## 8. Ejecución desde RStudio
@@ -402,7 +404,7 @@ Si quieres monitorear en tiempo real cómo se están comportando los núcleos de
 Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (grandes espacios y/o alta resolución). Es un error común seguir la intuición de usar un Geopackage vectorial para guardar una colección de datos referidos a una cuadrícula regular. Una colección vectorial de cuadrados regulares guarda 4 coordenadas completas para cada entidad, además de los datos de topología y  metadatos variados. La cobertura de México completa  a una resolución de 250m tendría un peso estimado de ~15 a 30 GB constituida por unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice del pixel. La posición espacial se infiere por cálculo simple, referido a la matriz que forma la colección de pixeles. Hagamos un script (`4_crear_raster_regional.py`) que aborde la tarea que ya hicimos en vectores, pero que ahora volveremos a hacer en formato ráster.
   
 
-```python
+```{.python}
 {{< include scripts-y-reglas/4_crear_raster_regional.py >}}
 
 ```
@@ -410,16 +412,17 @@ Este ejemplo es bueno para apreciar la conveniencia de optar por el formato rás
 
 Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así (guardadlo en: `reportes/resumen_nacional.qmd`):
 
-
+:::{.quarto}
 ````{text}
 {{< include scripts-y-reglas/resumen_nacional.qmdtx >}}
 
 ````
+:::
 
 Ahora sólo resta ajustar `snakefile` para incorporar las nuevas capacidades.
 Con esta nueva opción de cómputo en su lugar, hay que regresar al archivo `snakefile` y actualizarlo para incorporar la nueva capacidad y aprovecharla para producir nuevos resultados. Deberá quedar así:
 
-```python
+```{.python}
 {{< include scripts-y-reglas/reglas-paso-2.txt >}}
 
 ```

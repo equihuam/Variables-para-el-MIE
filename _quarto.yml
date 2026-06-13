@@ -11,6 +11,7 @@ website:
     left:
       - href: index.qmd
         text: Inicio
+        
 #  sidebar:
   page-navigation: true
   
@@ -21,21 +22,9 @@ crossref:
 format:
   html:
     embed-resources: true
-    include-in-header:
-      text: |
-        <style>
-        .ai-prompt {
-          background-color: #f0f7ff;
-          border-left: 4px solid #0066cc;
-          font-family: 'Courier New', Courier, monospace;
-          padding: 12px 15px;
-          margin: 15px 0;
-          border-radius: 4px;
-        }
-        </style>
     theme:
       light: cosmo
       dark: darkly
-#    css: styles.css
+    css: styles.css
     toc: true
     lang: es
