@@ -197,8 +197,7 @@ Para los siguientes pasos puede convenir tener acceso cómodo al disco que usare
 ![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png)
 
 
-Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz.
-,Pita, julian) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
+Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz, Pita, julian) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
 
 
 Al usar `$USER` los comandos substituirán esa variable automáticamente por el dato de quién inició la terminal (ej. `martha`, `octavio`, `maricruz`, `pita`, `julian` o `equihuam`). Lo hará en cualquier comando en el que aparezca.
@@ -644,11 +643,11 @@ Ahora vamos a abordar el desarrollo del script 5. Imaginé que debería dejar la
 
 La plantilla que hice a mi gusto la puedes descargar y arreglar según tu preferencia. Ponla en `plantillas/`, en la *estructura canónica de directorios*. 
 
-{{< downloadthis  iie-cartografia.qpt >}}
+{{< downloadthis  scripts-y-reglas/iie-cartografia.qpt >}}
 
 Use el logo del Inecol, para que funcione asegúrate de poderlo desplegar en tu diseño. También puedes descargar aquí ese logo.
 
-{{< downloadthis  img/inecol.svg >}}
+{{< downloadthis  scripts-y-reglas/img/inecol.svg >}}
 
 Finalmente, quiero tener la libertad de escoger como se llamará el resultado y algo para indicarle que tipo de proceso desarrollará. Con todo esto ya claro y preparado, pídele a la **IA** lo siguiente:
 
@@ -698,7 +697,8 @@ Lo siguiente es resolver como quieres que se vea el mapa. Básicamente hay que r
 
 ::: {.ai-prompt}
 ```text
-Ahora quiero extender el script Py**QGis** para aplicar simbología reproducible.
+Ahora quiero extender el script Py**QGis** para aplicar 
+simbología reproducible.
 
 Para el raster:
 - usar banda 1;
@@ -793,7 +793,7 @@ Si todo funciona bien, la tarea correrá el script con los parámetros adecuados
 >- título correcto;
 >- capas correctas por layout.
 
-Cuando estés satisfecha con el resultado pasa al siguiente producto, que es preparar un proyecto para que actúe como servidor de mapas. Esta versión no requiere tener un diseño de mapas para imprimir. Debe adecuar los metadatos de las capas para que el servidor de mapas las ubique y las haga disponibles a través de la web. Por la forma como configuré el servidor ahora, este mapa debe llamarse forzosamente `proyecto_server.qgz`.
+Cuando estés satisfecha con el resultado pasa al siguiente producto, que es preparar un proyecto para que actúe como servidor de mapas. Esta versión no requiere tener un diseño de mapas para imprimir. Debe adecuar los metadatos de las capas para que el servidor de mapas las ubique y las haga disponibles a través de la web. Por la forma como configuré el servidor ahora, este mapa debe estar forzosamente en resultados, pero tienes para elegir el nombre, pero anótalo, pues tendrás que usarlo para definir la conexión en tu **QGis**. Yo usé este nombre `proyecto_server.qgz`.
 
 
 ::: {.ai-prompt}
@@ -832,7 +832,8 @@ Propón una arquitectura donde Py**QGis**:
 3. escriba un proyecto **QGis** válido;
 4. y luego, si hace falta, se parchee el `.qgs` interno del `.qgz` como XML para ajustar rutas y propiedades OGC.
 
-Quiero el código de la variante server integrado en el mismo script, manteniendo separada la lógica `standalone` y `server`.
+Quiero el código de la variante server integrado en el mismo script, 
+manteniendo separada la lógica `standalone` y `server`.
 ```
 :::
 
@@ -850,7 +851,8 @@ snakemake --cores 3 --force create_project_server --scheduler greedy
 ```text
 Ya se generó `resultados/proyecto_server.qgz`.
 
-Ayúdame a inspeccionar el `.qgz` para verificar que el `.qgs` interno contiene:
+Ayúdame a inspeccionar el `.qgz` para verificar que el `.qgs` 
+interno contiene:
 
 - capas con nombres:
   - `iie_mapa_raster`
@@ -897,7 +899,7 @@ El servir mapas en la Web se hace con la tecnología [**WMS**](https://mapserver
 2. **WFS**. *Web Feature Service* es la opción que entrega datos vectoriales sin las especificaciones de diseño de leyendas.
 3. **WCS**. **Web Coverage Service** es la opción que entrega datos en formato ráster y puede incluir series de tiempo. 
 
-En nuestra configuración, el servidor de mapas está montado en el equipo de Octavio y llegas a él mediante el puerto **8085**. En **QGis**, busca la sección "browser", ahí encontrarás las etiquetas **WMS**, **WFS** y **WCS**. Si das clic con botón derecho del mouse, te dará oportunidad de dar de alta un nuevo enlace del tipo. Entra ahí, elige un nombre para identificar tu conexión y en `URL` anota `http://10.0.90.76:8085/cgi-bin/qgis_mapserv.fcgi`, cambia la **IP** por que tenga el equipo de Octavio en este momento (@def-consigue-ip). Guarda y verifica el resultado. Deberías ver que la conexión se activa y te ofrece los productos que tu proyecto ha especificado.
+En nuestra configuración, el servidor de mapas está montado en el equipo de Octavio y llegas a él mediante el puerto **8085**. En **QGis**, busca la sección "browser", ahí encontrarás las etiquetas **WMS**, **WFS** y **WCS**. Si das clic con botón derecho del mouse, te dará oportunidad de dar de alta un nuevo enlace del tipo. Entra ahí, elige un nombre para identificar tu conexión y en `URL` anota `http://<<IP-Octavio>>:8085/cgi-bin/qgis_mapserv.fcg?MAP=/data/<<uername>-iie/resultados/proyecto_server.qgz&VERSION=1.3.0`, cambia la **IP** y el **username**por los datos que correspondan en este momento (@def-consigue-ip). Si usaste otro nombre eb lugar de `proyecto_server.qgz` deberas susstituirlo también. Guarda y verifica el resultado. Deberías ver que la conexión se activa y te ofrece los productos que tu proyecto ha especificado.
 
 
 #### Revisar la entrega de mapas formateados mediante **WMS**
