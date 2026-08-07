@@ -262,9 +262,9 @@ Es curioso, pero puedes imaginar que este *mover* es en realidad sólo otro mane
 
 ### Operar desde un proyecto RStudio  
 
-Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de RaiDrive, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el navegador la misma **IP** (@def-consigue-ip) que te funcione para el **ssh** seguido de **:8787**, contesta lo que te pregunte (tus credenciales). ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
+Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de **WinSCP**, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el navegador la misma **IP** (@def-consigue-ip) que te funcione para el **ssh** seguido de **:8787**, contesta lo que te pregunte (tus credenciales). ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
 
-![http:// 10.0.122.35:8787](../img/rstudio.png)
+![http://10.0.122.35:8787](../img/rstudio.png)
 
 Me encantará saber cuál de todas las opciones que les he preparado les parece más natural y fácil de operar.
 
@@ -286,7 +286,7 @@ Con el botón que está aquí abajo podrás descargar los datos que se requieren
 
 El archivo `config/config.yaml` se usa para especificar los parámetros del modelo sin tener que tocar una sola línea del código de los scripts. Al usar **rutas relativas**, el flujo funcionará perfectamente sin importar qué usuario lo esté corriendo. Cada vez que tengas los scripts y las reglas que los usan en este snakefile, podrás correr `snakemake --cores  1`, lo que implica poner en marcha el workflow hasta el punto de desarrollo que lleves. 
 
-En los pasos siguientes verás versiones progresivas del mismo `snakefile`, que iras construyendo conforme agregues tareas y procesos al flujo de trabajo. Cada vez Que tengas un nuevo `snakefile`, con sus scripts y componentes necesarios, deberás correr el comando `snakemake --cores 1` para verificar que todo está en orden y para obtener los productos involucrados en cada paso.
+En los pasos siguientes verás versiones progresivas del mismo `snakefile`, que iras construyendo conforme agregues tareas y procesos al flujo de trabajo. Cada vez Que tengas un nuevo `snakefile`, con sus scripts y componentes necesarios, podrás correr el comando `snakemake --cores 1` para verificar que todo está en orden y si es así,  obtenedrás los productos involucrados en cada paso y que especificaste en la línea **output:**.
 
 ```yaml
 
@@ -308,7 +308,7 @@ salidas:
 
 ## 5. Orquestación del Flujo: El `Snakefile`
 
-Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este archivo le indica a `Snakemake`  cómo conectar las entradas y salidas de las 4 tareas del ejercicio de capacitación.
+Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este archivo le indica a `Snakemake`  cómo conectar las entradas y salidas de las 4 tareas del ejercicio de capacitación descrito en este tutorial.
 
 ```python
 {{< include scripts-y-reglas/reglas-paso-1.txt >}} 
@@ -318,7 +318,7 @@ Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este a
 
 ## 6. Scripts de las Tareas 
 
-Ya tienes definido el proceso en el `snakefile`. Ve lo que marcaste en las líneas que dicen **script:**, para cada regla. Eso indica que scripts deberás desarrollar para que el flujo de trabajo haga su tarea. A continuación te sugiero los tres scripts que ya están indicados en el `snakefile` que acabas de terminar. Este flujo de trabajo también incluye un reporte en Quarto, que es el último componente de esta primera tarea. Constrúyelos y dales el nombre y ubicación que están registrados en el `snakefile`.
+Con el archivo `snakefile` que acabas de construir, ya tienes definido el proceso de trabajo que harás enseguida. Ve lo que marcaste en las líneas que dicen **script:**, para cada regla. Eso indica que scripts deberás desarrollar para que el flujo de trabajo haga su tarea. A continuación te sugiero los tres scripts que ya están indicados en el `snakefile` que acabas de terminar. Este flujo de trabajo también incluye un reporte en **Quarto**, que es el último componente de esta primera tarea y para el cual también te ofrezco una sugerencia. Constrúyelos y dales el nombre y ubicación que están registrados en el `snakefile`.
 
 ### Tarea 1: `scripts/1_leer_datos.R`
 
@@ -354,10 +354,94 @@ Este documento lee los resultados espaciales intermedios de la simulación para 
 ````
 :::
 
-Ya tienes todos los ingredientes para hacer una primera corrida del flujo de trabajo. Ejecuta el comando `snakemake --cores 1` y si todo está bien deberás veru un montón de mensajes en pantalla y tendrás los primeros resultados en las carpetas de salida que indicaste en el mismo `snakefile` bajo el encabezado **output**.
+Ya tienes todos los ingredientes para hacer una primera corrida del flujo de trabajo. y si todo está bien deberás ver un montón de mensajes en pantalla y tendrás los primeros resultados en las carpetas de salida que indicaste en el mismo `snakefile` bajo el encabezado **output**.
 
 
-## 7. Recolección tabular de las variables
+## 7. Ejecución desde RStudio
+
+Para poner en marcha el flujo, abre tu pestaña **Terminal** dentro de RStudio (asegúrate de estar posicionada en `/srv/iie-tutor/$USER-iie/`) y ejecuta:
+
+```bash
+# Paso 1: Simulación (Dry-run) para verificar qué tareas faltan o cambiaron
+snakemake -n
+
+# Paso 2: Ejecución real utilizando dos núcleos del CPU del servidor
+snakemake --cores 2
+
+```
+
+Si posteriormente deseas cambiar el tamaño de celda, modifica el valor numérico en tu `config/config.yaml`, vuelve a lanzar `snakemake --cores 2` y observa cómo el motor recalcula exclusivamente la retícula y el documento Quarto de forma limpia y precisa.
+
+
+## 8. ¿Cuántos núcleos tenemos disponibles?
+
+El procesador del equipo de Octavio (**Intel Core i7-14700KF**) tiene una arquitectura híbrida moderna. Físicamente cuenta con **20 núcleos** (8 de alto rendimiento y 12 de eficiencia). Sin embargo, gracias a la tecnología Hyper-Threading en los núcleos de rendimiento, el sistema operativo (y por lo tanto WSL y Snakemake) detectan un total de **28 hilos lógicos**.
+
+Para efectos de Snakemake, **tienes hasta 28 núcleos disponibles** (potencial `--cores 28`).
+
+
+### a) El Cuello de Botella Oculto: La Memoria RAM
+
+Aquí es donde entra la experiencia técnica. Aunque tienes 28 "cerebros" para procesar, **tu límite real son tus 32 GB de RAM**.
+
+En flujos de trabajo geoespaciales con R (usando librerías como `sf`, `terra` o procesando Geopackages), cada vez que Snakemake lanza una tarea en un núcleo nuevo, **R abre una sesión independiente en la memoria**.
+
+* Si una sola tarea de leer mapas y cruzar polígonos consume 2 GB de RAM, y le dices a Snakemake que use `--cores 20`, R intentará consumir 40 GB de RAM de golpe.
+* El sistema se quedará sin memoria, WSL entrará en pánico y matará el proceso de Snakemake abruptamente.
+
+
+### b) ¿Cuántos núcleos conviene utilizar? 
+
+Dado el hardware disponible (28 hilos de CPU y 32 GB de RAM), las recomendaciones para este servidor son:
+
+* **Para capacitación y pruebas del equipo:** `snakemake --cores 2` o `snakemake --cores 4`.
+Es perfecto porque los procesos terminarán rápido sin que los usuarios noten ninguna lentitud si están trabajando al mismo tiempo en el servidor.
+* **El "Punto Dulce" para el trabajo diario:** `snakemake --cores 8` a `snakemake --cores 10`.
+Esto te da un paralelismo masivo (procesarás 10 mapas al mismo tiempo). Asumiendo que cada proceso consuma ~2 GB de RAM, utilizarás unos 20 GB en total. Te sobrarán 12 GB para que Windows y otras aplicaciones funcionen con total fluidez.
+* **Modo "Máxima Potencia" (Dejarlo corriendo de noche):** `snakemake --cores 14`.
+Utilizar la mitad exacta de tus hilos lógicos es una regla de oro en el modelado geoespacial. Aprovecharás muchísimo el CPU y mantendrás el uso de RAM al borde seguro (cerca de los 28 GB).
+
+**Lo que nunca debes hacer:**
+Evita usar `--cores 24` o `--cores 28` a menos que estés corriendo scripts sumamente sencillos (como limpiar texto o mover archivos) que sepas que consumen menos de 500 MB de RAM por proceso.
+
+### c) Un truco extra
+
+Si quieres monitorear en tiempo real cómo se están comportando los núcleos del equipo y la RAM mientras los usuarios corren el tutorial de Snakemake, abre una terminal de WSL y ejecuta el comando `htop`. Verás una gráfica espectacular con las 28 barras del i7 trabajando como una orquesta, y una barra indicando cuánta de tus 32GB de RAM se está llenando.
+
+
+
+## 9. Procesar tareas más complejas
+
+### Cambiar el enfoque: Ráster vs Vectorial
+
+Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (grandes espacios y/o alta resolución). Es un error común seguir la intuición de usar un Geopackage vectorial para guardar una colección de datos referidos a una cuadrícula regular. Una colección vectorial de cuadrados regulares guarda 4 coordenadas completas para cada entidad, además de los datos de topología y  metadatos variados. La cobertura de México completa  a una resolución de 250m tendría un peso estimado de ~15 a 30 GB constituida por unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice del pixel. La posición espacial se infiere por cálculo simple, referido a la matriz que forma la colección de píxeles. Hagamos un script (`4_crear_raster_regional.py`) que aborde la tarea que ya hicimos en vectores, pero que ahora volveremos a hacer en formato ráster.
+  
+
+```{.python}
+{{< include scripts-y-reglas/4_crear_raster_regional.py >}}
+
+```
+
+
+Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así (guardadlo en: `reportes/resumen_nacional.qmd`):
+
+:::{.quarto}
+````{text}
+{{< include scripts-y-reglas/resumen_nacional.qmdtx >}}
+
+````
+:::
+
+Ahora sólo resta ajustar `snakefile` para incorporar las nuevas capacidades.
+Con esta nueva opción de cómputo en su lugar, hay que regresar al archivo `snakefile` y actualizarlo para incorporar la nueva capacidad y aprovecharla para producir nuevos resultados. Deberá quedar así:
+
+```{.python}
+{{< include scripts-y-reglas/reglas-paso-2.txt >}}
+
+```
+
+
+## 10. Recolección tabular de las variables
 
 La siguiente tarea es recolectar los datos y producir un arreglo centralizado a partir de las múltiples fuentes de información geoespacial, sin importar su formato de origen (ráster o vectorial). 
 
@@ -397,89 +481,6 @@ El archivo final debe cumplir rigurosamente las siguientes expectativas de forma
 3. **Columnas dinámicas:** Mapeo exitoso e individualizado de coberturas según el nombre del archivo origen de datos (ej. `integridad_mexico` y `reticula_variable`).
 
 
-
-## 8. Ejecución desde RStudio
-
-Para poner en marcha el flujo, abre tu pestaña **Terminal** dentro de RStudio (asegúrate de estar posicionada en `/srv/iie-tutor/$USER-iie/`) y ejecuta:
-
-```bash
-# Paso 1: Simulación (Dry-run) para verificar qué tareas faltan o cambiaron
-snakemake -n
-
-# Paso 2: Ejecución real utilizando dos núcleos del CPU del servidor
-snakemake --cores 2
-
-```
-
-Si posteriormente deseas cambiar el tamaño de celda, modifica el valor numérico en tu `config/config.yaml`, vuelve a lanzar `snakemake --cores 2` y observa cómo el motor recalcula exclusivamente la retícula y el documento Quarto de forma limpia y precisa.
-
-
-## 9. ¿Cuántos núcleos tenemos disponibles?
-
-El procesador del equipo de Octavio (**Intel Core i7-14700KF**) tiene una arquitectura híbrida moderna. Físicamente cuenta con **20 núcleos** (8 de alto rendimiento y 12 de eficiencia). Sin embargo, gracias a la tecnología Hyper-Threading en los núcleos de rendimiento, el sistema operativo (y por lo tanto WSL y Snakemake) detectan un total de **28 hilos lógicos**.
-
-Para efectos de Snakemake, **tienes hasta 28 núcleos disponibles** (potencial `--cores 28`).
-
-
-### a) El Cuello de Botella Oculto: La Memoria RAM
-
-Aquí es donde entra la experiencia técnica. Aunque tienes 28 "cerebros" para procesar, **tu límite real son tus 32 GB de RAM**.
-
-En flujos de trabajo geoespaciales con R (usando librerías como `sf`, `terra` o procesando Geopackages), cada vez que Snakemake lanza una tarea en un núcleo nuevo, **R abre una sesión independiente en la memoria**.
-
-* Si una sola tarea de leer mapas y cruzar polígonos consume 2 GB de RAM, y le dices a Snakemake que use `--cores 20`, R intentará consumir 40 GB de RAM de golpe.
-* El sistema se quedará sin memoria, WSL entrará en pánico y matará el proceso de Snakemake abruptamente.
-
-
-### b) ¿Cuántos núcleos conviene utilizar? 
-
-Dado el hardware disponible (28 hilos de CPU y 32 GB de RAM), las recomendaciones para este servidor son:
-
-* **Para capacitación y pruebas del equipo:** `snakemake --cores 2` o `snakemake --cores 4`.
-Es perfecto porque los procesos terminarán rápido sin que los usuarios noten ninguna lentitud si están trabajando al mismo tiempo en el servidor.
-* **El "Punto Dulce" para el trabajo diario:** `snakemake --cores 8` a `snakemake --cores 10`.
-Esto te da un paralelismo masivo (procesarás 10 mapas al mismo tiempo). Asumiendo que cada proceso consuma ~2 GB de RAM, utilizarás unos 20 GB en total. Te sobrarán 12 GB para que Windows y otras aplicaciones funcionen con total fluidez.
-* **Modo "Máxima Potencia" (Dejarlo corriendo de noche):** `snakemake --cores 14`.
-Utilizar la mitad exacta de tus hilos lógicos es una regla de oro en el modelado geoespacial. Aprovecharás muchísimo el CPU y mantendrás el uso de RAM al borde seguro (cerca de los 28 GB).
-
-**Lo que nunca debes hacer:**
-Evita usar `--cores 24` o `--cores 28` a menos que estés corriendo scripts sumamente sencillos (como limpiar texto o mover archivos) que sepas que consumen menos de 500 MB de RAM por proceso.
-
-### c) Un truco extra
-
-Si quieres monitorear en tiempo real cómo se están comportando los núcleos del equipo y la RAM mientras los usuarios corren el tutorial de Snakemake, abre una terminal de WSL y ejecuta el comando `htop`. Verás una gráfica espectacular con las 28 barras del i7 trabajando como una orquesta, y una barra indicando cuánta de tus 32GB de RAM se está llenando.
-
-
-
-## 10. Procesar tareas más complejas
-
-### Cambiar el enfoque: Ráster vs Vectorial
-
-Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (grandes espacios y/o alta resolución). Es un error común seguir la intuición de usar un Geopackage vectorial para guardar una colección de datos referidos a una cuadrícula regular. Una colección vectorial de cuadrados regulares guarda 4 coordenadas completas para cada entidad, además de los datos de topología y  metadatos variados. La cobertura de México completa  a una resolución de 250m tendría un peso estimado de ~15 a 30 GB constituida por unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice del pixel. La posición espacial se infiere por cálculo simple, referido a la matriz que forma la colección de píxeles. Hagamos un script (`4_crear_raster_regional.py`) que aborde la tarea que ya hicimos en vectores, pero que ahora volveremos a hacer en formato ráster.
-  
-
-```{.python}
-{{< include scripts-y-reglas/4_crear_raster_regional.py >}}
-
-```
-
-
-Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así (guardadlo en: `reportes/resumen_nacional.qmd`):
-
-:::{.quarto}
-````{text}
-{{< include scripts-y-reglas/resumen_nacional.qmdtx >}}
-
-````
-:::
-
-Ahora sólo resta ajustar `snakefile` para incorporar las nuevas capacidades.
-Con esta nueva opción de cómputo en su lugar, hay que regresar al archivo `snakefile` y actualizarlo para incorporar la nueva capacidad y aprovecharla para producir nuevos resultados. Deberá quedar así:
-
-```{.python}
-{{< include scripts-y-reglas/reglas-paso-2.txt >}}
-
-```
 
 ## 11. El Reporte Maestro de Snakemake
 
