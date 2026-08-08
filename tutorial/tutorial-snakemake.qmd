@@ -195,7 +195,7 @@ Todo este tutorial se opera mediante terminal conectada al equipo de Octavio. Ha
 
 Para los siguientes pasos puede convenir tener acceso cómodo al disco que usaremos todos, en la máquina de Octavio. Una herramienta para lograr esto es [winscpf](https://winscp.net/). Es una aplicación para Windows que te mostrará, lado a lado, el directorio local y el del servidor que estamos usando. Una vez que lo tengas instalado, te pedirá los datos de conexión La **IP** local de Octavio, tus credenciales y listo (@def-consigue-ip). Le das conectar y ya está. 
 
-![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png)
+![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png){#fig-acceso-servidor}
 
 
 Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz, Pita, Julián) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
@@ -262,9 +262,9 @@ Es curioso, pero puedes imaginar que este *mover* es en realidad sólo otro mane
 
 ### Operar desde un proyecto RStudio  
 
-Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de RaiDrive, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el navegador la misma **IP** (@def-consigue-ip) que te funcione para el **ssh** seguido de **:8787**, contesta lo que te pregunte (tus credenciales). ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
+Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de **WinSCP**, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el navegador la misma **IP** (@def-consigue-ip) que te funcione para el **ssh** seguido de **:8787**, contesta lo que te pregunte (tus credenciales). ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
 
-![http:// 10.0.122.35:8787](../img/rstudio.png)
+![http://10.0.122.35:8787](../img/rstudio.png){#fig-rstudio}
 
 Me encantará saber cuál de todas las opciones que les he preparado les parece más natural y fácil de operar.
 
@@ -276,6 +276,113 @@ Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamen
 
 Cuando inicias en tu sesión **SSH**, seguramente notarás la frase `qgis_env`. Se trata de una indicación de que ya estas ubicada en un **ambiente virtual de trabajo** que contiene todo lo necesario para hacer mapas con **QGis** y también está ahí habilitado **Snakemake**. Hay otros dos ambientes posibles `base` y `profiling_env`. El primero es la condición de la máquina sin ninguna preparación, probablemente no tendrás ahí ni siquiera a Python. Llegas a esa configuración con `micromamba deactivate` o con `micromamba activate base`. Hay ocasiones en las que conviene tener tal configuración, pero no será el caso en este tutorial. El otro *ambiente virtual* tiene instalada la paquetería necesaria para hacer *data profiling*. Esto quiere decir que puedes darle cualquier **CSV** con datos organizados por columnas, y te entregará un análisis muy completo de los atributos que tienen las variables y sus peculiaridades estadísticas. No lo usaremos en este tutorial, pero es algo que tiene mucho interés para las nuevas variables que estaremos procesando. Puedes hacer un análisis descriptivo de este tipo escribiendo dentro de ese entorno el comando `ydata-profiling <<ruta al archivo csv que quieras>>`. Te entregará un reporte en una archivo `HTML` que verás como una página Web. La forma de activar ese entorno virtual es `micromamba activate profiling_env`. Para los fines de este tutorial, debes asegurarte de tener activo el entorno virtual `qgis_env`. Si no ves tal indicación en tu línea de comandos de tu terminal, puedes activarlo con `micromamba activate qgis_env`en el momento en el que lo necesites.
 
+El Ejercicio que desarrollarás en este tutorial te hará viajar a lo largo del siguiente diagrama de flujo.
+
+
+
+```{mermaid}
+%%| fig-cap: "Diagrama de Bloques del Flujo de Trabajo Geoespacial Automatizado (DAG de Snakemake)"
+%%| label: fig-dag
+%%| fig-width: 10
+%%| fig-align: center
+
+graph TD
+    %% --- Configuración de Estilos Globales de Aristas ---
+    linkStyle default stroke:#cbd5e1,stroke-width:2px;
+
+    %% --- Estilos de Nodos ---
+    classDef storage fill:#db2777,stroke:#fff,stroke-width:2px,color:#fff,font-weight:bold;
+    classDef process fill:#0284c7,stroke:#bae6fd,stroke-width:1px,color:#fff,rx:5,ry:5;
+    classDef paralell fill:#eab308,stroke:#fef08a,stroke-width:2px,color:#000,font-weight:bold;
+    classDef deliverable fill:#16a34a,stroke:#bbf7d0,stroke-width:2px,color:#fff,rx:10,ry:10;
+    classDef env fill:#475569,stroke:#cbd5e1,stroke-width:1.5px,stroke-dasharray: 4 4,color:#fff;
+
+    %% --- Entorno y Datos Maestros ---
+    subgraph Env [Entorno Servidor WSL2]
+        PathText["/srv/iie-tutor/"]:::env
+        Conda[<i class='fa fa-terminal'></i> conda activate qgis_env]:::env
+        Maestro[(<i class='fa fa-database'></i> datos/registros_base.csv)]:::storage
+    end
+
+    %% --- Entradas Principales ---
+    Maestro --> R1_In
+    Maestro --> R2_In
+
+    %% ========================================================================
+    %% RAMA 1: VECTORIAL
+    %% ========================================================================
+    subgraph Rama1 [RAMA 1: Vectorial]
+        R1_In(1_leer_datos.R):::process
+        R1_Ret(3_crear_reticula.py):::process
+        R1_Out[(resultados/reticula_variable.gpkg)]:::deliverable
+    end
+    
+    R1_In -->|Filtrado WGS84| R1_Ret
+    R1_Ret -->|Muestreo variable| R1_Out
+
+    %% ========================================================================
+    %% RAMA 2: BIG DATA / RÁSTER
+    %% ========================================================================
+    subgraph Rama2 [RAMA 2: Big Data Raster]
+        R2_In(0_segmentar_csv.R):::process
+        
+        subgraph Paralelo [Procesamiento Concurrente]
+            R2_Reg1(Región 1):::paralell
+            R2_Reg2(Región 2):::paralell
+            R2_RegN(Región N):::paralell
+        end
+        
+        R2_Fuse(Fusionar Ráster Nacional):::process
+        R2_Out[(resultados/integridad_mexico.tif)]:::deliverable
+    end
+    
+    R2_In -->|Scatter regional| R2_Reg1
+    R2_In -->|Scatter regional| R2_Reg2
+    R2_In -->|Scatter regional| R2_RegN
+    
+    R2_Reg1 -->|Gather TIFs| R2_Fuse
+    R2_Reg2 -->|Gather TIFs| R2_Fuse
+    R2_RegN -->|Gather TIFs| R2_Fuse
+    R2_Fuse -->|GDAL Merge| R2_Out
+
+    %% ========================================================================
+    %% RAMA 3: AGREGACIÓN ESTADÍSTICA
+    %% ========================================================================
+    subgraph Rama3 [RAMA 3: Agregación Estadística]
+        R3_In(6_agregar_datos.py):::process
+        R3_Out[(resultados/dataset_agregado.csv)]:::deliverable
+    end
+    
+    R1_Out -->|Definición de puntos y CRS base| R3_In
+    R2_Out -->|Muestreo dinámico de variables| R3_In
+    R3_In -->|Extracción en CRS Métrico| R3_Out
+
+    %% ========================================================================
+    %% RAMA 4: DESPLIEGUE CARTOGRÁFICO
+    %% ========================================================================
+    subgraph Rama4 [RAMA 4: Despliegue QGIS]
+        R4_In(5_create_qgis_project.py):::process
+        R4_OutS[(proyecto_standalone.qgz)]:::deliverable
+        R4_OutV[(proyecto_server.qgz)]:::deliverable
+    end
+    
+    R1_Out -->|Carga de Capas| R4_In
+    R2_Out -->|Simbología y Extent| R4_In
+    
+    R4_In -->|Layouts cartográficos| R4_OutS
+    R4_In -->|Servicios OGC WMS/WFS/WCS| R4_OutV
+
+    R3_Out -.->|Importación lineal| RStudio[<i class='fa fa-line-chart'></i> Análisis RStudio Server]:::env
+
+    %% --- Estilos de los Subgraphs (Fondo oscuro uniforme y marcos contrastados) ---
+    style Env fill:#0f172a,stroke:#94a3b8,stroke-width:2px,color:#f8fafc
+    style Rama1 fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc
+    style Rama2 fill:#0f172a,stroke:#facc15,stroke-width:2px,color:#f8fafc
+    style Paralelo fill:#1e293b,stroke:#fde047,stroke-width:1.5px,color:#fef08a
+    style Rama3 fill:#0f172a,stroke:#4ade80,stroke-width:2px,color:#f8fafc
+    style Rama4 fill:#0f172a,stroke:#c084fc,stroke-width:2px,color:#f8fafc
+```
+
 ### Datos para el ejercicio
 
 Con el botón que está aquí abajo podrás descargar los datos que se requieren para arrancar el workflow que se describe en este tutorial.
@@ -286,7 +393,7 @@ Con el botón que está aquí abajo podrás descargar los datos que se requieren
 
 El archivo `config/config.yaml` se usa para especificar los parámetros del modelo sin tener que tocar una sola línea del código de los scripts. Al usar **rutas relativas**, el flujo funcionará perfectamente sin importar qué usuario lo esté corriendo. Cada vez que tengas los scripts y las reglas que los usan en este snakefile, podrás correr `snakemake --cores  1`, lo que implica poner en marcha el workflow hasta el punto de desarrollo que lleves. 
 
-En los pasos siguientes verás versiones progresivas del mismo `snakefile`, que iras construyendo conforme agregues tareas y procesos al flujo de trabajo. Cada vez Que tengas un nuevo `snakefile`, con sus scripts y componentes necesarios, deberás correr el comando `snakemake --cores 1` para verificar que todo está en orden y para obtener los productos involucrados en cada paso.
+En los pasos siguientes verás versiones progresivas del mismo `snakefile`, que iras construyendo conforme agregues tareas y procesos al flujo de trabajo. Cada vez Que tengas un nuevo `snakefile`, con sus scripts y componentes necesarios, podrás correr el comando `snakemake --cores 1` para verificar que todo está en orden y si es así,  obtenedrás los productos involucrados en cada paso y que especificaste en la línea **output:**.
 
 ```yaml
 
@@ -308,7 +415,7 @@ salidas:
 
 ## 5. Orquestación del Flujo: El `Snakefile`
 
-Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este archivo le indica a `Snakemake`  cómo conectar las entradas y salidas de las 4 tareas del ejercicio de capacitación.
+Ubicado en la raíz de tu carpeta está el archivo (`/srv/iie-tutor/$USER-iie/Snakefile`). Este archivo le indica a `Snakemake`  cómo conectar las entradas y salidas de las 4 tareas del ejercicio de capacitación descrito en este tutorial.
 
 ```python
 {{< include scripts-y-reglas/reglas-paso-1.txt >}} 
@@ -318,7 +425,7 @@ Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este a
 
 ## 6. Scripts de las Tareas 
 
-Ya tienes definido el proceso en el `snakefile`. Ve lo que marcaste en las líneas que dicen **script:**, para cada regla. Eso indica que scripts deberás desarrollar para que el flujo de trabajo haga su tarea. A continuación te sugiero los tres scripts que ya están indicados en el `snakefile` que acabas de terminar. Este flujo de trabajo también incluye un reporte en Quarto, que es el último componente de esta primera tarea. Constrúyelos y dales el nombre y ubicación que están registrados en el `snakefile`.
+Con el archivo `snakefile` que acabas de construir, ya tienes definido el proceso de trabajo que harás enseguida. Ve lo que marcaste en las líneas que dicen **script:**, para cada regla. Eso indica que scripts deberás desarrollar para que el flujo de trabajo haga su tarea. A continuación te sugiero los tres scripts que ya están indicados en el `snakefile` que acabas de terminar. Este flujo de trabajo también incluye un reporte en **Quarto**, que es el último componente de esta primera tarea y para el cual también te ofrezco una sugerencia. Constrúyelos y dales el nombre y ubicación que están registrados en el `snakefile`.
 
 ### Tarea 1: `scripts/1_leer_datos.R`
 
@@ -354,10 +461,94 @@ Este documento lee los resultados espaciales intermedios de la simulación para 
 ````
 :::
 
-Ya tienes todos los ingredientes para hacer una primera corrida del flujo de trabajo. Ejecuta el comando `snakemake --cores 1` y si todo está bien deberás veru un montón de mensajes en pantalla y tendrás los primeros resultados en las carpetas de salida que indicaste en el mismo `snakefile` bajo el encabezado **output**.
+Ya tienes todos los ingredientes para hacer una primera corrida del flujo de trabajo. y si todo está bien deberás ver un montón de mensajes en pantalla y tendrás los primeros resultados en las carpetas de salida que indicaste en el mismo `snakefile` bajo el encabezado **output**.
 
 
-## 7. Recolección tabular de las variables
+## 7. Ejecución desde RStudio
+
+Para poner en marcha el flujo, abre tu pestaña **Terminal** dentro de RStudio (asegúrate de estar posicionada en `/srv/iie-tutor/$USER-iie/`) y ejecuta:
+
+```bash
+# Paso 1: Simulación (Dry-run) para verificar qué tareas faltan o cambiaron
+snakemake -n
+
+# Paso 2: Ejecución real utilizando dos núcleos del CPU del servidor
+snakemake --cores 2
+
+```
+
+Si posteriormente deseas cambiar el tamaño de celda, modifica el valor numérico en tu `config/config.yaml`, vuelve a lanzar `snakemake --cores 2` y observa cómo el motor recalcula exclusivamente la retícula y el documento Quarto de forma limpia y precisa.
+
+
+## 8. ¿Cuántos núcleos tenemos disponibles?
+
+El procesador del equipo de Octavio (**Intel Core i7-14700KF**) tiene una arquitectura híbrida moderna. Físicamente cuenta con **20 núcleos** (8 de alto rendimiento y 12 de eficiencia). Sin embargo, gracias a la tecnología Hyper-Threading en los núcleos de rendimiento, el sistema operativo (y por lo tanto WSL y Snakemake) detectan un total de **28 hilos lógicos**.
+
+Para efectos de Snakemake, **tienes hasta 28 núcleos disponibles** (potencial `--cores 28`).
+
+
+### a) El Cuello de Botella Oculto: La Memoria RAM
+
+Aquí es donde entra la experiencia técnica. Aunque tienes 28 "cerebros" para procesar, **tu límite real son tus 32 GB de RAM**.
+
+En flujos de trabajo geoespaciales con R (usando librerías como `sf`, `terra` o procesando Geopackages), cada vez que Snakemake lanza una tarea en un núcleo nuevo, **R abre una sesión independiente en la memoria**.
+
+* Si una sola tarea de leer mapas y cruzar polígonos consume 2 GB de RAM, y le dices a Snakemake que use `--cores 20`, R intentará consumir 40 GB de RAM de golpe.
+* El sistema se quedará sin memoria, WSL entrará en pánico y matará el proceso de Snakemake abruptamente.
+
+
+### b) ¿Cuántos núcleos conviene utilizar? 
+
+Dado el hardware disponible (28 hilos de CPU y 32 GB de RAM), las recomendaciones para este servidor son:
+
+* **Para capacitación y pruebas del equipo:** `snakemake --cores 2` o `snakemake --cores 4`.
+Es perfecto porque los procesos terminarán rápido sin que los usuarios noten ninguna lentitud si están trabajando al mismo tiempo en el servidor.
+* **El "Punto Dulce" para el trabajo diario:** `snakemake --cores 8` a `snakemake --cores 10`.
+Esto te da un paralelismo masivo (procesarás 10 mapas al mismo tiempo). Asumiendo que cada proceso consuma ~2 GB de RAM, utilizarás unos 20 GB en total. Te sobrarán 12 GB para que Windows y otras aplicaciones funcionen con total fluidez.
+* **Modo "Máxima Potencia" (Dejarlo corriendo de noche):** `snakemake --cores 14`.
+Utilizar la mitad exacta de tus hilos lógicos es una regla de oro en el modelado geoespacial. Aprovecharás muchísimo el CPU y mantendrás el uso de RAM al borde seguro (cerca de los 28 GB).
+
+**Lo que nunca debes hacer:**
+Evita usar `--cores 24` o `--cores 28` a menos que estés corriendo scripts sumamente sencillos (como limpiar texto o mover archivos) que sepas que consumen menos de 500 MB de RAM por proceso.
+
+### c) Un truco extra
+
+Si quieres monitorear en tiempo real cómo se están comportando los núcleos del equipo y la RAM mientras los usuarios corren el tutorial de Snakemake, abre una terminal de WSL y ejecuta el comando `htop`. Verás una gráfica espectacular con las 28 barras del i7 trabajando como una orquesta, y una barra indicando cuánta de tus 32GB de RAM se está llenando.
+
+
+
+## 9. Procesar tareas más complejas
+
+### Cambiar el enfoque: Ráster vs Vectorial
+
+Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (grandes espacios y/o alta resolución). Es un error común seguir la intuición de usar un Geopackage vectorial para guardar una colección de datos referidos a una cuadrícula regular. Una colección vectorial de cuadrados regulares guarda 4 coordenadas completas para cada entidad, además de los datos de topología y  metadatos variados. La cobertura de México completa  a una resolución de 250m tendría un peso estimado de ~15 a 30 GB constituida por unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice del pixel. La posición espacial se infiere por cálculo simple, referido a la matriz que forma la colección de píxeles. Hagamos un script (`4_crear_raster_regional.py`) que aborde la tarea que ya hicimos en vectores, pero que ahora volveremos a hacer en formato ráster.
+  
+
+```{.python}
+{{< include scripts-y-reglas/4_crear_raster_regional.py >}}
+
+```
+
+
+Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así (guardadlo en: `reportes/resumen_nacional.qmd`):
+
+:::{.quarto}
+````{text}
+{{< include scripts-y-reglas/resumen_nacional.qmdtx >}}
+
+````
+:::
+
+Ahora sólo resta ajustar `snakefile` para incorporar las nuevas capacidades.
+Con esta nueva opción de cómputo en su lugar, hay que regresar al archivo `snakefile` y actualizarlo para incorporar la nueva capacidad y aprovecharla para producir nuevos resultados. Deberá quedar así:
+
+```{.python}
+{{< include scripts-y-reglas/reglas-paso-2.txt >}}
+
+```
+
+
+## 10. Recolección tabular de las variables
 
 La siguiente tarea es recolectar los datos y producir un arreglo centralizado a partir de las múltiples fuentes de información geoespacial, sin importar su formato de origen (ráster o vectorial). 
 
@@ -397,89 +588,6 @@ El archivo final debe cumplir rigurosamente las siguientes expectativas de forma
 3. **Columnas dinámicas:** Mapeo exitoso e individualizado de coberturas según el nombre del archivo origen de datos (ej. `integridad_mexico` y `reticula_variable`).
 
 
-
-## 8. Ejecución desde RStudio
-
-Para poner en marcha el flujo, abre tu pestaña **Terminal** dentro de RStudio (asegúrate de estar posicionada en `/srv/iie-tutor/$USER-iie/`) y ejecuta:
-
-```bash
-# Paso 1: Simulación (Dry-run) para verificar qué tareas faltan o cambiaron
-snakemake -n
-
-# Paso 2: Ejecución real utilizando dos núcleos del CPU del servidor
-snakemake --cores 2
-
-```
-
-Si posteriormente deseas cambiar el tamaño de celda, modifica el valor numérico en tu `config/config.yaml`, vuelve a lanzar `snakemake --cores 2` y observa cómo el motor recalcula exclusivamente la retícula y el documento Quarto de forma limpia y precisa.
-
-
-## 9. ¿Cuántos núcleos tenemos disponibles?
-
-El procesador del equipo de Octavio (**Intel Core i7-14700KF**) tiene una arquitectura híbrida moderna. Físicamente cuenta con **20 núcleos** (8 de alto rendimiento y 12 de eficiencia). Sin embargo, gracias a la tecnología Hyper-Threading en los núcleos de rendimiento, el sistema operativo (y por lo tanto WSL y Snakemake) detectan un total de **28 hilos lógicos**.
-
-Para efectos de Snakemake, **tienes hasta 28 núcleos disponibles** (potencial `--cores 28`).
-
-
-### a) El Cuello de Botella Oculto: La Memoria RAM
-
-Aquí es donde entra la experiencia técnica. Aunque tienes 28 "cerebros" para procesar, **tu límite real son tus 32 GB de RAM**.
-
-En flujos de trabajo geoespaciales con R (usando librerías como `sf`, `terra` o procesando Geopackages), cada vez que Snakemake lanza una tarea en un núcleo nuevo, **R abre una sesión independiente en la memoria**.
-
-* Si una sola tarea de leer mapas y cruzar polígonos consume 2 GB de RAM, y le dices a Snakemake que use `--cores 20`, R intentará consumir 40 GB de RAM de golpe.
-* El sistema se quedará sin memoria, WSL entrará en pánico y matará el proceso de Snakemake abruptamente.
-
-
-### b) ¿Cuántos núcleos conviene utilizar? 
-
-Dado el hardware disponible (28 hilos de CPU y 32 GB de RAM), las recomendaciones para este servidor son:
-
-* **Para capacitación y pruebas del equipo:** `snakemake --cores 2` o `snakemake --cores 4`.
-Es perfecto porque los procesos terminarán rápido sin que los usuarios noten ninguna lentitud si están trabajando al mismo tiempo en el servidor.
-* **El "Punto Dulce" para el trabajo diario:** `snakemake --cores 8` a `snakemake --cores 10`.
-Esto te da un paralelismo masivo (procesarás 10 mapas al mismo tiempo). Asumiendo que cada proceso consuma ~2 GB de RAM, utilizarás unos 20 GB en total. Te sobrarán 12 GB para que Windows y otras aplicaciones funcionen con total fluidez.
-* **Modo "Máxima Potencia" (Dejarlo corriendo de noche):** `snakemake --cores 14`.
-Utilizar la mitad exacta de tus hilos lógicos es una regla de oro en el modelado geoespacial. Aprovecharás muchísimo el CPU y mantendrás el uso de RAM al borde seguro (cerca de los 28 GB).
-
-**Lo que nunca debes hacer:**
-Evita usar `--cores 24` o `--cores 28` a menos que estés corriendo scripts sumamente sencillos (como limpiar texto o mover archivos) que sepas que consumen menos de 500 MB de RAM por proceso.
-
-### c) Un truco extra
-
-Si quieres monitorear en tiempo real cómo se están comportando los núcleos del equipo y la RAM mientras los usuarios corren el tutorial de Snakemake, abre una terminal de WSL y ejecuta el comando `htop`. Verás una gráfica espectacular con las 28 barras del i7 trabajando como una orquesta, y una barra indicando cuánta de tus 32GB de RAM se está llenando.
-
-
-
-## 10. Procesar tareas más complejas
-
-### Cambiar el enfoque: Ráster vs Vectorial
-
-Este ejemplo es bueno para apreciar la conveniencia de optar por el formato ráster en lugar del vectorial. En casos de datos grandes (grandes espacios y/o alta resolución). Es un error común seguir la intuición de usar un Geopackage vectorial para guardar una colección de datos referidos a una cuadrícula regular. Una colección vectorial de cuadrados regulares guarda 4 coordenadas completas para cada entidad, además de los datos de topología y  metadatos variados. La cobertura de México completa  a una resolución de 250m tendría un peso estimado de ~15 a 30 GB constituida por unos 31 millones de polígonos. En contraste, un Ráster (GeoTIFF) solo guarda el valor del índice del pixel. La posición espacial se infiere por cálculo simple, referido a la matriz que forma la colección de píxeles. Hagamos un script (`4_crear_raster_regional.py`) que aborde la tarea que ya hicimos en vectores, pero que ahora volveremos a hacer en formato ráster.
-  
-
-```{.python}
-{{< include scripts-y-reglas/4_crear_raster_regional.py >}}
-
-```
-
-
-Ahora tienes lo necesario para hacer un nuevo reporte basado en los datos ráster. El documento Quarto que te propongo sería así (guardadlo en: `reportes/resumen_nacional.qmd`):
-
-:::{.quarto}
-````{text}
-{{< include scripts-y-reglas/resumen_nacional.qmdtx >}}
-
-````
-:::
-
-Ahora sólo resta ajustar `snakefile` para incorporar las nuevas capacidades.
-Con esta nueva opción de cómputo en su lugar, hay que regresar al archivo `snakefile` y actualizarlo para incorporar la nueva capacidad y aprovecharla para producir nuevos resultados. Deberá quedar así:
-
-```{.python}
-{{< include scripts-y-reglas/reglas-paso-2.txt >}}
-
-```
 
 ## 11. El Reporte Maestro de Snakemake
 
@@ -1012,7 +1120,7 @@ Dame pruebas para:
 
 Para esta capa te sugiero ir a la opción *Layer/Data Source Manager*. Encontré que intentar jalar la capa directamente desde la pestaña browser deja algunos atributos sin definir y la interfaz reporta errores, aunque la cobertura esté bien y sea bien entregada por el servidor. En cambio, por el camino *Data Source Manager* tienes más control y la obtención de los datos fluye de mejor manera. Puedes incluso hacer ahí algo de manejo tipo base de datos **SQL**, que es interesante.
 
-![Data source manager](scripts-y-reglas/img/data-source-manager.png)
+![Data source manager](scripts-y-reglas/img/data-source-manager.png){#fig-data-manager}
 
 
 ::: {.ai-prompt}
