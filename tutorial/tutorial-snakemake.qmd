@@ -284,7 +284,9 @@ Con el botón que está aquí abajo podrás descargar los datos que se requieren
 
 ## 4. Configuración del `snakemake`
 
-El archivo `config/config.yaml` se usa para especificar los parámetros del modelo sin tener que tocar una sola línea del código de los scripts. Al usar **rutas relativas**, el flujo funcionará perfectamente sin importar qué usuario lo esté corriendo. Cada vez que tengas los scripts y las reglas que los usan en este snakefile, podrás correr `snakemake --cores  1`, lo que implica poner en marcha el workflow hasta el punto de desarrollo que lleves.
+El archivo `config/config.yaml` se usa para especificar los parámetros del modelo sin tener que tocar una sola línea del código de los scripts. Al usar **rutas relativas**, el flujo funcionará perfectamente sin importar qué usuario lo esté corriendo. Cada vez que tengas los scripts y las reglas que los usan en este snakefile, podrás correr `snakemake --cores  1`, lo que implica poner en marcha el workflow hasta el punto de desarrollo que lleves. 
+
+En los pasos siguientes verás versiones progresivas del mismo `snakefile`, que iras construyendo conforme agregues tareas y procesos al flujo de trabajo. Cada vez Que tengas un nuevo `snakefile`, con sus scripts y componentes necesarios, deberás correr el comando `snakemake --cores 1` para verificar que todo está en orden y para obtener los productos involucrados en cada paso.
 
 ```yaml
 
@@ -316,13 +318,14 @@ Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este a
 
 ## 6. Scripts de las Tareas 
 
+Ya tienes definido el proceso en el `snakefile`. Ve lo que marcaste en las líneas que dicen **script:**, para cada regla. Eso indica que scripts deberás desarrollar para que el flujo de trabajo haga su tarea. A continuación te sugiero los tres scripts que ya están indicados en el `snakefile` que acabas de terminar. Este flujo de trabajo también incluye un reporte en Quarto, que es el último componente de esta primera tarea. Constrúyelos y dales el nombre y ubicación que están registrados en el `snakefile`.
+
 ### Tarea 1: `scripts/1_leer_datos.R`
 
 ```{.r}
 {{< include scripts-y-reglas/1_leer_datos.R >}}
 
 ```
-
 
 
 ### Tarea 2: `scripts/2_construir_tabla.R`
@@ -334,12 +337,12 @@ Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este a
 
 ### Tarea 3: `scripts/3_crear_reticula.py`
 
+Este escript está escrito en Python y crea un mapa vectorial (malla) a partir de los datos tabulares.
+
 ```python
 {{< include scripts-y-reglas/3_crear_reticula.py >}}
 
 ```
-
-## 7. Documento Quarto para Reporte 
 
 Este documento lee los resultados espaciales intermedios de la simulación para compilar el HTML final. Guarde el documento de abajo aquí: `reportes/resumen_atributos.qmd`
 
@@ -351,9 +354,10 @@ Este documento lee los resultados espaciales intermedios de la simulación para 
 ````
 :::
 
+Ya tienes todos los ingredientes para hacer una primera corrida del flujo de trabajo. Ejecuta el comando `snakemake --cores 1` y si todo está bien deberás veru un montón de mensajes en pantalla y tendrás los primeros resultados en las carpetas de salida que indicaste en el mismo `snakefile` bajo el encabezado **output**.
 
 
-## 8. Recolección tabular de las variables
+## 7. Recolección tabular de las variables
 
 La siguiente tarea es recolectar los datos y producir un arreglo centralizado a partir de las múltiples fuentes de información geoespacial, sin importar su formato de origen (ráster o vectorial). 
 
@@ -394,7 +398,7 @@ El archivo final debe cumplir rigurosamente las siguientes expectativas de forma
 
 
 
-## 9. Ejecución desde RStudio
+## 8. Ejecución desde RStudio
 
 Para poner en marcha el flujo, abre tu pestaña **Terminal** dentro de RStudio (asegúrate de estar posicionada en `/srv/iie-tutor/$USER-iie/`) y ejecuta:
 
@@ -410,7 +414,7 @@ snakemake --cores 2
 Si posteriormente deseas cambiar el tamaño de celda, modifica el valor numérico en tu `config/config.yaml`, vuelve a lanzar `snakemake --cores 2` y observa cómo el motor recalcula exclusivamente la retícula y el documento Quarto de forma limpia y precisa.
 
 
-## 10. ¿Cuántos núcleos tenemos disponibles?
+## 9. ¿Cuántos núcleos tenemos disponibles?
 
 El procesador del equipo de Octavio (**Intel Core i7-14700KF**) tiene una arquitectura híbrida moderna. Físicamente cuenta con **20 núcleos** (8 de alto rendimiento y 12 de eficiencia). Sin embargo, gracias a la tecnología Hyper-Threading en los núcleos de rendimiento, el sistema operativo (y por lo tanto WSL y Snakemake) detectan un total de **28 hilos lógicos**.
 
@@ -447,7 +451,7 @@ Si quieres monitorear en tiempo real cómo se están comportando los núcleos de
 
 
 
-## 11. Procesar tareas más complejas
+## 10. Procesar tareas más complejas
 
 ### Cambiar el enfoque: Ráster vs Vectorial
 
@@ -477,7 +481,7 @@ Con esta nueva opción de cómputo en su lugar, hay que regresar al archivo `sna
 
 ```
 
-## 12. El Reporte Maestro de Snakemake
+## 11. El Reporte Maestro de Snakemake
 
 Una vez que Snakemake ha procesado exitosamente todos nuestros datos y Quarto ha generado nuestros reportes (\*.html), existe un paso final que con Snakemake resulta muy sencillo de producir: La auto-documentación técnica.
 
@@ -535,7 +539,7 @@ Nuevamente tienes que regresar a tu `snakefile` para registrar esto y habilitar 
 Al hacer esto, el comando simple:  `snakemake --report reporte_auditoria_iie.html` leerá automáticamente tu archivo de presentación, tomará el título principal y lo pondrá en la barra superior del navegador, además de colocar tu texto explicativo en la página principal del reporte.
 
 
-## 13. Gran desafío: hacer un script complejo
+## 12. Gran desafío: hacer un script complejo
 
 Espero que con el recorrido anterior haya desarrollado una comprensión inicial del concepto de construir un *workflow*. Ahora te propongo hacer algo más complicado y explorar como es que podemos recurrir a la *IA generativa* para desarrollar código que nos sirva. La idea que te propongo es desarrollar un nuevo paso del workflow que nos entregue un proyecto completo y funcional en **QGis**. Lo que haremos ahora es más que ver el código en sí, comentar sobre la secuencia de prompts que nos lleve a tener ese producto. El servidor de Octavio está preparado para 
 
