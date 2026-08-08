@@ -195,7 +195,7 @@ Todo este tutorial se opera mediante terminal conectada al equipo de Octavio. Ha
 
 Para los siguientes pasos puede convenir tener acceso cómodo al disco que usaremos todos, en la máquina de Octavio. Una herramienta para lograr esto es [winscpf](https://winscp.net/). Es una aplicación para Windows que te mostrará, lado a lado, el directorio local y el del servidor que estamos usando. Una vez que lo tengas instalado, te pedirá los datos de conexión La **IP** local de Octavio, tus credenciales y listo (@def-consigue-ip). Le das conectar y ya está. 
 
-![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png)
+![Acceso al disco del servidor de Octavio](../img/WindSCP-inicio.png){#fig-acceso-servidor}
 
 
 Para este tutorial cada miembro del equipo (Octavio, Martha, Maricruz, Pita, Julián) trabajará de forma aislada e independiente en su propio directorio asignado dentro del almacenamiento SSD del servidor. Esto garantiza que puedan experimentar, modificar configuraciones y correr la tubería sin interferir con los demás.
@@ -264,7 +264,7 @@ Es curioso, pero puedes imaginar que este *mover* es en realidad sólo otro mane
 
 Instalé en el equipo de Octavio a **R** y **RStudio server** (en Linux no hay una aplicación de escritorio como la de Windows). Esto quiere decir que si te quieres ahorrar lo de **WinSCP**, bien podrías hacer todo desde le browser. La forma de activar ese **RStudio** es poner en el navegador la misma **IP** (@def-consigue-ip) que te funcione para el **ssh** seguido de **:8787**, contesta lo que te pregunte (tus credenciales). ¡Listo!, tendrás frente a ti todo lo necesario para operar el flujo de trabajo.
 
-![http://10.0.122.35:8787](../img/rstudio.png)
+![http://10.0.122.35:8787](../img/rstudio.png){#fig-rstudio}
 
 Me encantará saber cuál de todas las opciones que les he preparado les parece más natural y fácil de operar.
 
@@ -275,6 +275,113 @@ Conviene por muchas razones crear un *Proyecto de RStudio* localizado directamen
 ### Entorno de trabajo
 
 Cuando inicias en tu sesión **SSH**, seguramente notarás la frase `qgis_env`. Se trata de una indicación de que ya estas ubicada en un **ambiente virtual de trabajo** que contiene todo lo necesario para hacer mapas con **QGis** y también está ahí habilitado **Snakemake**. Hay otros dos ambientes posibles `base` y `profiling_env`. El primero es la condición de la máquina sin ninguna preparación, probablemente no tendrás ahí ni siquiera a Python. Llegas a esa configuración con `micromamba deactivate` o con `micromamba activate base`. Hay ocasiones en las que conviene tener tal configuración, pero no será el caso en este tutorial. El otro *ambiente virtual* tiene instalada la paquetería necesaria para hacer *data profiling*. Esto quiere decir que puedes darle cualquier **CSV** con datos organizados por columnas, y te entregará un análisis muy completo de los atributos que tienen las variables y sus peculiaridades estadísticas. No lo usaremos en este tutorial, pero es algo que tiene mucho interés para las nuevas variables que estaremos procesando. Puedes hacer un análisis descriptivo de este tipo escribiendo dentro de ese entorno el comando `ydata-profiling <<ruta al archivo csv que quieras>>`. Te entregará un reporte en una archivo `HTML` que verás como una página Web. La forma de activar ese entorno virtual es `micromamba activate profiling_env`. Para los fines de este tutorial, debes asegurarte de tener activo el entorno virtual `qgis_env`. Si no ves tal indicación en tu línea de comandos de tu terminal, puedes activarlo con `micromamba activate qgis_env`en el momento en el que lo necesites.
+
+El Ejercicio que desarrollarás en este tutorial te hará viajar a lo largo del siguiente diagrama de flujo.
+
+
+
+```{mermaid}
+%%| fig-cap: "Diagrama de Bloques del Flujo de Trabajo Geoespacial Automatizado (DAG de Snakemake)"
+%%| label: fig-dag
+%%| fig-width: 10
+%%| fig-align: center
+
+graph TD
+    %% --- Configuración de Estilos Globales de Aristas ---
+    linkStyle default stroke:#cbd5e1,stroke-width:2px;
+
+    %% --- Estilos de Nodos ---
+    classDef storage fill:#db2777,stroke:#fff,stroke-width:2px,color:#fff,font-weight:bold;
+    classDef process fill:#0284c7,stroke:#bae6fd,stroke-width:1px,color:#fff,rx:5,ry:5;
+    classDef paralell fill:#eab308,stroke:#fef08a,stroke-width:2px,color:#000,font-weight:bold;
+    classDef deliverable fill:#16a34a,stroke:#bbf7d0,stroke-width:2px,color:#fff,rx:10,ry:10;
+    classDef env fill:#475569,stroke:#cbd5e1,stroke-width:1.5px,stroke-dasharray: 4 4,color:#fff;
+
+    %% --- Entorno y Datos Maestros ---
+    subgraph Env [Entorno Servidor WSL2]
+        PathText["/srv/iie-tutor/"]:::env
+        Conda[<i class='fa fa-terminal'></i> conda activate qgis_env]:::env
+        Maestro[(<i class='fa fa-database'></i> datos/registros_base.csv)]:::storage
+    end
+
+    %% --- Entradas Principales ---
+    Maestro --> R1_In
+    Maestro --> R2_In
+
+    %% ========================================================================
+    %% RAMA 1: VECTORIAL
+    %% ========================================================================
+    subgraph Rama1 [RAMA 1: Vectorial]
+        R1_In(1_leer_datos.R):::process
+        R1_Ret(3_crear_reticula.py):::process
+        R1_Out[(resultados/reticula_variable.gpkg)]:::deliverable
+    end
+    
+    R1_In -->|Filtrado WGS84| R1_Ret
+    R1_Ret -->|Muestreo variable| R1_Out
+
+    %% ========================================================================
+    %% RAMA 2: BIG DATA / RÁSTER
+    %% ========================================================================
+    subgraph Rama2 [RAMA 2: Big Data Raster]
+        R2_In(0_segmentar_csv.R):::process
+        
+        subgraph Paralelo [Procesamiento Concurrente]
+            R2_Reg1(Región 1):::paralell
+            R2_Reg2(Región 2):::paralell
+            R2_RegN(Región N):::paralell
+        end
+        
+        R2_Fuse(Fusionar Ráster Nacional):::process
+        R2_Out[(resultados/integridad_mexico.tif)]:::deliverable
+    end
+    
+    R2_In -->|Scatter regional| R2_Reg1
+    R2_In -->|Scatter regional| R2_Reg2
+    R2_In -->|Scatter regional| R2_RegN
+    
+    R2_Reg1 -->|Gather TIFs| R2_Fuse
+    R2_Reg2 -->|Gather TIFs| R2_Fuse
+    R2_RegN -->|Gather TIFs| R2_Fuse
+    R2_Fuse -->|GDAL Merge| R2_Out
+
+    %% ========================================================================
+    %% RAMA 3: AGREGACIÓN ESTADÍSTICA
+    %% ========================================================================
+    subgraph Rama3 [RAMA 3: Agregación Estadística]
+        R3_In(6_agregar_datos.py):::process
+        R3_Out[(resultados/dataset_agregado.csv)]:::deliverable
+    end
+    
+    R1_Out -->|Definición de puntos y CRS base| R3_In
+    R2_Out -->|Muestreo dinámico de variables| R3_In
+    R3_In -->|Extracción en CRS Métrico| R3_Out
+
+    %% ========================================================================
+    %% RAMA 4: DESPLIEGUE CARTOGRÁFICO
+    %% ========================================================================
+    subgraph Rama4 [RAMA 4: Despliegue QGIS]
+        R4_In(5_create_qgis_project.py):::process
+        R4_OutS[(proyecto_standalone.qgz)]:::deliverable
+        R4_OutV[(proyecto_server.qgz)]:::deliverable
+    end
+    
+    R1_Out -->|Carga de Capas| R4_In
+    R2_Out -->|Simbología y Extent| R4_In
+    
+    R4_In -->|Layouts cartográficos| R4_OutS
+    R4_In -->|Servicios OGC WMS/WFS/WCS| R4_OutV
+
+    R3_Out -.->|Importación lineal| RStudio[<i class='fa fa-line-chart'></i> Análisis RStudio Server]:::env
+
+    %% --- Estilos de los Subgraphs (Fondo oscuro uniforme y marcos contrastados) ---
+    style Env fill:#0f172a,stroke:#94a3b8,stroke-width:2px,color:#f8fafc
+    style Rama1 fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc
+    style Rama2 fill:#0f172a,stroke:#facc15,stroke-width:2px,color:#f8fafc
+    style Paralelo fill:#1e293b,stroke:#fde047,stroke-width:1.5px,color:#fef08a
+    style Rama3 fill:#0f172a,stroke:#4ade80,stroke-width:2px,color:#f8fafc
+    style Rama4 fill:#0f172a,stroke:#c084fc,stroke-width:2px,color:#f8fafc
+```
 
 ### Datos para el ejercicio
 
@@ -308,7 +415,7 @@ salidas:
 
 ## 5. Orquestación del Flujo: El `Snakefile`
 
-Ubicado en la raíz de tu carpeta (`/srv/iie-tutor/$USER-iie/Snakefile`), este archivo le indica a `Snakemake`  cómo conectar las entradas y salidas de las 4 tareas del ejercicio de capacitación descrito en este tutorial.
+Ubicado en la raíz de tu carpeta está el archivo (`/srv/iie-tutor/$USER-iie/Snakefile`). Este archivo le indica a `Snakemake`  cómo conectar las entradas y salidas de las 4 tareas del ejercicio de capacitación descrito en este tutorial.
 
 ```python
 {{< include scripts-y-reglas/reglas-paso-1.txt >}} 
@@ -1013,7 +1120,7 @@ Dame pruebas para:
 
 Para esta capa te sugiero ir a la opción *Layer/Data Source Manager*. Encontré que intentar jalar la capa directamente desde la pestaña browser deja algunos atributos sin definir y la interfaz reporta errores, aunque la cobertura esté bien y sea bien entregada por el servidor. En cambio, por el camino *Data Source Manager* tienes más control y la obtención de los datos fluye de mejor manera. Puedes incluso hacer ahí algo de manejo tipo base de datos **SQL**, que es interesante.
 
-![Data source manager](scripts-y-reglas/img/data-source-manager.png)
+![Data source manager](scripts-y-reglas/img/data-source-manager.png){#fig-data-manager}
 
 
 ::: {.ai-prompt}
