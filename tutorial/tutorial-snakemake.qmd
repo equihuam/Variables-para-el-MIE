@@ -545,6 +545,7 @@ Nuevamente tienes que regresar a tu `snakefile` para registrar esto y habilitar 
 Al hacer esto, el comando simple:  `snakemake --report reporte_auditoria_iie.html` leerá automáticamente tu archivo de presentación, tomará el título principal y lo pondrá en la barra superior del navegador, además de colocar tu texto explicativo en la página principal del reporte.
 
 
+
 ## 12. Gran desafío: hacer un script complejo
 
 Espero que con el recorrido anterior haya desarrollado una comprensión inicial del concepto de construir un *workflow*. Ahora te propongo hacer algo más complicado y explorar como es que podemos recurrir a la *IA generativa* para desarrollar código que nos sirva. La idea que te propongo es desarrollar un nuevo paso del workflow que nos entregue un proyecto completo y funcional en **QGis**. Lo que haremos ahora es más que ver el código en sí, comentar sobre la secuencia de prompts que nos lleve a tener ese producto. El servidor de Octavio está preparado para 
@@ -1164,7 +1165,7 @@ Snakemake separado
 → nota de cierre
 ```
 
-### 13 Cierre
+## 13 Cierre
 
 A lo largo de este ejercicio se presentó y consolidó una estrategia reproducible para generar proyectos **QGis** desde Snakemake. El flujo construye el proyecto desde cero con **PyQGis**, carga ráster y vector desde productos generados por el workflow, aplica simbología por código, importa únicamente una plantilla .qpt para el layout de impresión y produce dos variantes del proyecto: una standalone para revisión en **QGis** Desktop y otra server para **QGis Server** que ya tenemos habilitado en el equipo de Octavio con **Docker**.
 
