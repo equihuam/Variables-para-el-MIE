@@ -634,7 +634,7 @@ de **Quarto** con los resultados cartográficos de ambas corridas.
 
 ```
 
-Nuevamente tienes que regresar a tu `snakefile` para registrar esto y habilitar lo necesario para el reporte. Se trata básicamente de agregar la línea que define el reporte y algunas indicaciones de que productos poner en bajo etiquetas accesibles en la página que se producirá Un ejemplo de esto se vería así:
+Nuevamente tienes que regresar a tu `snakefile` para registrar esto y habilitar lo necesario para el reporte. Se trata básicamente de agregar la línea que define el reporte y algunas indicaciones de que productos poner bajo etiquetas descriptivas en la página que se producirá. Un ejemplo de esto se vería así:
 
 
 
