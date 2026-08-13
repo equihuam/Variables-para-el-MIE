@@ -1,0 +1,846 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 850 970"
+   width="100%"
+   height="100%"
+   version="1.1"
+   id="svg49"
+   sodipodi:docname="tutorial-snakemake.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview49"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.8814433"
+     inkscape:cx="225.76608"
+     inkscape:cy="405.5848"
+     inkscape:window-width="1920"
+     inkscape:window-height="1057"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer7" />
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+      .title { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: bold; text-anchor: middle; }
+      .node-text { font-family: system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: bold; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }
+      .sub-text { font-family: system-ui, -apple-system, sans-serif; font-size: 11px; fill: #1e293b; text-anchor: middle; dominant-baseline: central; font-weight: 600; }
+      .db-text { font-family: system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: bold; fill: #ffffff; text-anchor: middle; dominant-baseline: central; }
+      .arrow-line { stroke: #94a3b8; stroke-width: 1.8; fill: none; marker-end: url(#arrow); }
+      .label-bg { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; rx: 4px; }
+    </style>
+    <marker
+       id="arrow"
+       viewBox="0 0 10 10"
+       refX="6"
+       refY="5"
+       markerWidth="5"
+       markerHeight="5"
+       orient="auto-start-reverse">
+      <path
+         d="M 0 1 L 10 5 L 0 9 z"
+         fill="#94a3b8"
+         id="path1" />
+    </marker>
+    <marker
+       id="arrow-9"
+       viewBox="0 0 10 10"
+       refX="6"
+       refY="5"
+       markerWidth="5"
+       markerHeight="5"
+       orient="auto-start-reverse">
+      <path
+         d="M 0,1 10,5 0,9 Z"
+         fill="#94a3b8"
+         id="path1-4" />
+    </marker>
+    <marker
+       id="arrow-2"
+       viewBox="0 0 10 10"
+       refX="6"
+       refY="5"
+       markerWidth="5"
+       markerHeight="5"
+       orient="auto-start-reverse">
+      <path
+         d="M 0,1 10,5 0,9 Z"
+         fill="#94a3b8"
+         id="path1-45" />
+    </marker>
+    <marker
+       id="arrow-7"
+       viewBox="0 0 10 10"
+       refX="6"
+       refY="5"
+       markerWidth="5"
+       markerHeight="5"
+       orient="auto-start-reverse">
+      <path
+         d="M 0,1 10,5 0,9 Z"
+         fill="#94a3b8"
+         id="path1-1" />
+    </marker>
+  </defs>
+  <!-- Fondo principal -->
+  <!-- 1. BLOQUE SUPERIOR: Punto de Entrada -->
+  <!-- Conectores desde la DB superior -->
+  <!-- 2. BLOQUE IZQUIERDA: Validador e Ingesta -->
+  <!-- 3. BLOQUE DERECHA: Procesamiento Asíncrono -->
+  <!-- 4. SECCIÓN INTERMEDIA: Flujos y Estrategia de Errores -->
+  <!-- 5. BLOQUE INFERIOR IZQUIERDA: Reintentos -->
+  <!-- 6. BLOQUE INFERIOR DERECHA: Notificador -->
+  <!-- 7. PIE DE PÁGINA / Salida Final -->
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="diagrama base"
+     style="display:inline">
+    <rect
+       x="40"
+       y="15"
+       width="770"
+       height="110"
+       rx="8"
+       fill="#0f172a"
+       stroke="#334155"
+       stroke-width="1.5"
+       id="rect2" />
+    <rect
+       x="70"
+       y="55"
+       width="110"
+       height="42"
+       rx="6"
+       fill="#334155"
+       id="rect3" />
+    <rect
+       x="210"
+       y="55"
+       width="220"
+       height="42"
+       rx="6"
+       fill="#0284c7"
+       id="rect4" />
+    <path
+       d="m 580,62 v 25 a 50,12 0 0 0 100,0 V 62 Z"
+       fill="#be185d"
+       stroke="#fbcfe8"
+       stroke-width="1.2"
+       id="path4" />
+    <ellipse
+       cx="630"
+       cy="62"
+       rx="50"
+       ry="12"
+       fill="#f472b6"
+       stroke="#fbcfe8"
+       stroke-width="1.2"
+       id="ellipse4" />
+    <path
+       d="M 580,90 C 500,120 245.68,82 250,162"
+       class="arrow-line"
+       id="path5"
+       style="stroke-width:3.77953;stroke-dasharray:none"
+       sodipodi:nodetypes="cc" />
+    <path
+       d="m 680,90 c 40,30 -60,40 -60,80"
+       class="arrow-line"
+       id="path6"
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#94a3b8;stroke-width:3.77953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;marker-end:url(#arrow);stop-color:#000000;stop-opacity:1" />
+    <rect
+       x="110"
+       y="170"
+       width="280"
+       height="400"
+       rx="8"
+       fill="#0f172a"
+       stroke="#2563eb"
+       stroke-width="2"
+       id="rect6" />
+    <rect
+       x="170"
+       y="215"
+       width="160"
+       height="40"
+       rx="6"
+       fill="#0284c7"
+       id="rect7" />
+    <path
+       d="m 250,255 v 25"
+       class="arrow-line"
+       id="path7" />
+    <rect
+       x="180"
+       y="280"
+       width="140"
+       height="24"
+       class="label-bg"
+       id="rect8" />
+    <path
+       d="m 250,304 v 26"
+       class="arrow-line"
+       id="path8" />
+    <rect
+       x="170"
+       y="330"
+       width="160"
+       height="40"
+       rx="6"
+       fill="#0284c7"
+       id="rect9" />
+    <path
+       d="m 250,370 v 25"
+       class="arrow-line"
+       id="path9" />
+    <rect
+       x="180"
+       y="395"
+       width="140"
+       height="24"
+       class="label-bg"
+       id="rect10" />
+    <path
+       d="m 250,419 v 31"
+       class="arrow-line"
+       id="path10" />
+    <path
+       d="M 250,530 V 642"
+       class="arrow-line"
+       id="path35"
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#94a3b8;stroke-width:3.77953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;marker-end:url(#arrow);stop-color:#000000;stop-opacity:1"
+       sodipodi:nodetypes="cc" />
+    <path
+       d="m 160,485 v 35 a 90,15 0 0 0 180,0 v -35 z"
+       fill="#15803d"
+       stroke="#bbf7d0"
+       stroke-width="1.2"
+       id="path11" />
+    <ellipse
+       cx="250"
+       cy="485"
+       rx="90"
+       ry="15"
+       fill="#4ade80"
+       stroke="#bbf7d0"
+       stroke-width="1.2"
+       id="ellipse11" />
+    <rect
+       x="420"
+       y="170"
+       width="400"
+       height="400"
+       rx="8"
+       fill="#0f172a"
+       stroke="#d97706"
+       stroke-width="2"
+       id="rect11" />
+    <rect
+       x="520"
+       y="215"
+       width="200"
+       height="40"
+       rx="6"
+       fill="#0284c7"
+       id="rect12" />
+    <path
+       d="m 520,235 -35,45"
+       class="arrow-line"
+       id="path13"
+       sodipodi:nodetypes="cc" />
+    <path
+       d="m 620,255 v 25"
+       class="arrow-line"
+       id="path14" />
+    <path
+       d="m 720,235 35,45"
+       class="arrow-line"
+       id="path15"
+       sodipodi:nodetypes="cc" />
+    <rect
+       x="435"
+       y="280"
+       width="100"
+       height="22"
+       class="label-bg"
+       id="rect15" />
+    <rect
+       x="570"
+       y="280"
+       width="100"
+       height="22"
+       class="label-bg"
+       id="rect16" />
+    <rect
+       x="705"
+       y="280"
+       width="100"
+       height="22"
+       class="label-bg"
+       id="rect17" />
+    <path
+       d="m 485,302 v 18"
+       class="arrow-line"
+       id="path17" />
+    <path
+       d="m 620,302 v 18"
+       class="arrow-line"
+       id="path18" />
+    <path
+       d="m 755,302 v 18"
+       class="arrow-line"
+       id="path19" />
+    <rect
+       x="430"
+       y="320"
+       width="380"
+       height="65"
+       rx="6"
+       fill="#1c1917"
+       stroke="#f59e0b"
+       stroke-width="1.5"
+       stroke-dasharray="4, 4"
+       id="rect19" />
+    <rect
+       x="440"
+       y="345"
+       width="90"
+       height="30"
+       rx="4"
+       fill="#d97706"
+       id="rect20" />
+    <rect
+       x="575"
+       y="345"
+       width="90"
+       height="30"
+       rx="4"
+       fill="#d97706"
+       id="rect21" />
+    <rect
+       x="710"
+       y="345"
+       width="90"
+       height="30"
+       rx="4"
+       fill="#d97706"
+       id="rect22" />
+    <path
+       d="m 485,385 v 17"
+       class="arrow-line"
+       id="path22" />
+    <path
+       d="m 620,385 v 17"
+       class="arrow-line"
+       id="path23" />
+    <path
+       d="m 755,385 v 17"
+       class="arrow-line"
+       id="path24" />
+    <rect
+       x="435"
+       y="402"
+       width="100"
+       height="22"
+       class="label-bg"
+       id="rect24" />
+    <rect
+       x="570"
+       y="402"
+       width="100"
+       height="22"
+       class="label-bg"
+       id="rect25" />
+    <rect
+       x="705"
+       y="402"
+       width="100"
+       height="22"
+       class="label-bg"
+       id="rect26" />
+    <path
+       d="m 485,424 135,26"
+       class="arrow-line"
+       id="path26" />
+    <path
+       d="m 620,424 v 26"
+       class="arrow-line"
+       id="path27" />
+    <path
+       d="M 755,424 620,450"
+       class="arrow-line"
+       id="path28" />
+    <rect
+       x="520"
+       y="450"
+       width="200"
+       height="36"
+       rx="6"
+       fill="#0284c7"
+       id="rect28" />
+    <path
+       d="m 620,486 v 16"
+       class="arrow-line"
+       id="path29" />
+    <rect
+       x="550"
+       y="502"
+       width="140"
+       height="22"
+       class="label-bg"
+       id="rect29" />
+    <path
+       d="m 620,524 v 16"
+       class="arrow-line"
+       id="path30" />
+    <path
+       d="m 620,570 c 15.58869,15.94932 23.54932,43.62217 23,72"
+       class="arrow-line"
+       id="path36"
+       sodipodi:nodetypes="cc"
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#94a3b8;stroke-width:3.77953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;marker-end:url(#arrow);stop-color:#000000;stop-opacity:1" />
+    <path
+       d="m 530,552 v 22 a 90,12 0 0 0 180,0 v -22 z"
+       fill="#15803d"
+       stroke="#bbf7d0"
+       stroke-width="1.2"
+       id="path31" />
+    <ellipse
+       cx="620"
+       cy="552"
+       rx="90"
+       ry="12"
+       fill="#4ade80"
+       stroke="#bbf7d0"
+       stroke-width="1.2"
+       id="ellipse31" />
+    <rect
+       x="360"
+       y="602"
+       width="250"
+       height="28"
+       rx="14"
+       fill="#334155"
+       stroke="#64748b"
+       stroke-width="1"
+       id="rect34" />
+    <path
+       d="m 360,616 c -36.49878,10.8407 -85.03667,-12.53801 -85,26"
+       class="arrow-line"
+       id="path37"
+       sodipodi:nodetypes="cc"
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#94a3b8;stroke-width:3.77953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;marker-end:url(#arrow);stop-color:#000000;stop-opacity:1" />
+    <rect
+       x="110"
+       y="650"
+       width="330"
+       height="210"
+       rx="8"
+       fill="#0f172a"
+       stroke="#8b5cf6"
+       stroke-width="2"
+       id="rect37" />
+    <rect
+       x="195"
+       y="690"
+       width="160"
+       height="36"
+       rx="6"
+       fill="#0284c7"
+       id="rect38" />
+    <path
+       d="m 275,726 -90,26"
+       class="arrow-line"
+       id="path38" />
+    <path
+       d="m 275,726 90,26"
+       class="arrow-line"
+       id="path39" />
+    <rect
+       x="125"
+       y="752"
+       width="120"
+       height="22"
+       class="label-bg"
+       id="rect39" />
+    <rect
+       x="295"
+       y="752"
+       width="140"
+       height="22"
+       class="label-bg"
+       id="rect40" />
+    <path
+       d="m 185,774 v 21"
+       class="arrow-line"
+       id="path40" />
+    <path
+       d="m 365,774 v 21"
+       class="arrow-line"
+       id="path41" />
+    <path
+       d="m 117.02728,805.03704 v 19.92592 a 69.674475,9.9629682 0 0 0 139.34895,0 v -19.92592 z"
+       fill="#15803d"
+       stroke="#bbf7d0"
+       stroke-width="1.34813"
+       id="path42" />
+    <ellipse
+       cx="186.70175"
+       cy="805.03699"
+       rx="69.674469"
+       ry="9.9629679"
+       fill="#4ade80"
+       stroke="#bbf7d0"
+       stroke-width="1.34813"
+       id="ellipse42" />
+    <path
+       d="m 300.96213,805.01908 v 19.96184 a 62.336115,9.9809227 0 0 0 124.67223,0 v -19.96184 z"
+       fill="#15803d"
+       stroke="#bbf7d0"
+       stroke-width="1.2763"
+       id="path43" />
+    <ellipse
+       cx="363.29825"
+       cy="805.0191"
+       rx="62.336117"
+       ry="9.9809227"
+       fill="#4ade80"
+       stroke="#bbf7d0"
+       stroke-width="1.2763"
+       id="ellipse43" />
+    <rect
+       x="470"
+       y="650"
+       width="330"
+       height="210"
+       rx="8"
+       fill="#0f172a"
+       stroke="#10b981"
+       stroke-width="2"
+       id="rect43" />
+    <rect
+       x="555"
+       y="690"
+       width="160"
+       height="36"
+       rx="6"
+       fill="#0284c7"
+       id="rect44" />
+    <path
+       d="m 635,726 v 26"
+       class="arrow-line"
+       id="path45" />
+    <rect
+       x="540"
+       y="752"
+       width="190"
+       height="22"
+       class="label-bg"
+       id="rect45" />
+    <path
+       d="m 635,774 v 21"
+       class="arrow-line"
+       id="path46" />
+    <path
+       d="m 555,805 v 22 a 80,10 0 0 0 160,0 v -22 z"
+       fill="#15803d"
+       stroke="#bbf7d0"
+       stroke-width="1.2"
+       id="path47" />
+    <ellipse
+       cx="635"
+       cy="805"
+       rx="80"
+       ry="10"
+       fill="#4ade80"
+       stroke="#bbf7d0"
+       stroke-width="1.2"
+       id="ellipse47" />
+    <path
+       d="m 635,835 v 42"
+       class="arrow-line"
+       id="path48"
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#94a3b8;stroke-width:3.77953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;marker-end:url(#arrow);stop-color:#000000;stop-opacity:1"
+       sodipodi:nodetypes="cc" />
+    <rect
+       x="555"
+       y="885"
+       width="160"
+       height="22"
+       class="label-bg"
+       id="rect48" />
+    <path
+       d="m 635,907 v 13"
+       class="arrow-line"
+       id="path49"
+       style="font-variation-settings:normal;opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#94a3b8;stroke-width:3.77953;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;-inkscape-stroke:none;marker-end:url(#arrow);stop-color:#000000;stop-opacity:1" />
+    <rect
+       x="545"
+       y="928"
+       width="180"
+       height="32"
+       rx="6"
+       fill="#334155"
+       stroke="#64748b"
+       stroke-width="1"
+       id="rect49" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer7"
+     inkscape:label="textos"
+     style="display:inline">
+    <text
+       x="425"
+       y="38"
+       class="title"
+       fill="#f8fafc"
+       id="text2">Punto de Entrada de Snakemake (API)</text>
+    <text
+       x="125"
+       y="76"
+       class="node-text"
+       id="text3">webhook.py</text>
+    <text
+       x="320"
+       y="76"
+       class="node-text"
+       id="text4">/api/procesar-solicitud</text>
+    <text
+       x="630"
+       y="62"
+       class="db-text"
+       id="text5">DB</text>
+    <text
+       x="250"
+       y="195"
+       class="title"
+       fill="#38bdf8"
+       id="text6">Validador e Ingesta</text>
+    <text
+       x="250"
+       y="235"
+       class="node-text"
+       id="text7">1. Validar Datos</text>
+    <text
+       x="250"
+       y="292"
+       class="sub-text"
+       id="text8">Datos Validados</text>
+    <text
+       x="250"
+       y="350"
+       class="node-text"
+       id="text9">2. Guardar en DB</text>
+    <text
+       x="250"
+       y="407"
+       class="sub-text"
+       id="text10">Estado: Pendiente</text>
+    <text
+       x="250"
+       y="485"
+       class="db-text"
+       id="text11">transacciones_pendientes</text>
+    <text
+       x="620"
+       y="195"
+       class="title"
+       fill="#fbbf24"
+       id="text12">Procesamiento Asíncrono</text>
+    <text
+       x="620"
+       y="235"
+       class="node-text"
+       id="text13">1. Procesar Evento</text>
+    <text
+       x="485"
+       y="291"
+       class="sub-text"
+       id="text15">Llamada Serv. 1</text>
+    <text
+       x="620"
+       y="291"
+       class="sub-text"
+       id="text16">Llamada Serv. 2</text>
+    <text
+       x="755"
+       y="291"
+       class="sub-text"
+       id="text17">Llamada Serv. 3</text>
+    <text
+       x="620"
+       y="334"
+       font-family="system-ui, sans-serif"
+       font-size="11px"
+       font-weight="bold"
+       fill="#fef08a"
+       text-anchor="middle"
+       id="text19">Procesadores en paralelo</text>
+    <text
+       x="485"
+       y="360"
+       class="node-text"
+       id="text20">Worker 1</text>
+    <text
+       x="620"
+       y="360"
+       class="node-text"
+       id="text21">Worker 2</text>
+    <text
+       x="755"
+       y="360"
+       class="node-text"
+       id="text22">Worker 3</text>
+    <text
+       x="485"
+       y="413"
+       class="sub-text"
+       id="text24">Resultado OK</text>
+    <text
+       x="620"
+       y="413"
+       class="sub-text"
+       id="text25">Resultado OK</text>
+    <text
+       x="755"
+       y="413"
+       class="sub-text"
+       id="text26">Resultado OK</text>
+    <text
+       x="620"
+       y="468"
+       class="node-text"
+       id="text28">Procesado Exitoso</text>
+    <text
+       x="620"
+       y="513"
+       class="sub-text"
+       id="text29">Guardar estado</text>
+    <text
+       x="620"
+       y="551"
+       class="db-text"
+       id="text31">transacciones_procesadas</text>
+    <text
+       x="194"
+       y="603"
+       font-family="system-ui, sans-serif"
+       font-size="13px"
+       font-weight="bold"
+       fill="#94a3b8"
+       text-anchor="middle"
+       id="text32"
+       style="fill:#3737c8">Flujo Síncrono</text>
+    <text
+       x="706"
+       y="611"
+       font-family="system-ui, sans-serif"
+       font-size="13px"
+       font-weight="bold"
+       fill="#94a3b8"
+       text-anchor="middle"
+       id="text33"
+       style="fill:#3737c8">Flujo Asíncrono</text>
+    <text
+       x="485"
+       y="592"
+       font-family="system-ui, sans-serif"
+       font-size="12px"
+       font-weight="bold"
+       fill="#cbd5e1"
+       text-anchor="middle"
+       id="text34"
+       style="fill:#3737c8">Estrategia de Errores</text>
+    <text
+       x="485"
+       y="616"
+       font-family="system-ui, sans-serif"
+       font-size="11px"
+       font-weight="600"
+       fill="#ffffff"
+       text-anchor="middle"
+       dominant-baseline="central"
+       id="text35">Si hay error de sistema / Timeout</text>
+    <text
+       x="275"
+       y="675"
+       class="title"
+       fill="#c084fc"
+       id="text37">Gestor de Reintentos (Retry)</text>
+    <text
+       x="275"
+       y="708"
+       class="node-text"
+       id="text38">Procesar Reintentos</text>
+    <text
+       x="185"
+       y="763"
+       class="sub-text"
+       id="text39">Si reintentos &lt; MAX</text>
+    <text
+       x="365"
+       y="763"
+       class="sub-text"
+       id="text40">Si reintentos &gt;= MAX (DLQ)</text>
+    <text
+       x="185"
+       y="805"
+       class="db-text"
+       font-size="10px"
+       id="text42">reintentos_pendientes</text>
+    <text
+       x="365"
+       y="805.86548"
+       class="db-text"
+       font-size="10px"
+       id="text43">fallos_persistentes</text>
+    <text
+       x="635"
+       y="675"
+       class="title"
+       fill="#34d399"
+       id="text44">Módulo Notificador</text>
+    <text
+       x="635"
+       y="708"
+       class="node-text"
+       id="text45">Enviar Notificación</text>
+    <text
+       x="635"
+       y="763"
+       class="sub-text"
+       id="text46">Notificar cliente / webhook</text>
+    <text
+       x="635"
+       y="804"
+       class="db-text"
+       id="text47">notificaciones_enviadas</text>
+    <text
+       x="635"
+       y="896"
+       class="sub-text"
+       id="text48">Flujo Completado</text>
+    <text
+       x="635"
+       y="944"
+       class="node-text"
+       id="text49">Cliente / Dashboard</text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer8"
+     inkscape:label="guías" />
+</svg>
