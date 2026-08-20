@@ -548,7 +548,7 @@ Al hacer esto, el comando simple:  `snakemake --report reporte_auditoria_iie.htm
 
 ## 12. Gran desafío: hacer un script complejo
 
-Espero que con el recorrido anterior haya desarrollado una comprensión inicial del concepto de construir un *workflow*. Ahora te propongo hacer algo más complicado y explorar como es que podemos recurrir a la *IA generativa* para desarrollar código que nos sirva. La idea que te propongo es desarrollar un nuevo paso del workflow que nos entregue un proyecto completo y funcional en **QGis**. Lo que haremos ahora es más que ver el código en sí, comentar sobre la secuencia de prompts que nos lleve a tener ese producto. El servidor de Octavio está preparado para 
+Espero que con el recorrido anterior hayas desarrollado una comprensión inicial del concepto de construir un *workflow*. Ahora te propongo hacer algo más complicado y explorar como es que podemos recurrir a la *IA generativa* para desarrollar código que nos sirva. La idea que te propongo es desarrollar un nuevo paso del workflow que nos entregue un proyecto completo y funcional en **QGis**. Lo que haremos ahora es más que ver el código en sí, comentar sobre la secuencia de *prompts* que nos lleve a tener ese producto. El servidor de Octavio está preparado para servir mapas mediante **QGis server**, así que también podrás asomarte a esa funcionalidad.
 
 
 ### Snakemake + Py**QGis** + pruebas
